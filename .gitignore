@@ -1,0 +1,8 @@
+scheduler_config/
+__pycache__
+*.pyc
+build/
+*.egg-info
+*.tar.xz
+*.tar.gz
+backup/

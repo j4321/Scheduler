@@ -1,0 +1,18 @@
+# Maintainer: Juliette Monsel <j_4321@protonmail.com>
+pkgname=scheduler
+pkgver=0.5.0
+pkgrel=1
+pkgdesc="Alarms and reminders"
+arch=('any')
+license=('GPL3')
+# provides=('scheduler')
+# conflicts=('scheduler')
+makedepends=('python-setuptools')
+depends=('tk' 'tktray' 'desktop-file-utils' 'python-apscheduler')
+source=("$pkgname-$pkgver.tar.gz")
+sha512sums=('d18a4ebf93699dc3b4d6d14cceb076838c7de1a5ce009ad8512fc0313c8ce878380cc4f2a5869a478bc70280b97899bdb22d4ecc6af26a8cfabcb939836d0220')
+
+package() {
+ cd "$srcdir/$pkgname-$pkgver"
+ python3 setup.py install --root="$pkgdir/" --prefix=/usr --optimize=1;
+}

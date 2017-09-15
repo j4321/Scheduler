@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0.0
+Encoding=UTF-8
+Name=Scheduler
+Comment="Alarms and reminders"
+Exec=scheduler
+Icon=scheduler
+Terminal=false
+Type=Application
+Categories=Utility
+StartupNotify=false
