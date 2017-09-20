@@ -6,3 +6,4 @@ build/
 *.tar.xz
 *.tar.gz
 backup/
+dist/

@@ -10,7 +10,7 @@ license=('GPL3')
 makedepends=('python-setuptools')
 depends=('tk' 'tktray' 'desktop-file-utils' 'python-apscheduler')
 source=("$pkgname-$pkgver.tar.gz")
-sha512sums=('d18a4ebf93699dc3b4d6d14cceb076838c7de1a5ce009ad8512fc0313c8ce878380cc4f2a5869a478bc70280b97899bdb22d4ecc6af26a8cfabcb939836d0220')
+sha512sums=('dd618b01c671776715c2dcfd45301b403b199d18885bfa9ce615734a5171e8ba555d3bd5b13876757232937ff92e5df32a73f10f4f67f027c3e25350b81a6d16')
 
 package() {
  cd "$srcdir/$pkgname-$pkgver"

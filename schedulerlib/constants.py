@@ -51,6 +51,8 @@ if not os.path.isdir(LOCAL_PATH):
 PATH_CONFIG = os.path.join(LOCAL_PATH, "checkmails.ini")
 PATH = os.path.dirname(__file__)
 
+PIDFILE = os.path.join(LOCAL_PATH, 'scheduler.pid')
+
 DATA_PATH = os.path.join(LOCAL_PATH, 'data')
 BACKUP_PATH = os.path.join(LOCAL_PATH, 'backup', 'data.backup%i')
 CONFIG_PATH = os.path.join(LOCAL_PATH, 'scheduler.ini')
