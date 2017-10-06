@@ -22,14 +22,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Task manager (main app)
 """
 
-from tkinter import Tk, PhotoImage, Menu, StringVar, TclError
-from tkinter.ttk import Button, Treeview, Style, Label, Combobox, Frame
+from tkinter import Tk, PhotoImage, Menu, StringVar, TclError, Toplevel
+from tkinter.ttk import Button, Treeview, Style, Label, Combobox, Frame, Entry, Checkbutton
 from schedulerlib.messagebox import showerror
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers import SchedulerNotRunningError
 from datetime import datetime, timedelta
-from schedulerlib.constants import ICON, PLUS, CONFIG, DOT, JOBSTORE
-from schedulerlib.constants import backup, DATA_PATH, BACKUP_PATH
+from schedulerlib.constants import ICON, PLUS, CONFIG, DOT, JOBSTORE, backup,\
+    DATA_PATH, BACKUP_PATH, SYNC_PWD
 from schedulerlib.tktray import Icon
 from schedulerlib.form import Form
 from schedulerlib.event import Event
@@ -39,11 +39,18 @@ from schedulerlib.task_widget import TaskWidget
 from schedulerlib.calendar_widget import CalendarWidget
 from schedulerlib.ttkwidgets import AutoScrollbar
 from schedulerlib.about import About
+from schedulerlib.messagebox import showinfo
+from schedulerlib.sync import download_from_server, check_login_info, warn_exist_remote
 import os
+import time
 import shutil
 from pickle import Pickler, Unpickler
 import logging
 import traceback
+
+
+def _(text):
+    return text
 
 
 #TODO: fix reminder duplication
@@ -149,6 +156,34 @@ class EventScheduler(Tk):
         self.tree.grid(row=1, column=0, sticky='eswn')
         scroll.grid(row=1, column=1, sticky='ns')
 
+        # --- Sync
+
+        if CONFIG.getboolean("Sync", "on"):
+            try:
+                with open(SYNC_PWD) as f:
+                    self.password = f.read().strip()
+            except FileNotFoundError:
+                self.password = ""
+
+            if not self.password:
+                self.get_server_pwd()
+
+            if self.password:
+                while (not check_login_info(self.password)) and self.password:
+                    self.get_server_login()
+                if self.password:
+                    self.configure(cursor="watch")
+                    res = download_from_server(self.password)
+                    if not res:
+                        showinfo(_("Information"),
+                                 _("There was an error during the synchronization so synchronization has been disabled."))
+                        CONFIG.set("Sync", "on", "False")
+            else:
+                showinfo(_("Information"),
+                         _("No password has been given so synchronization has been disabled."))
+                CONFIG.set("Sync", "on", "False")
+        self.time = time.time()
+
         # --- restore data
         data = {}
         self.events = {}
@@ -210,6 +245,7 @@ class EventScheduler(Tk):
                              variable=self.timer_widget.variable)
 
         self.scheduler.start()
+
 
     def report_callback_exception(self, *args):
         err = ''.join(traceback.format_exception(*args))
@@ -481,3 +517,123 @@ class EventScheduler(Tk):
             if event['Task']:
                 tasks.append(event)
         return tasks
+
+    def get_server_pwd(self):
+        def ok(event=None):
+            self.password = pwd.get()
+            top.destroy()
+            self.update_idletasks()
+
+        top = Toplevel(self)
+        top.title(_("Sync"))
+        top.grab_set()
+        top.resizable(False, False)
+        pwd = Entry(top, show="*", justify="center")
+
+        Label(top, text="Server password").pack(padx=4, pady=4)
+        pwd.pack(padx=4, pady=4)
+        Button(top, text=_("Connect"), command=ok).pack(padx=4, pady=4)
+        pwd.bind("<Return>", ok)
+        pwd.focus_set()
+        self.wait_window(top)
+
+    def get_server_login(self):
+        def ok(event=None):
+            if "selected" in ch.state():
+                username = user.get()
+                CONFIG.set("Sync", "username", username)
+                self.password = pwd.get()
+            else:
+                CONFIG.set("Sync", "on", "False")
+                self.password = ""
+            top.destroy()
+
+        def toggle():
+            if "selected" in ch.state():
+                state = "!disabled"
+            else:
+                state = "disabled"
+            user.state((state,))
+            pwd.state((state,))
+
+        top = Toplevel(self)
+        top.title(_("Sync"))
+        top.grab_set()
+        top.resizable(False, False)
+
+        user = Entry(top)
+        user.insert(0, CONFIG.get("Sync", "username"))
+        pwd = Entry(top, show="*")
+
+        ch = Checkbutton(top, text=_("Synchronize notes with server"), command=toggle)
+        ch.state(("selected",))
+        ch.grid(row=0, columnspan=2, padx=4, pady=4, sticky="w")
+        Label(top, text=_("Username")).grid(row=1, column=0, padx=4, pady=4,
+                                            sticky='e')
+        Label(top, text=_("Password")).grid(row=2, column=0, padx=4, pady=4,
+                                            sticky='e')
+        user.grid(row=1, column=1, padx=4, pady=4)
+        pwd.grid(row=2, column=1, padx=4, pady=4)
+        Button(top, text="Ok", command=ok).grid(row=3, columnspan=2)
+        pwd.bind("<Return>", ok)
+        pwd.focus_set()
+        self.wait_window(top)
+
+    def set_password(self, pwd, sync_activated):
+        self.password = pwd
+        if CONFIG.getboolean("Sync", "on"):
+            if not self.password:
+                CONFIG.set("Sync", "on", "False")
+                showinfo(_("Information"),
+                         _("No password has been given so synchronization has been disabled."))
+            while (not check_login_info(self.password)) and self.password:
+                self.get_server_login()
+            if self.password and sync_activated:
+                res = warn_exist_remote(self.password)
+                if res == "download":
+                    self.reinit()
+
+    def reinit(self):
+        try:
+            self.scheduler.shutdown()
+        except SchedulerNotRunningError:
+            pass
+        self.scheduler = BackgroundScheduler(coalesce=False,
+                                             misfire_grace_time=86400)
+        self.scheduler.add_jobstore('sqlalchemy',
+                                    url='sqlite:///%s' % JOBSTORE)
+        self.tree.delete(*(self.tree.get_children('')))
+        data = {}
+        self.events = {}
+        self.nb = 0
+        try:
+            with open(DATA_PATH, 'rb') as file:
+                dp = Unpickler(file)
+                data = dp.load()
+        except Exception:
+            l = os.listdir(os.path.dirname(BACKUP_PATH))
+            if l:
+                l.sort(key=lambda x: int(x[11:]))
+                shutil.copy(os.path.join(os.path.dirname(BACKUP_PATH), l[-1]),
+                            DATA_PATH)
+                with open(DATA_PATH, 'rb') as file:
+                    dp = Unpickler(file)
+                    data = dp.load()
+        self.nb = len(data)
+        backup()
+
+        now = datetime.now()
+        for i, prop in enumerate(data):
+            iid = str(i)
+            self.events[iid] = Event(self.scheduler, iid=iid, **prop)
+            self.tree.insert('', 'end', iid, values=self.events[str(i)].values())
+            tags = [str(self.tree.index(iid) % 2)]
+            if not prop['Repeat'] and prop['Start'] < now:
+                tags.append('outdated')
+            self.tree.item(iid, tags=tags)
+
+    def get_password(self):
+        return self.password
+
+    def get_time(self):
+        return self.time

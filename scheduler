@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from schedulerlib.scheduler import EventScheduler
+from schedulerlib.sync import upload_to_server
 from schedulerlib.constants import CONFIG, CONFIG_PATH, HOLIDAYS, PIDFILE
 import os
 import sys
@@ -33,6 +34,8 @@ try:
 finally:
     try:
         app.save()
+        if CONFIG.getboolean("Sync", "on"):
+            upload_to_server(app.get_password(), app.get_time())
     except NameError:
         pass
     CONFIG.set('Calendar', 'holidays', ', '.join(HOLIDAYS))

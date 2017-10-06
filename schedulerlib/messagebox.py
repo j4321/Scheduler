@@ -188,6 +188,41 @@ ICONS = {"information": IM_INFO_DATA, "error": IM_ERROR_DATA,
          "question": IM_QUESTION_DATA, "warning": IM_WARNING_DATA}
 
 
+class SyncConflict(Toplevel):
+    def __init__(self, master=None,
+                 text=_("There is a synchronization conflict. What do you want to do?")):
+        Toplevel.__init__(self, master)
+        self.icon = PhotoImage(data=IM_ERROR_DATA)
+        self.title(_("Sync Conflict"))
+        self.grab_set()
+        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
+
+        self.action = ""
+        frame = Frame(self)
+        frame.grid(row=0, columnspan=2, sticky="eswn")
+        Label(frame, image=self.icon).pack(padx=4, pady=4, side="left")
+        Label(frame, text=text,
+              font="TkDefaultFont 10 bold").pack(side="right", fill="x",
+                                                 anchor="center", expand=True,
+                                                 padx=4, pady=4)
+        Button(self, text=_("Download notes from server"),
+               command=self.download).grid(row=1, column=0, padx=4, pady=4, sticky='ew')
+        Button(self, text=_("Upload local notes on server"),
+               command=self.upload).grid(row=1, column=1, padx=4, pady=4, sticky='ew')
+
+    def download(self):
+        self.action = "download"
+        self.destroy()
+
+    def upload(self):
+        self.action = "upload"
+        self.destroy()
+
+    def get_action(self):
+        return self.action
+
+
 class OneButtonBox(Toplevel):
     def __init__(self, parent=None, title="", message="", button="Ok", image=None):
         """

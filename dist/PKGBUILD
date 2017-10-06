@@ -1,6 +1,6 @@
 # Maintainer: Juliette Monsel <j_4321@protonmail.com>
 pkgname=scheduler
-pkgver=0.5.0
+pkgver=0.6.0
 pkgrel=1
 pkgdesc="Alarms and reminders"
 arch=('any')
@@ -8,9 +8,9 @@ license=('GPL3')
 # provides=('scheduler')
 # conflicts=('scheduler')
 makedepends=('python-setuptools')
-depends=('tk' 'tktray' 'desktop-file-utils' 'python-apscheduler')
+depends=('tk' 'tktray' 'desktop-file-utils' 'python' 'python-easywebdav' 'python-apscheduler')
 source=("$pkgname-$pkgver.tar.gz")
-sha512sums=('dd618b01c671776715c2dcfd45301b403b199d18885bfa9ce615734a5171e8ba555d3bd5b13876757232937ff92e5df32a73f10f4f67f027c3e25350b81a6d16')
+sha512sums=('e1c601be3519c7a4d47597363ee5315a55b2af769e701892e780016ebae3f11f6aa475fd2e69db9a8fe6af4650a0017e6185fc187eeece3982aad5cf6ece7342')
 
 package() {
  cd "$srcdir/$pkgname-$pkgver"
