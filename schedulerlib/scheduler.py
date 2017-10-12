@@ -565,7 +565,7 @@ class EventScheduler(Tk):
         user.insert(0, CONFIG.get("Sync", "username"))
         pwd = Entry(top, show="*")
 
-        ch = Checkbutton(top, text=_("Synchronize notes with server"), command=toggle)
+        ch = Checkbutton(top, text=_("Synchronize data with server"), command=toggle)
         ch.state(("selected",))
         ch.grid(row=0, columnspan=2, padx=4, pady=4, sticky="w")
         Label(top, text=_("Username")).grid(row=1, column=0, padx=4, pady=4,
