@@ -149,18 +149,20 @@ MOINS = os.path.join(IMAGES_PATH, 'moins.png')
 PLUS = os.path.join(IMAGES_PATH, 'plus.png')
 DOT = os.path.join(IMAGES_PATH, 'dot.png')
 PLAY = os.path.join(IMAGES_PATH, 'play.png')
-PAUSE= os.path.join(IMAGES_PATH, 'pause.png')
+PAUSE = os.path.join(IMAGES_PATH, 'pause.png')
 STOP = os.path.join(IMAGES_PATH, 'stop.png')
 CLOSED = os.path.join(IMAGES_PATH, 'closed.png')
 OPENED = os.path.join(IMAGES_PATH, 'open.png')
 CLOSED_SEL = os.path.join(IMAGES_PATH, 'closed_sel.png')
 OPENED_SEL = os.path.join(IMAGES_PATH, 'open_sel.png')
+SCROLL_ALPHA = os.path.join(IMAGES_PATH, "scroll.png")
 
 
 TASK_STATE = {'Pending': '⌛', 'In Progress': '✎', 'Completed': '✔', 'Cancelled': '✗'}
 
 CATEGORIES = {cat: CONFIG.get('Categories', cat).split(', ')
               for cat in CONFIG.options('Categories')}
+
 
 def backup():
     nb_backup = CONFIG.getint('General', 'backups')
@@ -174,12 +176,27 @@ def backup():
             os.remove(BACKUP_PATH % 0)
             for i in range(1, len(backups)):
                 os.rename(BACKUP_PATH % i, BACKUP_PATH % (i - 1))
-            os.rename(DATA_PATH, BACKUP_PATH % (nb_backup-1))
+            os.rename(DATA_PATH, BACKUP_PATH % (nb_backup - 1))
     except FileNotFoundError:
         pass
 
-def active_color(r, g, b):
-    r += (255 - r)/3
-    g += (255 - g)/3
-    b += (255 - b)/3
-    return ("#%2.2x%2.2x%2.2x" % (round(r), round(g), round(b))).upper()
+
+def is_color_light(r, g, b):
+    p = ((0.299 * r ** 2 + 0.587 * g ** 2 + 0.114 * b ** 2) ** 0.5) / 255
+    return p > 0.5
+
+
+def active_color(r, g, b, output='HTML'):
+    """Return a lighter shade of color (RGB triplet with value max 255) in HTML format."""
+    if is_color_light(r, g, b):
+        r *= 3 / 4
+        g *= 3 / 4
+        b *= 3 / 4
+    else:
+        r += (255 - r) / 3
+        g += (255 - g) / 3
+        b += (255 - b) / 3
+    if output == 'HTML':
+        return ("#%2.2x%2.2x%2.2x" % (round(r), round(g), round(b))).upper()
+    else:
+        return (round(r), round(g), round(b))

@@ -37,7 +37,7 @@ class About(Toplevel):
     """ About diaog """
     def __init__(self, master):
         """ create About dialog """
-        Toplevel.__init__(self, master)
+        Toplevel.__init__(self, master, class_='Scheduler')
 
         self.title(_("About Scheduler"))
         self.image = PhotoImage(file=ICON48, master=self)
@@ -72,7 +72,7 @@ class About(Toplevel):
             self.focus_set()
             fen.destroy()
 
-        fen = Toplevel(self)
+        fen = Toplevel(self, class_='Scheduler')
         fen.title(_("License"))
         fen.transient(self)
         fen.protocol("WM_DELETE_WINDOW", close)

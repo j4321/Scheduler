@@ -37,7 +37,7 @@ def only_nb(text):
 
 class Form(Toplevel):
     def __init__(self, master, event, new=False):
-        Toplevel.__init__(self, master)
+        Toplevel.__init__(self, master, class_='Scheduler')
         self.minsize(410, 402)
         if master.winfo_ismapped():
             self.transient(master)

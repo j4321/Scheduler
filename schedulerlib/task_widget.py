@@ -25,6 +25,7 @@ Task desktop widget
 from tkinter import Toplevel, Text, BooleanVar, Menu, StringVar
 from tkinter.ttk import Style, Label, Separator, Sizegrip
 from schedulerlib.constants import CONFIG, TASK_STATE
+from schedulerlib.ttkwidgets import AutoScrollbar
 from ewmh import EWMH
 
 
@@ -33,6 +34,8 @@ class TaskWidget(Toplevel):
         Toplevel.__init__(self, master)
         self.attributes('-type', 'splash')
         self.attributes('-alpha', CONFIG.get('General', 'alpha'))
+        self.rowconfigure(2, weight=1)
+        self.columnconfigure(0, weight=1)
         self.minsize(50, 50)
         self.hide_completed = CONFIG.getboolean('Tasks', 'hide_completed')
 
@@ -52,10 +55,10 @@ class TaskWidget(Toplevel):
         self.configure(bg=bg)
 
         style = Style(self)
-        style.configure('tasks.TFrame', background=bg)
-        style.configure('tasks.TSizegrip', background=bg)
-        style.configure('tasks.TSeparator', background=bg)
-        style.configure('tasks.TLabel', background=bg, foreground=fg)
+        style.configure('Tasks.TFrame', background=bg)
+        style.configure('Tasks.TSizegrip', background=bg)
+        style.configure('Tasks.TSeparator', background=bg)
+        style.configure('Tasks.TLabel', background=bg, foreground=fg)
 
         # --- menu
         self.menu = Menu(self, tearoff=False)
@@ -70,9 +73,10 @@ class TaskWidget(Toplevel):
         self.menu.add_command(label='Hide', command=self.withdraw)
 
         # --- elements
-        Label(self, text='TASKS', style='tasks.TLabel',
-              font=CONFIG.get('Tasks', 'font_title')).pack(pady=4)
-        Separator(self, style='tasks.TSeparator').pack(fill='x')
+        label = Label(self, text='TASKS', style='Tasks.TLabel',
+                      anchor='center', font=CONFIG.get('Tasks', 'font_title'))
+        label.grid(row=0, columnspan=2, pady=4, sticky='ew')
+        Separator(self, style='Tasks.TSeparator').grid(row=1, columnspan=2, sticky='we')
         self.display = Text(self, width=20, height=10, relief='flat',
                             cursor='arrow', wrap='word',
                             highlightthickness=0, state='disabled',
@@ -83,10 +87,15 @@ class TaskWidget(Toplevel):
                             tabs=('35', 'right', '45', 'left'),
                             background=bg, foreground=fg,
                             font=CONFIG.get('Tasks', 'font'))
-        self.display.pack(fill='both', expand=True, padx=2, pady=2)
+        self.display.grid(sticky='nsew', row=2, column=0, padx=2, pady=2)
+        scroll = AutoScrollbar(self, orient='vertical',
+                               style='Tasks.Vertical.TScrollbar',
+                               command=self.display.yview)
+        scroll.grid(row=2, column=1, sticky='ns', pady=(2, 16))
+        self.display.configure(yscrollcommand=scroll.set)
         self.display_tasks()
 
-        corner = Sizegrip(self, style="tasks.TSizegrip")
+        corner = Sizegrip(self, style="Tasks.TSizegrip")
         corner.place(relx=1, rely=1, anchor='se')
 
         geometry = CONFIG.get('Tasks', 'geometry')
@@ -95,12 +104,13 @@ class TaskWidget(Toplevel):
             self.geometry(geometry)
             if self.display.get('1.0', 'end') != '\n':
                 self.deiconify()
+                self.variable.set(True)
 
         # --- bindings
         self.bind('<3>', lambda e: self.menu.tk_popup(e.x_root, e.y_root))
-        self.bind('<ButtonPress-1>', self._start_move)
-        self.bind('<ButtonRelease-1>', self._stop_move)
-        self.bind('<B1-Motion>', self._move)
+        label.bind('<ButtonPress-1>', self._start_move)
+        label.bind('<ButtonRelease-1>', self._stop_move)
+        label.bind('<B1-Motion>', self._move)
         self.bind('<Configure>', self._on_configure)
         self.display.bind('<Unmap>', self._on_unmap)
         self.display.bind('<Map>', self._on_map)
