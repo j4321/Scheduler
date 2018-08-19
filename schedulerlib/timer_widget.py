@@ -9,7 +9,7 @@ Created on Thu Jun 15 13:02:41 2017
 from tkinter import Menu, BooleanVar, StringVar, Toplevel, PhotoImage, Text
 from tkinter.ttk import Style, Button, Label, Sizegrip
 from ewmh import EWMH
-from schedulerlib.constants import PLAY, PAUSE, STOP, CONFIG, active_color
+from schedulerlib.constants import PLAY, PAUSE, STOP, CONFIG, active_color, save_config
 
 
 class Timer(Toplevel):
@@ -143,27 +143,31 @@ class Timer(Toplevel):
 
     def _on_map(self, event=None):
         ''' make widget sticky '''
-        for w in self.ewmh.getClientList():
-            if w.get_wm_name() == 'scheduler.timer':
-                self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
-        pos = self._position.get()
-        if pos == 'above':
+        try:
             for w in self.ewmh.getClientList():
                 if w.get_wm_name() == 'scheduler.timer':
-                    self.ewmh.setWmState(w, 1, '_NET_WM_STATE_ABOVE')
-                    self.ewmh.setWmState(w, 0, '_NET_WM_STATE_BELOW')
-        elif pos == 'below':
-            for w in self.ewmh.getClientList():
-                if w.get_wm_name() == 'scheduler.timer':
-                    self.ewmh.setWmState(w, 0, '_NET_WM_STATE_ABOVE')
-                    self.ewmh.setWmState(w, 1, '_NET_WM_STATE_BELOW')
-        else:
-            for w in self.ewmh.getClientList():
-                if w.get_wm_name() == 'scheduler.timer':
-                    self.ewmh.setWmState(w, 0, '_NET_WM_STATE_BELOW')
-                    self.ewmh.setWmState(w, 0, '_NET_WM_STATE_ABOVE')
-        self.ewmh.display.flush()
-        self.variable.set(True)
+                    self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
+            pos = self._position.get()
+            if pos == 'above':
+                for w in self.ewmh.getClientList():
+                    if w.get_wm_name() == 'scheduler.timer':
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_ABOVE')
+                        self.ewmh.setWmState(w, 0, '_NET_WM_STATE_BELOW')
+            elif pos == 'below':
+                for w in self.ewmh.getClientList():
+                    if w.get_wm_name() == 'scheduler.timer':
+                        self.ewmh.setWmState(w, 0, '_NET_WM_STATE_ABOVE')
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_BELOW')
+            else:
+                for w in self.ewmh.getClientList():
+                    if w.get_wm_name() == 'scheduler.timer':
+                        self.ewmh.setWmState(w, 0, '_NET_WM_STATE_BELOW')
+                        self.ewmh.setWmState(w, 0, '_NET_WM_STATE_ABOVE')
+            self.ewmh.display.flush()
+            self.variable.set(True)
+            save_config()
+        except TypeError:
+            pass
 
     def _change_pos(self):
         self.withdraw()
@@ -176,10 +180,12 @@ class Timer(Toplevel):
     def _on_unmap(self, event):
         CONFIG.set('Timer', 'geometry', '')
         self.variable.set(False)
+        save_config()
 
     def _on_configure(self, event):
         CONFIG.set('Timer', 'geometry', self.geometry())
         self.variable.set(True)
+        save_config()
 
     def _start_move(self, event):
         self.x = event.x

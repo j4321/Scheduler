@@ -183,3 +183,9 @@ def active_color(r, g, b):
     g += (255 - g)/3
     b += (255 - b)/3
     return ("#%2.2x%2.2x%2.2x" % (round(r), round(g), round(b))).upper()
+
+
+def save_config():
+    CONFIG.set('Calendar', 'holidays', ', '.join(HOLIDAYS))
+    with open(CONFIG_PATH, 'w') as file:
+        CONFIG.write(file)
