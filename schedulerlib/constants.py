@@ -200,3 +200,8 @@ def active_color(r, g, b, output='HTML'):
         return ("#%2.2x%2.2x%2.2x" % (round(r), round(g), round(b))).upper()
     else:
         return (round(r), round(g), round(b))
+
+def save_config():
+    CONFIG.set('Calendar', 'holidays', ', '.join(HOLIDAYS))
+    with open(CONFIG_PATH, 'w') as file:
+        CONFIG.write(file)

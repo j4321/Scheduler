@@ -24,7 +24,7 @@ Calendar desktop widget
 
 
 from tkinter import Toplevel, BooleanVar, StringVar, Menu
-from schedulerlib.constants import CONFIG
+from schedulerlib.constants import CONFIG, save_config
 from schedulerlib.event_calendar import EventCalendar
 from ewmh import EWMH
 

@@ -24,7 +24,7 @@ Event desktop widget
 
 from tkinter import Toplevel, BooleanVar, Menu, StringVar, PhotoImage, Canvas
 from tkinter.ttk import Style, Label, Separator, Sizegrip, Frame, Checkbutton
-from schedulerlib.constants import CONFIG, CLOSED, OPENED, CLOSED_SEL, OPENED_SEL
+from schedulerlib.constants import CONFIG, CLOSED, OPENED, CLOSED_SEL, OPENED_SEL, save_config
 from schedulerlib.ttkwidgets import AutoScrollbar
 from ewmh import EWMH
 from datetime import datetime, timedelta

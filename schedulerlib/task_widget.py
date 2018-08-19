@@ -24,7 +24,7 @@ Task desktop widget
 
 from tkinter import Toplevel, Text, BooleanVar, Menu, StringVar
 from tkinter.ttk import Style, Label, Separator, Sizegrip
-from schedulerlib.constants import CONFIG, TASK_STATE
+from schedulerlib.constants import CONFIG, TASK_STATE, save_config
 from schedulerlib.ttkwidgets import AutoScrollbar
 from ewmh import EWMH
 
