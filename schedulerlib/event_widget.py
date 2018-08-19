@@ -195,27 +195,31 @@ class EventWidget(Toplevel):
 
     def _on_map(self, event=None):
         ''' make widget sticky '''
-        for w in self.ewmh.getClientList():
-            if w.get_wm_name() == 'scheduler.events':
-                self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
-        pos = self._position.get()
-        if pos == 'above':
-            for w in self.ewmh.getClientList():
-                if w.get_wm_name() == 'scheduler.events':
-                    self.ewmh.setWmState(w, 1, '_NET_WM_STATE_ABOVE')
-                    self.ewmh.setWmState(w, 0, '_NET_WM_STATE_BELOW')
-        elif pos == 'below':
-            for w in self.ewmh.getClientList():
-                if w.get_wm_name() == 'scheduler.events':
-                    self.ewmh.setWmState(w, 0, '_NET_WM_STATE_ABOVE')
-                    self.ewmh.setWmState(w, 1, '_NET_WM_STATE_BELOW')
-        else:
-            for w in self.ewmh.getClientList():
-                if w.get_wm_name() == 'scheduler.events':
-                    self.ewmh.setWmState(w, 0, '_NET_WM_STATE_BELOW')
-                    self.ewmh.setWmState(w, 0, '_NET_WM_STATE_ABOVE')
-        self.ewmh.display.flush()
-        self.variable.set(True)
+        try:
+            pos = self._position.get()
+            if pos == 'above':
+                for w in self.ewmh.getClientList():
+                    if w.get_wm_name() == 'scheduler.events':
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_ABOVE')
+                        self.ewmh.setWmState(w, 0, '_NET_WM_STATE_BELOW')
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
+            elif pos == 'below':
+                for w in self.ewmh.getClientList():
+                    if w.get_wm_name() == 'scheduler.events':
+                        self.ewmh.setWmState(w, 0, '_NET_WM_STATE_ABOVE')
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_BELOW')
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
+            else:
+                for w in self.ewmh.getClientList():
+                    if w.get_wm_name() == 'scheduler.events':
+                        self.ewmh.setWmState(w, 0, '_NET_WM_STATE_BELOW')
+                        self.ewmh.setWmState(w, 0, '_NET_WM_STATE_ABOVE')
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
+            self.ewmh.display.flush()
+            self.variable.set(True)
+            save_config()
+        except TypeError:
+            pass
 
     def _on_unmap(self, event):
         CONFIG.set('Events', 'geometry', '')
@@ -225,6 +229,7 @@ class EventWidget(Toplevel):
         self.canvas.configure(scrollregion=self.canvas.bbox('all'))
         self.canvas.itemconfigure('display', width=self.canvas.winfo_width() - 4)
         CONFIG.set('Events', 'geometry', self.geometry())
+        save_config()
 
     def update_evts(self):
         """ update event list every day"""

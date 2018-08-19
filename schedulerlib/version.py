@@ -21,4 +21,4 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Version.
 """
-__version__ = '0.7.0'
+__version__ = '0.8.0'

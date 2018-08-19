@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from schedulerlib.scheduler import EventScheduler
-from schedulerlib.constants import CONFIG, CONFIG_PATH, HOLIDAYS, PIDFILE
+from schedulerlib.constants import CONFIG, CONFIG_PATH, HOLIDAYS, PIDFILE, save_config
 import os
 import sys
 import logging
@@ -35,9 +35,7 @@ finally:
         app.save()
     except NameError:
         pass
-    CONFIG.set('Calendar', 'holidays', ', '.join(HOLIDAYS))
-    with open(CONFIG_PATH, 'w') as file:
-        CONFIG.write(file)
+    save_config()
     try:
         os.unlink(PIDFILE)
     except FileNotFoundError:

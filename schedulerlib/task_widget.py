@@ -117,27 +117,31 @@ class TaskWidget(Toplevel):
 
     def _on_map(self, event=None):
         ''' make widget sticky '''
-        for w in self.ewmh.getClientList():
-            if w.get_wm_name() == 'scheduler.tasks':
-                self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
-        pos = self._position.get()
-        if pos == 'above':
-            for w in self.ewmh.getClientList():
-                if w.get_wm_name() == 'scheduler.tasks':
-                    self.ewmh.setWmState(w, 1, '_NET_WM_STATE_ABOVE')
-                    self.ewmh.setWmState(w, 0, '_NET_WM_STATE_BELOW')
-        elif pos == 'below':
-            for w in self.ewmh.getClientList():
-                if w.get_wm_name() == 'scheduler.tasks':
-                    self.ewmh.setWmState(w, 0, '_NET_WM_STATE_ABOVE')
-                    self.ewmh.setWmState(w, 1, '_NET_WM_STATE_BELOW')
-        else:
-            for w in self.ewmh.getClientList():
-                if w.get_wm_name() == 'scheduler.tasks':
-                    self.ewmh.setWmState(w, 0, '_NET_WM_STATE_BELOW')
-                    self.ewmh.setWmState(w, 0, '_NET_WM_STATE_ABOVE')
-        self.ewmh.display.flush()
-        self.variable.set(True)
+        try:
+            pos = self._position.get()
+            if pos == 'above':
+                for w in self.ewmh.getClientList():
+                    if w.get_wm_name() == 'scheduler.tasks':
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_ABOVE')
+                        self.ewmh.setWmState(w, 0, '_NET_WM_STATE_BELOW')
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
+            elif pos == 'below':
+                for w in self.ewmh.getClientList():
+                    if w.get_wm_name() == 'scheduler.tasks':
+                        self.ewmh.setWmState(w, 0, '_NET_WM_STATE_ABOVE')
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_BELOW')
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
+            else:
+                for w in self.ewmh.getClientList():
+                    if w.get_wm_name() == 'scheduler.tasks':
+                        self.ewmh.setWmState(w, 0, '_NET_WM_STATE_BELOW')
+                        self.ewmh.setWmState(w, 0, '_NET_WM_STATE_ABOVE')
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
+            self.ewmh.display.flush()
+            self.variable.set(True)
+            save_config()
+        except TypeError:
+            pass
 
     def _on_unmap(self, event):
         CONFIG.set('Tasks', 'geometry', '')
@@ -145,6 +149,7 @@ class TaskWidget(Toplevel):
 
     def _on_configure(self, event):
         CONFIG.set('Tasks', 'geometry', self.geometry())
+        save_config()
 
     def display_tasks(self, force=False):
         tasks = self.master.get_tasks()
