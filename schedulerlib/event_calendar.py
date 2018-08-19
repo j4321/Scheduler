@@ -174,7 +174,7 @@ class EventCalendar(Calendar):
                 for desc, iid, start, end, cat in evts:
                     if day >= start and (end is None or day <= end):
                         self._add_to_tooltip(w, d, desc, cat)
-
+        self._display_selection()
 
     def _add_to_tooltip(self, week_nb, day, txt, cat):
         tp = self._events_tooltips[week_nb][day]
@@ -353,6 +353,7 @@ class EventCalendar(Calendar):
                     for d in repeat['WeekDays']:
                         if d < d_max:
                             self._add_to_tooltip(w_max, d, desc, cat)
+        self._display_selection()
 
     def _remove_event(self, date, desc, iid, repeat, cat):
         year, month, day = date.year, date.month, date.day

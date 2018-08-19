@@ -24,7 +24,7 @@ Calendar desktop widget
 
 
 from tkinter import Toplevel, BooleanVar, StringVar, Menu
-from schedulerlib.constants import CONFIG
+from schedulerlib.constants import CONFIG, save_config
 from schedulerlib.event_calendar import EventCalendar
 from ewmh import EWMH
 
@@ -105,25 +105,25 @@ class CalendarWidget(Toplevel):
     def _on_map(self, event=None):
         ''' make widget sticky '''
         try:
-            for w in self.ewmh.getClientList():
-                if w.get_wm_name() == 'scheduler.calendar':
-                    self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
             pos = self._position.get()
             if pos == 'above':
                 for w in self.ewmh.getClientList():
                     if w.get_wm_name() == 'scheduler.calendar':
                         self.ewmh.setWmState(w, 1, '_NET_WM_STATE_ABOVE')
                         self.ewmh.setWmState(w, 0, '_NET_WM_STATE_BELOW')
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
             elif pos == 'below':
                 for w in self.ewmh.getClientList():
                     if w.get_wm_name() == 'scheduler.calendar':
                         self.ewmh.setWmState(w, 0, '_NET_WM_STATE_ABOVE')
                         self.ewmh.setWmState(w, 1, '_NET_WM_STATE_BELOW')
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
             else:
                 for w in self.ewmh.getClientList():
                     if w.get_wm_name() == 'scheduler.calendar':
                         self.ewmh.setWmState(w, 0, '_NET_WM_STATE_BELOW')
                         self.ewmh.setWmState(w, 0, '_NET_WM_STATE_ABOVE')
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
             self.ewmh.display.flush()
             self.variable.set(True)
             save_config()

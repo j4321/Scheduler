@@ -144,25 +144,25 @@ class Timer(Toplevel):
     def _on_map(self, event=None):
         ''' make widget sticky '''
         try:
-            for w in self.ewmh.getClientList():
-                if w.get_wm_name() == 'scheduler.timer':
-                    self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
             pos = self._position.get()
             if pos == 'above':
                 for w in self.ewmh.getClientList():
                     if w.get_wm_name() == 'scheduler.timer':
                         self.ewmh.setWmState(w, 1, '_NET_WM_STATE_ABOVE')
                         self.ewmh.setWmState(w, 0, '_NET_WM_STATE_BELOW')
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
             elif pos == 'below':
                 for w in self.ewmh.getClientList():
                     if w.get_wm_name() == 'scheduler.timer':
                         self.ewmh.setWmState(w, 0, '_NET_WM_STATE_ABOVE')
                         self.ewmh.setWmState(w, 1, '_NET_WM_STATE_BELOW')
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
             else:
                 for w in self.ewmh.getClientList():
                     if w.get_wm_name() == 'scheduler.timer':
                         self.ewmh.setWmState(w, 0, '_NET_WM_STATE_BELOW')
                         self.ewmh.setWmState(w, 0, '_NET_WM_STATE_ABOVE')
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
             self.ewmh.display.flush()
             self.variable.set(True)
             save_config()

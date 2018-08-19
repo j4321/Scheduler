@@ -200,7 +200,7 @@ class OneButtonBox(Toplevel):
             button: message displayed on the button
             image: image displayed at the left of the message, either a PhotoImage or a string
         """
-        Toplevel.__init__(self, parent)
+        Toplevel.__init__(self, parent, class_='Scheduler')
         self.transient(parent)
         self.resizable(False, False)
         self.title(title)
@@ -265,7 +265,7 @@ class ShowError(Toplevel):
             report_msg: if True display a suggestion to report error
             image: image displayed at the left of the message, either a PhotoImage or a string
         """
-        Toplevel.__init__(self, parent)
+        Toplevel.__init__(self, parent, class_='Scheduler')
         self.transient(parent)
         self.resizable(False, False)
         self.title(title)
@@ -378,7 +378,7 @@ class TwoButtonBox(Toplevel):
             image: image displayed at the left of the message
         """
 
-        Toplevel.__init__(self, parent)
+        Toplevel.__init__(self, parent, class_='Scheduler')
         self.transient(parent)
         self.resizable(False, False)
         self.title(title)
@@ -439,7 +439,7 @@ class AskYesNoCancel(Toplevel):
             image: image displayed at the left of the message
         """
 
-        Toplevel.__init__(self, parent)
+        Toplevel.__init__(self, parent, class_='Scheduler')
         self.transient(parent)
         self.resizable(False, False)
         self.title(title)

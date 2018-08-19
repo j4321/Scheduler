@@ -24,7 +24,8 @@ Event desktop widget
 
 from tkinter import Toplevel, BooleanVar, Menu, StringVar, PhotoImage, Canvas
 from tkinter.ttk import Style, Label, Separator, Sizegrip, Frame, Checkbutton
-from schedulerlib.constants import CONFIG, CLOSED, OPENED, CLOSED_SEL, OPENED_SEL
+from schedulerlib.constants import CONFIG, CLOSED, OPENED, CLOSED_SEL, OPENED_SEL, save_config
+from schedulerlib.ttkwidgets import AutoScrollbar
 from ewmh import EWMH
 from datetime import datetime, timedelta
 
@@ -91,6 +92,8 @@ class EventWidget(Toplevel):
         self.attributes('-type', 'splash')
         self.attributes('-alpha', CONFIG.get('General', 'alpha'))
         self.minsize(50, 50)
+        self.rowconfigure(2, weight=1)
+        self.columnconfigure(0, weight=1)
 
         self._position = StringVar(self, CONFIG.get('Events', 'position'))
         self._position.trace_add('write', lambda *x: CONFIG.set('Events', 'position', self._position.get()))
@@ -108,10 +111,10 @@ class EventWidget(Toplevel):
         self.configure(bg=bg)
 
         style = Style(self)
-        style.configure('events.TFrame', background=bg)
-        style.configure('events.TSizegrip', background=bg)
-        style.configure('events.TSeparator', background=bg)
-        style.configure('events.TLabel', background=bg, foreground=fg)
+        style.configure('Events.TFrame', background=bg)
+        style.configure('Events.TSizegrip', background=bg)
+        style.configure('Events.TSeparator', background=bg)
+        style.configure('Events.TLabel', background=bg, foreground=fg)
 
         # --- menu
         self.menu = Menu(self, tearoff=False)
@@ -126,12 +129,19 @@ class EventWidget(Toplevel):
         self.menu.add_command(label='Hide', command=self.withdraw)
 
         # --- elements
-        Label(self, text='EVENTS', style='events.TLabel',
-              font=CONFIG.get('Events', 'font_title')).pack(pady=4)
-        Separator(self, style='events.TSeparator').pack(fill='x')
+        label = Label(self, text='EVENTS', style='Events.TLabel',
+                      anchor='center',font=CONFIG.get('Events', 'font_title'))
+        label.grid(row=0, columnspan=2, pady=4, sticky='ew')
+        Separator(self, style='Events.TSeparator').grid(row=1, columnspan=2, sticky='we')
         self.canvas = Canvas(self, background=bg, highlightthickness=0)
-        self.canvas.pack(fill='both', expand=True, padx=2, pady=2)
-        self.display = Frame(self.canvas, style='events.TFrame')
+        self.canvas.grid(sticky='nsew', row=2, column=0, padx=2, pady=2)
+        scroll = AutoScrollbar(self, orient='vertical',
+                               style='Events.Vertical.TScrollbar',
+                               command=self.canvas.yview)
+        scroll.grid(row=2, column=1, sticky='ns', pady=(2, 16))
+        self.canvas.configure(yscrollcommand=scroll.set)
+
+        self.display = Frame(self.canvas, style='Events.TFrame')
         self.canvas.create_window(0, 0, anchor='nw', window=self.display, tags=('display',))
 #        self.display = Text(self, width=20, height=10, relief='flat',
 #                            cursor='arrow', wrap='word',
@@ -146,7 +156,7 @@ class EventWidget(Toplevel):
         self.display.columnconfigure(0, weight=1)
         self.display_evts()
 
-        corner = Sizegrip(self, style="events.TSizegrip")
+        corner = Sizegrip(self, style="Events.TSizegrip")
         corner.place(relx=1, rely=1, anchor='se')
 
         geometry = CONFIG.get('Events', 'geometry')
@@ -155,12 +165,13 @@ class EventWidget(Toplevel):
             self.geometry(geometry)
             if self.display.children:
                 self.deiconify()
+                self.variable.set(True)
 
         # --- bindings
         self.bind('<3>', lambda e: self.menu.tk_popup(e.x_root, e.y_root))
-        self.bind('<ButtonPress-1>', self._start_move)
-        self.bind('<ButtonRelease-1>', self._stop_move)
-        self.bind('<B1-Motion>', self._move)
+        label.bind('<ButtonPress-1>', self._start_move)
+        label.bind('<ButtonRelease-1>', self._stop_move)
+        label.bind('<B1-Motion>', self._move)
         self.bind('<Configure>', self._on_configure)
         self.display.bind('<Unmap>', self._on_unmap)
         self.display.bind('<Map>', self._on_map)
@@ -185,25 +196,25 @@ class EventWidget(Toplevel):
     def _on_map(self, event=None):
         ''' make widget sticky '''
         try:
-            for w in self.ewmh.getClientList():
-                if w.get_wm_name() == 'scheduler.events':
-                    self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
             pos = self._position.get()
             if pos == 'above':
                 for w in self.ewmh.getClientList():
                     if w.get_wm_name() == 'scheduler.events':
                         self.ewmh.setWmState(w, 1, '_NET_WM_STATE_ABOVE')
                         self.ewmh.setWmState(w, 0, '_NET_WM_STATE_BELOW')
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
             elif pos == 'below':
                 for w in self.ewmh.getClientList():
                     if w.get_wm_name() == 'scheduler.events':
                         self.ewmh.setWmState(w, 0, '_NET_WM_STATE_ABOVE')
                         self.ewmh.setWmState(w, 1, '_NET_WM_STATE_BELOW')
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
             else:
                 for w in self.ewmh.getClientList():
                     if w.get_wm_name() == 'scheduler.events':
                         self.ewmh.setWmState(w, 0, '_NET_WM_STATE_BELOW')
                         self.ewmh.setWmState(w, 0, '_NET_WM_STATE_ABOVE')
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
             self.ewmh.display.flush()
             self.variable.set(True)
             save_config()
@@ -246,20 +257,20 @@ class EventWidget(Toplevel):
                 text = day.capitalize()
             Label(self.display, text=text,
                   font=CONFIG.get('Events', 'font_day'),
-                  style='events.TLabel').grid(sticky='w', pady=(4, 0), padx=4)
+                  style='Events.TLabel').grid(sticky='w', pady=(4, 0), padx=4)
             for ev, desc in evts:
                 if desc.strip():
-                    tf = ToggledFrame(self.display, text=ev.strip(), style='events.TFrame')
+                    tf = ToggledFrame(self.display, text=ev.strip(), style='Events.TFrame')
                     l = Label(tf.interior,
                               text=desc.strip(),
-                              style='events.TLabel')
+                              style='Events.TLabel')
                     l.pack(padx=4, fill='both', expand=True)
                     l.configure(wraplength=l.winfo_width())
                     l.bind('<Configure>', wrap)
                     tf.grid(sticky='we', pady=2, padx=(8, 4))
                 else:
                     l = Label(self.display, text=ev.strip(),
-                              style='events.TLabel')
+                              style='Events.TLabel')
                     l.bind('<Configure>', wrap)
                     l.grid(sticky='ew', pady=2, padx=(21, 10))
 

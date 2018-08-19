@@ -40,5 +40,6 @@ setup(name='scheduler',
       keywords=['tkinter', 'tasks', 'scheduling'],
       packages=["schedulerlib"],
       scripts = ["scheduler"],
-      requires=["os", "tkinter", "apscheduler", "pickle", "traceback", "sys"]
+      requires=["os", "tkinter", "apscheduler", "pickle", "traceback", "sys",
+                "pillow"]
 )

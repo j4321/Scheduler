@@ -22,14 +22,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Task manager (main app)
 """
 
-from tkinter import Tk, PhotoImage, Menu, StringVar, TclError
+from tkinter import Tk, Menu, StringVar, TclError
+from tkinter import PhotoImage as tkPhotoImage
 from tkinter.ttk import Button, Treeview, Style, Label, Combobox, Frame
 from schedulerlib.messagebox import showerror
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers import SchedulerNotRunningError
 from datetime import datetime, timedelta
-from schedulerlib.constants import ICON, PLUS, CONFIG, DOT, JOBSTORE
-from schedulerlib.constants import backup, DATA_PATH, BACKUP_PATH
+from schedulerlib.constants import ICON, PLUS, CONFIG, DOT, JOBSTORE, backup, \
+    DATA_PATH, BACKUP_PATH, SCROLL_ALPHA, active_color
 from schedulerlib.tktray import Icon
 from schedulerlib.form import Form
 from schedulerlib.event import Event
@@ -44,13 +45,15 @@ import shutil
 from pickle import Pickler, Unpickler
 import logging
 import traceback
+from PIL import Image
+from PIL.ImageTk import PhotoImage
 
 
-#TODO: fix reminder duplication
+# TODO: fix reminder duplication
 
 class EventScheduler(Tk):
     def __init__(self):
-        Tk.__init__(self)
+        Tk.__init__(self, className='Scheduler')
         logging.info('Start')
         self.withdraw()
         self.protocol("WM_DELETE_WINDOW", self.display_hide)
@@ -81,7 +84,7 @@ class EventScheduler(Tk):
             self.menu_task.add_radiobutton(label=state, value=state,
                                            variable=self._task_var,
                                            command=self._set_progress)
-        self._img_dot = PhotoImage(master=self)
+        self._img_dot = tkPhotoImage(master=self)
         self.menu_task.insert_cascade(1, menu=menu_in_progress,
                                       compound='left',
                                       label='In Progress',
@@ -102,6 +105,48 @@ class EventScheduler(Tk):
         self.style.map("TCombobox", fieldbackground=[("readonly", "white")],
                        foreground=[("readonly", "black")])
 
+        self._im_trough = {}
+        self._im_slider_vert = {}
+        self._im_slider_vert_prelight = {}
+        self._im_slider_vert_active = {}
+        for widget in ['Events', 'Tasks']:
+            bg = CONFIG.get(widget, 'background', fallback='gray10')
+            fg = CONFIG.get(widget, 'foreground')
+            vmax = self.winfo_rgb('white')[0]
+            widget_bg = tuple(int(val / vmax * 255) for val in self.winfo_rgb(bg))
+            widget_fg = tuple(int(val / vmax * 255) for val in self.winfo_rgb(fg))
+            active_bg = active_color(*widget_bg)
+            active_bg2 = active_color(*active_color(*widget_bg, 'RGB'))
+            slider_alpha = Image.open(SCROLL_ALPHA)
+            slider_vert = Image.new('RGBA', (13, 28), active_bg)
+            slider_vert.putalpha(slider_alpha)
+            slider_vert_active = Image.new('RGBA', (13, 28), widget_fg)
+            slider_vert_active.putalpha(slider_alpha)
+            slider_vert_prelight = Image.new('RGBA', (13, 28), active_bg2)
+            slider_vert_prelight.putalpha(slider_alpha)
+
+            self._im_trough[widget] = tkPhotoImage(width=15, height=15, master=self)
+            self._im_trough[widget].put(" ".join(["{" + " ".join([bg] * 15) + "}"] * 15))
+            self._im_slider_vert_active[widget] = PhotoImage(slider_vert_active,
+                                                             master=self)
+            self._im_slider_vert[widget] = PhotoImage(slider_vert,
+                                                      master=self)
+            self._im_slider_vert_prelight[widget] = PhotoImage(slider_vert_prelight,
+                                                               master=self)
+            self.style.element_create('%s.Vertical.Scrollbar.trough' % widget,
+                                      'image', self._im_trough[widget])
+            self.style.element_create('%s.Vertical.Scrollbar.thumb' % widget,
+                                      'image', self._im_slider_vert[widget],
+                                      ('pressed', '!disabled',
+                                       self._im_slider_vert_active[widget]),
+                                      ('active', '!disabled',
+                                       self._im_slider_vert_prelight[widget]),
+                                      border=6, sticky='ns')
+            self.style.layout('%s.Vertical.TScrollbar' % widget,
+                              [('%s.Vertical.Scrollbar.trough' % widget,
+                                {'children': [('%s.Vertical.Scrollbar.thumb' % widget,
+                                               {'expand': '1'})],
+                                 'sticky': 'ns'})])
         # --- tree
         self.tree = Treeview(self, show="headings",
                              columns=('Summary', 'Place', 'Start', 'End', 'Category'))
@@ -341,7 +386,7 @@ class EventScheduler(Tk):
                 if '%' in state:
                     self._img_dot = PhotoImage(master=self, file=DOT)
                 else:
-                    self._img_dot = PhotoImage(master=self)
+                    self._img_dot = tkPhotoImage(master=self)
                 self.menu_task.entryconfigure(1, image=self._img_dot)
                 self.menu.insert_cascade(0, menu=self.menu_task, label='Progress')
             self.menu.tk_popup(event.x_root, event.y_root)
