@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Scheduler - Task scheduling and calendar
-Copyright 2017 Juliette Monsel <j_4321@protonmail.com>
+Copyright 2017-2018 Juliette Monsel <j_4321@protonmail.com>
 code based on http://effbot.org/zone/tkinter-autoscrollbar.htm
 
 Scheduler is free software: you can redistribute it and/or modify
@@ -29,9 +29,9 @@ from schedulerlib.messagebox import showerror
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers import SchedulerNotRunningError
 from datetime import datetime, timedelta
-from schedulerlib.constants import ICON, PLUS, CONFIG, DOT, JOBSTORE, backup, \
-    DATA_PATH, BACKUP_PATH, SCROLL_ALPHA, active_color
-from schedulerlib.tktray import Icon
+from schedulerlib.constants import ICON48, ICON, PLUS, CONFIG, DOT, JOBSTORE, \
+    DATA_PATH, BACKUP_PATH, SCROLL_ALPHA, active_color, backup, add_trace
+from schedulerlib.trayicon import TrayIcon, SubMenu
 from schedulerlib.form import Form
 from schedulerlib.event import Event
 from schedulerlib.event_widget import EventWidget
@@ -49,23 +49,22 @@ from PIL import Image
 from PIL.ImageTk import PhotoImage
 
 
-# TODO: fix reminder duplication
-
 class EventScheduler(Tk):
     def __init__(self):
         Tk.__init__(self, className='Scheduler')
         logging.info('Start')
-        self.withdraw()
         self.protocol("WM_DELETE_WINDOW", self.display_hide)
 
-        self.icon_img = PhotoImage(master=self, file=ICON)
+        self.icon_img = PhotoImage(master=self, file=ICON48)
         self.iconphoto(True, self.icon_img)
-        self.icon = Icon(self, image=self.icon_img)
-        menu = Menu(self.icon.menu, tearoff=False)
-        self.icon.menu.add_cascade(label='Widgets', menu=menu)
+        self.icon = TrayIcon(ICON, fallback_icon_path=ICON48)
+        self.menu_widgets = SubMenu(parent=self.icon.menu)
+        self.icon.menu.add_checkbutton(label='Manager', command=self.display_hide)
+        self.withdraw()
+        self.icon.menu.add_cascade(label='Widgets', menu=self.menu_widgets)
         self.icon.menu.add_command(label='About', command=lambda: About(self))
         self.icon.menu.add_command(label='Quit', command=self.exit)
-        self.icon.bind('<1>', self.display_hide)
+        self.icon.bind_left_click(self.display_hide)
 
         self.menu = Menu(self, tearoff=False)
         self.menu.add_command(label='Edit', command=self._edit_menu)
@@ -245,15 +244,20 @@ class EventScheduler(Tk):
         self.tasks_widget = TaskWidget(self)
         self.timer_widget = Timer(self)
 
-        menu.add_checkbutton(label='Calendar', command=self.display_hide_cal,
-                             variable=self.cal_widget.variable)
-        menu.add_checkbutton(label='Events', command=self.display_hide_events,
-                             variable=self.events_widget.variable)
-        menu.add_checkbutton(label='Tasks', command=self.display_hide_tasks,
-                             variable=self.tasks_widget.variable)
-        menu.add_checkbutton(label='Timer', command=self.display_hide_timer,
-                             variable=self.timer_widget.variable)
+        for item, widget in zip(['Calendar', 'Events', 'Tasks', 'Timer'],
+                                [self.cal_widget, self.events_widget,
+                                 self.tasks_widget, self.timer_widget]):
+            self.menu_widgets.add_checkbutton(label=item,
+                                              command=lambda i=item, w=widget: self.display_hide_widget(i, w))
+            self.menu_widgets.set_item_value(item, widget.variable.get())
+            add_trace(widget.variable, 'write',
+                      lambda *args: self._menu_widgets_trace(item, widget))
 
+        # self.menu_widgets.add_checkbutton(label='Calendar', command=self.display_hide_cal)
+        # self.menu_widgets.add_checkbutton(label='Events', command=self.display_hide_events)
+        # self.menu_widgets.add_checkbutton(label='Tasks', command=self.display_hide_tasks)
+        # self.menu_widgets.add_checkbutton(label='Timer', command=self.display_hide_timer)
+        self.icon.loop(self)
         self.scheduler.start()
 
     def report_callback_exception(self, *args):
@@ -308,6 +312,24 @@ class EventScheduler(Tk):
     def _select(self, event):
         if not self.tree.identify_row(event.y):
             self.tree.selection_remove(*self.tree.selection())
+
+    def _menu_widgets_trace(self, item, widget):
+        self.menu_widgets.set_item_value(item, widget.variable.get())
+
+    def withdraw(self):
+        Tk.withdraw(self)
+        self.icon.menu.set_item_value('Manager', False)
+
+    def deiconify(self):
+        Tk.deiconify(self)
+        self.icon.menu.set_item_value('Manager', True)
+
+    def display_hide_widget(self, item, widget):
+        value = self.menu_widgets.get_item_value(item)
+        if value:
+            widget.deiconify()
+        else:
+            widget.withdraw()
 
     def display_hide_tasks(self):
         if self.tasks_widget.winfo_ismapped():

@@ -1,9 +1,8 @@
 #! /usr/bin/python3
-# -*- coding: utf-8 -*-
+# -*- coding:Utf-8 -*-
 """
-Scheduler - Task scheduling and calendar
-Copyright 2017 Juliette Monsel <j_4321@protonmail.com>
-code based on http://effbot.org/zone/tkinter-autoscrollbar.htm
+Scheduler - System tray unread mail checker
+Copyright 2016-2018 Juliette Monsel <j_4321@protonmail.com>
 
 Scheduler is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -14,11 +13,19 @@ Scheduler is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-Version.
+System tray icon.
 """
-__version__ = '0.9.0'
+
+
+from schedulerlib.constants import GUI
+
+if GUI == 'gtk':
+    from schedulerlib.trayicon.gtkicon import TrayIcon, SubMenu
+elif GUI == 'qt':
+    from schedulerlib.trayicon.qticon import TrayIcon, SubMenu
+else:
+    from schedulerlib.trayicon.tkicon import TrayIcon, SubMenu
