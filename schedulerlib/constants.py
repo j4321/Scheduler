@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#! /usr/bin/python3
-# -*- coding: utf-8 -*-
 """
 Scheduler - Task scheduling and calendar
-Copyright 2017 Juliette Monsel <j_4321@protonmail.com>
+Copyright 2017-2018 Juliette Monsel <j_4321@protonmail.com>
 code based on http://effbot.org/zone/tkinter-autoscrollbar.htm
 
 Scheduler is free software: you can redistribute it and/or modify
@@ -30,7 +28,8 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 import locale
 from configparser import ConfigParser
-
+import warnings
+from subprocess import check_output
 
 # --- paths
 PATH = os.path.dirname(__file__)
@@ -82,6 +81,7 @@ if not CONFIG.read(CONFIG_PATH):
     CONFIG.set('General', 'locale', '.'.join(locale.getdefaultlocale()))
     CONFIG.set('General', 'alpha', '0.85')
     CONFIG.set('General', 'backups', '10')
+    CONFIG.set('General', 'trayicon', '')
 
     CONFIG.add_section('Events')
     CONFIG.set('Events', 'geometry', '')
@@ -113,9 +113,9 @@ if not CONFIG.read(CONFIG_PATH):
     CONFIG.set('Calendar', 'holidays', '')
     CONFIG.set('Calendar', 'geometry', '')
     CONFIG.set('Calendar', 'font', '')
-    CONFIG.set('Calendar','background', '#424242')
-    CONFIG.set('Calendar','foreground', '#ECECEC')
-    CONFIG.set('Calendar','bordercolor', 'gray70')
+    CONFIG.set('Calendar', 'background', '#424242')
+    CONFIG.set('Calendar', 'foreground', '#ECECEC')
+    CONFIG.set('Calendar', 'bordercolor', 'gray70')
     CONFIG.set('Calendar', 'othermonthforeground', 'gray30')
     CONFIG.set('Calendar', 'othermonthbackground', 'gray93')
     CONFIG.set('Calendar', 'othermonthweforeground', 'gray30')
@@ -132,7 +132,6 @@ if not CONFIG.read(CONFIG_PATH):
     CONFIG.set('Calendar', 'tooltipbackground', 'black')
     CONFIG.set('Calendar', 'position', 'normal')
 
-
     CONFIG.add_section('Categories')
     CONFIG.set('Categories', 'default', 'white, #186CBE')
 
@@ -142,8 +141,9 @@ HOLIDAYS = set(CONFIG.get('Calendar', 'holidays').split(', '))
 if '' in HOLIDAYS:
     HOLIDAYS.remove('')
 
+ICON_NAME = "scheduler-tray"  # gtk / qt tray icon
 ICON48 = os.path.join(IMAGES_PATH, 'icon48.png')
-ICON = os.path.join(IMAGES_PATH, 'scheduler.png')
+TKTRAY_ICON = os.path.join(IMAGES_PATH, 'scheduler.png')
 BELL = os.path.join(IMAGES_PATH, 'bell.png')
 MOINS = os.path.join(IMAGES_PATH, 'moins.png')
 PLUS = os.path.join(IMAGES_PATH, 'plus.png')
@@ -164,6 +164,111 @@ CATEGORIES = {cat: CONFIG.get('Categories', cat).split(', ')
               for cat in CONFIG.options('Categories')}
 
 
+# --- system tray icon
+def get_available_gui_toolkits():
+    """Check which gui toolkits are available to create a system tray icon."""
+    toolkits = {'gtk': True, 'qt': True, 'tk': True}
+    b = False
+    try:
+        import gi
+        b = True
+    except ImportError:
+        toolkits['gtk'] = False
+
+    try:
+        import PyQt5
+        b = True
+    except ImportError:
+        try:
+            import PyQt4
+            b = True
+        except ImportError:
+            try:
+                import PySide
+                b = True
+            except ImportError:
+                toolkits['qt'] = False
+
+    tcl_packages = check_output(["tclsh",
+                                 os.path.join(PATH, "packages.tcl")]).decode().strip().split()
+    toolkits['tk'] = "tktray" in tcl_packages
+    b = b or toolkits['tk']
+    if not b:
+        raise ImportError("No GUI toolkits available to create the system tray icon.")
+    return toolkits
+
+
+TOOLKITS = get_available_gui_toolkits()
+GUI = CONFIG.get("General", "trayicon", fallback='').lower()
+
+if not TOOLKITS.get(GUI):
+    DESKTOP = os.environ.get('XDG_CURRENT_DESKTOP')
+    if DESKTOP == 'KDE':
+        if TOOLKITS['qt']:
+            GUI = 'qt'
+        else:
+            warnings.warn("No version of PyQt was found, falling back to another GUI toolkits so the system tray icon might not behave properly in KDE.")
+            GUI = 'gtk' if TOOLKITS['gtk'] else 'tk'
+    else:
+        if TOOLKITS['gtk']:
+            GUI = 'gtk'
+        elif TOOLKITS['qt']:
+            GUI = 'qt'
+        else:
+            GUI = 'tk'
+    CONFIG.set("General", "trayicon", GUI)
+print('GUI', GUI)
+
+if GUI == 'tk':
+    ICON = TKTRAY_ICON
+else:
+    ICON = ICON_NAME
+
+
+# --- compatibility
+def add_trace(variable, mode, callback):
+    """
+    Add trace to variable.
+
+    Ensure compatibility with old and new trace method.
+    mode: "read", "write", "unset" (new syntax)
+    """
+    try:
+        return variable.trace_add(mode, callback)
+    except AttributeError:
+        # fallback to old method
+        return variable.trace(mode[0], callback)
+
+
+def remove_trace(variable, mode, cbname):
+    """
+    Remove trace from variable.
+
+    Ensure compatibility with old and new trace method.
+    mode: "read", "write", "unset" (new syntax)
+    """
+    try:
+        variable.trace_remove(mode, cbname)
+    except AttributeError:
+        # fallback to old method
+        variable.trace_vdelete(mode[0], cbname)
+
+
+def info_trace(variable):
+    """
+    Remove trace from variable.
+
+    Ensure compatibility with old and new trace method.
+    mode: "read", "write", "unset" (new syntax)
+    """
+    try:
+        return variable.trace_info()
+    except AttributeError:
+        return variable.trace_vinfo()
+
+
+
+# --- functions
 def backup():
     nb_backup = CONFIG.getint('General', 'backups')
     backups = [int(f.split(".")[-1][6:])
@@ -200,6 +305,7 @@ def active_color(r, g, b, output='HTML'):
         return ("#%2.2x%2.2x%2.2x" % (round(r), round(g), round(b))).upper()
     else:
         return (round(r), round(g), round(b))
+
 
 def save_config():
     CONFIG.set('Calendar', 'holidays', ', '.join(HOLIDAYS))
