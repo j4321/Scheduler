@@ -29,7 +29,15 @@ from logging.handlers import TimedRotatingFileHandler
 import locale
 from configparser import ConfigParser
 import warnings
-from subprocess import check_output
+import gettext
+import matplotlib
+from tkinter import Toplevel
+from tkinter.ttk import Label, Entry, Button
+from subprocess import check_output, CalledProcessError
+from tkinter import filedialog
+from tkinter import colorchooser
+
+APP_NAME = "scheduler"
 
 # --- paths
 PATH = os.path.dirname(__file__)
@@ -38,18 +46,22 @@ if os.access(PATH, os.W_OK) and os.path.exists(os.path.join(PATH, "images")):
     # the app is not installed
     # local directory containing config files
     LOCAL_PATH = os.path.join(os.path.dirname(PATH), "scheduler_config")
-    IMAGES_PATH = os.path.join(PATH, 'images')
+    PATH_IMAGES = os.path.join(PATH, 'images')
+    PATH_SOUNDS = os.path.join(PATH, 'sounds')
+    PATH_LOCALE = os.path.join(PATH, "locale")
 else:
     # local directory containing config files
     LOCAL_PATH = os.path.join(os.path.expanduser('~'), '.scheduler')
-    IMAGES_PATH = "/usr/share/scheduler/images"
+    PATH_LOCALE = "/usr/share/locale"
+    PATH_IMAGES = "/usr/share/scheduler/images"
+    PATH_SOUNDS = "/usr/share/scheduler/sounds"
 
 if not os.path.isdir(LOCAL_PATH):
         os.mkdir(LOCAL_PATH)
 
-PATH_CONFIG = os.path.join(LOCAL_PATH, "checkmails.ini")
+PATH_CONFIG = os.path.join(LOCAL_PATH, "scheduler.ini")
+PATH_STATS = os.path.join(LOCAL_PATH, "pomodoro_stats")
 PATH = os.path.dirname(__file__)
-
 PIDFILE = os.path.join(LOCAL_PATH, 'scheduler.pid')
 
 DATA_PATH = os.path.join(LOCAL_PATH, 'data')
@@ -64,6 +76,12 @@ if not os.path.exists(LOCAL_PATH):
 
 if not os.path.exists(os.path.dirname(BACKUP_PATH)):
     os.mkdir(os.path.dirname(BACKUP_PATH))
+
+if not os.path.exists(PATH_STATS):
+    os.mkdir(PATH_STATS)
+
+# --- stat colors
+CMAP = ["blue", "green", "red", "cyan", "magenta", "yellow", "white", "black"]
 
 # --- log
 handler = TimedRotatingFileHandler(LOG_PATH, when='midnight', backupCount=7)
@@ -82,6 +100,7 @@ if not CONFIG.read(CONFIG_PATH):
     CONFIG.set('General', 'alpha', '0.85')
     CONFIG.set('General', 'backups', '10')
     CONFIG.set('General', 'trayicon', '')
+    CONFIG.set("General", "language", "")
 
     CONFIG.add_section('Events')
     CONFIG.set('Events', 'geometry', '')
@@ -135,33 +154,119 @@ if not CONFIG.read(CONFIG_PATH):
     CONFIG.add_section('Categories')
     CONFIG.set('Categories', 'default', 'white, #186CBE')
 
+    CONFIG.add_section('Pomodoro')
+    CONFIG.set('Pomodoro', 'geometry', '')
+    CONFIG.set('Pomodoro', 'foreground', 'white')
+    CONFIG.set('Pomodoro', 'background', 'gray10')
+    CONFIG.set('Pomodoro', 'position', 'normal')
+    CONFIG.set("Pomodoro", "font", "TimeDisplay")
+    CONFIG.set("Pomodoro", "fontsize", "48")
+    CONFIG.set("Pomodoro", "work_time", "25")
+    CONFIG.set("Pomodoro", "work_bg", "#ffffff")
+    CONFIG.set("Pomodoro", "work_fg", "#000000")
+    CONFIG.set("Pomodoro", "break_time", "5")
+    CONFIG.set("Pomodoro", "break_bg", "#77ABE2")
+    CONFIG.set("Pomodoro", "break_fg", "#000000")
+    CONFIG.set("Pomodoro", "rest_time", "20")
+    CONFIG.set("Pomodoro", "rest_bg", "#FF7A40")
+    CONFIG.set("Pomodoro", "rest_fg", "#000000")
+    CONFIG.set("Pomodoro", "beep", os.path.join(PATH_SOUNDS, 'ting.wav'))
+    CONFIG.set("Pomodoro", "player", "")
+    CONFIG.set("Pomodoro", "mute", "False")
+
+    CONFIG.add_section("PomodoroTasks")
+
+# --- language
 locale.setlocale(locale.LC_ALL, CONFIG.get('General', 'locale'))
+
+LANGUES = {"en": "English", "fr": "Français"}
+LANGUE = CONFIG.get("General", "language")
+if LANGUE not in ["en", "fr"]:
+    # Check the default locale
+    lc = locale.getlocale()[0][:2]
+    # If we have a default, it's the first in the list
+    if lc == "fr":
+        LANGUE = "fr_FR"
+    else:
+        LANGUE = "en_US"
+    CONFIG.set("General", "language", LANGUE[:2])
+
+gettext.bind_textdomain_codeset(APP_NAME, "UTF - 8")
+gettext.bindtextdomain(APP_NAME, PATH_LOCALE)
+gettext.textdomain(APP_NAME)
+LANG = gettext.translation(APP_NAME, PATH_LOCALE,
+                           languages=[LANGUE], fallback=True)
+LANG.install()
 
 HOLIDAYS = set(CONFIG.get('Calendar', 'holidays').split(', '))
 if '' in HOLIDAYS:
     HOLIDAYS.remove('')
 
+if not CONFIG.options("PomodoroTasks"):
+    # task = color
+    CONFIG.set("PomodoroTasks", _("Work"), CMAP[0])
+
+if not CONFIG.get("Pomodoro", "player"):
+    if os.path.exists("/usr/bin/aplay"):
+        CONFIG.set("Pomodoro", "player", "aplay")
+    elif os.path.exists("/usr/bin/paplay"):
+        CONFIG.set("Pomodoro", "player", "paplay")
+    elif os.path.exists("/usr/bin/mpg123"):
+        CONFIG.set("Pomodoro", "player", "mpg123")
+    elif os.path.exists("/usr/bin/cvlc"):
+        CONFIG.set("Pomodoro", "player", "cvlc")
+    else:
+        top = Toplevel()
+        top.resizable((0, 0))
+        top.title(_("Sound configuration"))
+        Label(top, text=_("The automatic detection of command line soundplayer has failed. \
+If you want to hear the beep between work sessions and breaks, please give the \
+name of a command line soundplayer installed on your system. If you do not know, \
+you can install mpg123.")).grid(row=0, columnspan=2)
+        player = Entry(top, justify='center')
+        player.grid(row=1, columnspan=2, sticky="ew")
+
+        def valide():
+            CONFIG.set("Pomodoro", "player", player.get())
+            top.destroy()
+
+        Button(top, _("Cancel"), command=top.destroy).grid(row=2, column=0)
+        Button(top, _("Ok"), command=valide).grid(row=2, column=1)
+
+
+# --- images
 ICON_NAME = "scheduler-tray"  # gtk / qt tray icon
-ICON48 = os.path.join(IMAGES_PATH, 'icon48.png')
-TKTRAY_ICON = os.path.join(IMAGES_PATH, 'scheduler.png')
-BELL = os.path.join(IMAGES_PATH, 'bell.png')
-MOINS = os.path.join(IMAGES_PATH, 'moins.png')
-PLUS = os.path.join(IMAGES_PATH, 'plus.png')
-DOT = os.path.join(IMAGES_PATH, 'dot.png')
-PLAY = os.path.join(IMAGES_PATH, 'play.png')
-PAUSE = os.path.join(IMAGES_PATH, 'pause.png')
-STOP = os.path.join(IMAGES_PATH, 'stop.png')
-CLOSED = os.path.join(IMAGES_PATH, 'closed.png')
-OPENED = os.path.join(IMAGES_PATH, 'open.png')
-CLOSED_SEL = os.path.join(IMAGES_PATH, 'closed_sel.png')
-OPENED_SEL = os.path.join(IMAGES_PATH, 'open_sel.png')
-SCROLL_ALPHA = os.path.join(IMAGES_PATH, "scroll.png")
+ICON48 = os.path.join(PATH_IMAGES, 'icon48.png')
+TKTRAY_ICON = os.path.join(PATH_IMAGES, 'scheduler.png')
+BELL = os.path.join(PATH_IMAGES, 'bell.png')
+MOINS = os.path.join(PATH_IMAGES, 'moins.png')
+PLUS = os.path.join(PATH_IMAGES, 'plus.png')
+DOT = os.path.join(PATH_IMAGES, 'dot.png')
+PLAY = os.path.join(PATH_IMAGES, 'play.png')
+PAUSE = os.path.join(PATH_IMAGES, 'pause.png')
+STOP = os.path.join(PATH_IMAGES, 'stop.png')
+TOMATE = os.path.join(PATH_IMAGES, "tomate.png")
+GRAPH = os.path.join(PATH_IMAGES, "graph.png")
+PARAMS = os.path.join(PATH_IMAGES, "params.png")
+COLOR = os.path.join(PATH_IMAGES, "color.png")
+SON = os.path.join(PATH_IMAGES, "son.png")
+MUTE = os.path.join(PATH_IMAGES, "mute.png")
+CLOSED = os.path.join(PATH_IMAGES, 'closed.png')
+OPENED = os.path.join(PATH_IMAGES, 'open.png')
+CLOSED_SEL = os.path.join(PATH_IMAGES, 'closed_sel.png')
+OPENED_SEL = os.path.join(PATH_IMAGES, 'open_sel.png')
+SCROLL_ALPHA = os.path.join(PATH_IMAGES, "scroll.png")
 
 
 TASK_STATE = {'Pending': '⌛', 'In Progress': '✎', 'Completed': '✔', 'Cancelled': '✗'}
 
 CATEGORIES = {cat: CONFIG.get('Categories', cat).split(', ')
               for cat in CONFIG.options('Categories')}
+
+# --- matplotlib config
+matplotlib.rc("axes.formatter", use_locale=True)
+matplotlib.rc('text', usetex=False)
+matplotlib.rc('font', size=12)
 
 
 # --- system tray icon
@@ -267,6 +372,116 @@ def info_trace(variable):
         return variable.trace_vinfo()
 
 
+# --- alternative filebrowser / colorchooser
+ZENITY = False
+
+tkfb = False
+try:
+    import tkfilebrowser as tkfb
+except ImportError:
+    tkfb = False
+try:
+    import tkcolorpicker as tkcp
+except ImportError:
+    tkcp = False
+
+if os.name != "nt":
+    paths = os.environ['PATH'].split(":")
+    for path in paths:
+        if os.path.exists(os.path.join(path, "zenity")):
+            ZENITY = True
+
+
+def askopenfilename(filetypes, initialdir, initialfile="", defaultextension="",
+                    title=_('Open'), **options):
+    """
+    Plateform specific file browser.
+
+    Arguments:
+        - defaultextension: extension added if none is given
+        - initialdir: directory where the filebrowser is opened
+        - filetypes: [('NOM', '*.ext'), ...]
+    """
+    filetypes2 = [(name, exts.replace('|', ' ')) for name, exts in filetypes]
+    if tkfb:
+        return tkfb.askopenfilename(title=title,
+                                    defaultext=defaultextension,
+                                    filetypes=filetypes,
+                                    initialdir=initialdir,
+                                    initialfile=initialfile,
+                                    **options)
+    elif ZENITY:
+        try:
+            args = ["zenity", "--file-selection",
+                    "--filename", os.path.join(initialdir, initialfile)]
+            for ext in filetypes:
+                args += ["--file-filter", "%s|%s" % ext]
+            args += ["--title", title]
+            file = check_output(args).decode("utf-8").strip()
+            filename, ext = os.path.splitext(file)
+            if not ext:
+                ext = defaultextension
+            return filename + ext
+        except CalledProcessError:
+            return ""
+        except Exception:
+            return filedialog.askopenfilename(title=title,
+                                              defaultextension=defaultextension,
+                                              filetypes=filetypes2,
+                                              initialdir=initialdir,
+                                              initialfile=initialfile,
+                                              **options)
+    else:
+        return filedialog.askopenfilename(title=title,
+                                          defaultextension=defaultextension,
+                                          filetypes=filetypes2,
+                                          initialdir=initialdir,
+                                          initialfile=initialfile,
+                                          **options)
+
+
+def askcolor(color=None, **options):
+    """
+    Plateform specific color chooser.
+
+    return the chose color in #rrggbb format.
+    """
+    if tkcp:
+        color = tkcp.askcolor(color, **options)
+        if color:
+            return color[1]
+        else:
+            return None
+    elif ZENITY:
+        try:
+            args = ["zenity", "--color-selection", "--show-palette"]
+            if "title" in options:
+                args += ["--title", options["title"]]
+            if color:
+                args += ["--color", color]
+            color = check_output(args).decode("utf-8").strip()
+            if color:
+                if color[0] == "#":
+                    if len(color) == 13:
+                        color = "#%s%s%s" % (color[1:3], color[5:7], color[9:11])
+                elif color[:4] == "rgba":
+                    color = color[5:-1].split(",")
+                    color = '#%02x%02x%02x' % (int(color[0]), int(color[1]), int(color[2]))
+                elif color[:3] == "rgb":
+                    color = color[4:-1].split(",")
+                    color = '#%02x%02x%02x' % (int(color[0]), int(color[1]), int(color[2]))
+                else:
+                    raise TypeError("Color formatting not understood.")
+            return color
+        except CalledProcessError:
+            return None
+        except Exception:
+            color = colorchooser.askcolor(color, **options)
+            return color[1]
+    else:
+        color = colorchooser.askcolor(color, **options)
+        return color[1]
+
 
 # --- functions
 def backup():
@@ -311,3 +526,12 @@ def save_config():
     CONFIG.set('Calendar', 'holidays', ', '.join(HOLIDAYS))
     with open(CONFIG_PATH, 'w') as file:
         CONFIG.write(file)
+
+
+def valide_entree_nb(d, S):
+    """ commande de validation des champs devant contenir
+        seulement des chiffres """
+    if d == '1':
+        return S.isdigit()
+    else:
+        return True

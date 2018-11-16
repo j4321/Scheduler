@@ -36,6 +36,7 @@ from schedulerlib.form import Form
 from schedulerlib.event import Event
 from schedulerlib.event_widget import EventWidget
 from schedulerlib.timer_widget import Timer
+from schedulerlib.pomodoro_widget import Pomodoro
 from schedulerlib.task_widget import TaskWidget
 from schedulerlib.calendar_widget import CalendarWidget
 from schedulerlib.ttkwidgets import AutoScrollbar
@@ -243,9 +244,10 @@ class EventScheduler(Tk):
         self.events_widget = EventWidget(self)
         self.tasks_widget = TaskWidget(self)
         self.timer_widget = Timer(self)
+        self.pomodoro_widget = Pomodoro(self)
 
-        for item, widget in zip(['Calendar', 'Events', 'Tasks', 'Timer'],
-                                [self.cal_widget, self.events_widget,
+        for item, widget in zip(['Calendar', 'Events', 'Pomodoro', 'Tasks', 'Timer'],
+                                [self.cal_widget, self.events_widget, self.pomodoro_widget,
                                  self.tasks_widget, self.timer_widget]):
             self.menu_widgets.add_checkbutton(label=item,
                                               command=lambda i=item, w=widget: self.display_hide_widget(i, w))
@@ -253,10 +255,6 @@ class EventScheduler(Tk):
             add_trace(widget.variable, 'write',
                       lambda *args: self._menu_widgets_trace(item, widget))
 
-        # self.menu_widgets.add_checkbutton(label='Calendar', command=self.display_hide_cal)
-        # self.menu_widgets.add_checkbutton(label='Events', command=self.display_hide_events)
-        # self.menu_widgets.add_checkbutton(label='Tasks', command=self.display_hide_tasks)
-        # self.menu_widgets.add_checkbutton(label='Timer', command=self.display_hide_timer)
         self.icon.loop(self)
         self.scheduler.start()
 
@@ -316,44 +314,12 @@ class EventScheduler(Tk):
     def _menu_widgets_trace(self, item, widget):
         self.menu_widgets.set_item_value(item, widget.variable.get())
 
-    def withdraw(self):
-        Tk.withdraw(self)
-        self.icon.menu.set_item_value('Manager', False)
-
-    def deiconify(self):
-        Tk.deiconify(self)
-        self.icon.menu.set_item_value('Manager', True)
-
     def display_hide_widget(self, item, widget):
         value = self.menu_widgets.get_item_value(item)
         if value:
             widget.deiconify()
         else:
             widget.withdraw()
-
-    def display_hide_tasks(self):
-        if self.tasks_widget.winfo_ismapped():
-            self.tasks_widget.withdraw()
-        else:
-            self.tasks_widget.deiconify()
-
-    def display_hide_events(self):
-        if self.events_widget.winfo_ismapped():
-            self.events_widget.withdraw()
-        else:
-            self.events_widget.deiconify()
-
-    def display_hide_timer(self):
-        if self.timer_widget.winfo_ismapped():
-            self.timer_widget.withdraw()
-        else:
-            self.timer_widget.deiconify()
-
-    def display_hide_cal(self):
-        if self.cal_widget.winfo_ismapped():
-            self.cal_widget.withdraw()
-        else:
-            self.cal_widget.deiconify()
 
     def display_hide(self, event=None):
         if self.winfo_ismapped():
@@ -486,6 +452,7 @@ class EventScheduler(Tk):
     def save(self):
         logging.info('Save event database')
         data = [ev.to_dict() for ev in self.events.values()]
+        self.pomodoro_widget.stats()
         with open(DATA_PATH, 'wb') as file:
             pick = Pickler(file)
             pick.dump(data)

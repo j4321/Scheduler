@@ -51,14 +51,14 @@ class Timer(Toplevel):
         self.style = Style(self)
         self.style.theme_use('clam')
         self.style.configure('timer.TButton', background=bg, relief='flat',
-                        foreground=fg, borderwidth=0)
+                             foreground=fg, borderwidth=0)
         self.style.configure('timer.TLabel', background=bg,
-                        foreground=fg)
+                             foreground=fg)
         self.style.configure('timer.TSizegrip', background=bg)
         self.style.map('timer.TSizegrip', background=[('active', active_bg)])
 #        self.style.configure('close.timer.TButton', font='Latin\ Modern\ Sans 16',)
         self.style.map('timer.TButton', background=[('disabled', bg),
-                                               ('!disabled', 'active', active_bg)])
+                                                    ('!disabled', 'active', active_bg)])
 #        self.style.map('close.timer.TButton',
 #                  background=[('disabled', bg),
 #                              ('!disabled', 'active', bg)],
@@ -79,9 +79,9 @@ class Timer(Toplevel):
 
         # --- elements
         self.display = Label(self, text='%i:%.2i:%.2i' % tuple(self._time),
-                                 anchor='center',
-                                 font=CONFIG.get('Timer', 'font_time'),
-                                 style='timer.TLabel')
+                             anchor='center',
+                             font=CONFIG.get('Timer', 'font_time'),
+                             style='timer.TLabel')
         self.intervals = Text(self, highlightthickness=0, relief='flat', bg=bg,
                               fg=fg, font=CONFIG.get('Timer', 'font_intervals'),
                               height=3, width=1,
@@ -94,21 +94,21 @@ class Timer(Toplevel):
 #                                   font=CONFIG.get('Timer', 'font_intervals'),
 #                                   style='timer.TLabel')
         self.b_interv = Button(self, text='Interval', style='timer.TButton',
-                                   command=self.add_interval)
+                               command=self.add_interval)
         self.b_interv.state(('disabled',))
 
         self.b_launch = Button(self, image=self.img_play, padding=2,
-                                   command=self.launch, style='timer.TButton')
+                               command=self.launch, style='timer.TButton')
         self.b_stop = Button(self, image=self.img_stop, padding=2,
-                                 command=self.stop, style='timer.TButton')
+                             command=self.stop, style='timer.TButton')
 
         # --- placement
 #        Button(self, text='x', padding=0, width=1,
 #                   style='close.timer.TButton',
 #                   command=self.quit).place(x=3, y=5, anchor='w', bordermode="outside")
-        self.display.grid(row=0, columnspan=2, sticky='ew', padx=8, pady=(4,0))
+        self.display.grid(row=0, columnspan=2, sticky='ew', padx=8, pady=(4, 0))
         Label(self, text='Intervals:',
-                  style='timer.TLabel').grid(row=1, columnspan=2, sticky='w', padx=4)
+              style='timer.TLabel').grid(row=1, columnspan=2, sticky='w', padx=4)
         self.intervals.grid(row=2, columnspan=2, sticky='eswn')
         self.b_interv.grid(row=3, columnspan=2, sticky='ew')
         self.b_launch.grid(row=4, column=0, sticky='ew')
