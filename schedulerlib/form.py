@@ -25,7 +25,7 @@ Task editor
 from tkinter import Toplevel, PhotoImage, Text, Spinbox, BooleanVar, StringVar
 from tkinter.ttk import Entry, Label, Button, Frame, Style, Combobox
 from tkinter.ttk import Radiobutton, Checkbutton, Notebook
-from schedulerlib.constants import BELL, MOINS, CONFIG, CATEGORIES
+from schedulerlib.constants import BELL, MOINS, CONFIG
 from schedulerlib.ttkcalendar import DateEntry, get_calendar
 from schedulerlib.ttkwidgets import LabelFrame
 from datetime import timedelta, time, datetime
@@ -147,7 +147,7 @@ class Form(Toplevel):
         self.desc.insert('1.0', self.event['Description'])
         self.desc.pack(fill='both', expand=True)
         txt_frame.grid(row=5, column=1, padx=4, pady=6, sticky='ewsn')
-        cats = list(CATEGORIES.keys())
+        cats = list(CONFIG.options('Categories'))
         width = max([len(cat) for cat in cats])
         self.category = Combobox(frame_event, width=width + 2, values=cats,
                                  state='readonly')
@@ -258,7 +258,7 @@ class Form(Toplevel):
         self._freqs = []
         for i, val in enumerate(['Year', 'Month', 'Week']):
             r = Radiobutton(frame_freq, text=val, variable=self._repeat_freq,
-                             value=val.lower(), command=self._toggle_wd)
+                            value=val.lower(), command=self._toggle_wd)
             r.grid(row=i, column=1, padx=4, pady=2, sticky='nw')
             self._freqs.append(r)
 
@@ -353,7 +353,7 @@ class Form(Toplevel):
 
     def _toggle_rep(self):
         rep = self._repeat.get()
-        state = state = '!'*int(rep) + "disabled"
+        state = state = '!' * int(rep) + "disabled"
         for r in self._freqs:
             r.state((state,))
         for r in self._rb_lim:
@@ -365,7 +365,7 @@ class Form(Toplevel):
     def _toggle_wd(self, val=True):
         if val:
             val = self._repeat_freq.get()
-        state = '!'*int(val == 'week') + "disabled"
+        state = '!' * int(val == 'week') + "disabled"
         for ch in self._week_days:
             ch.state((state,))
 
@@ -516,7 +516,6 @@ class Form(Toplevel):
 
         self.event["WholeDay"] = self._whole_day.get()
 
-
         if not self._repeat.get():
             self.event['Repeat'] = {}
         else:
@@ -535,7 +534,7 @@ class Form(Toplevel):
         for when, what in self.alarms:
             dt = int(when.get())
             unit = what.get()
-            date = self.event['Start'] - timedelta(**{unit:dt})
+            date = self.event['Start'] - timedelta(**{unit: dt})
             self.event.reminder_add(date)
 
         if self._new:
@@ -546,5 +545,5 @@ class Form(Toplevel):
 
     def cancel(self):
         if not self._new:
-            self.master.cal_widget.add_event(self.event)
+            self.master.widgets['Calendar'].add_event(self.event)
         self.destroy()

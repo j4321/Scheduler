@@ -23,42 +23,30 @@ Pomodoro GUI
 # TODO: change tasks CONFIG
 
 from subprocess import Popen
-from tkinter import Toplevel, StringVar, Menu, IntVar, PhotoImage, BooleanVar
-from tkinter.ttk import Style, Button, Label, Entry, Frame, Menubutton, \
+from tkinter import Toplevel, StringVar, Menu, IntVar, PhotoImage
+from tkinter.ttk import Button, Label, Entry, Frame, Menubutton, \
     Checkbutton, Sizegrip
 from tkinter.messagebox import askyesno
 import os
 import matplotlib.pyplot as plt
 from numpy import zeros, zeros_like, array, arange, concatenate, loadtxt
 import datetime as dt
-from .constants import CONFIG, CMAP, PATH_CONFIG, PATH_STATS, PLAY, STOP, PLUS, \
-    MOINS, TOMATE, PARAMS, GRAPH, active_color, save_config, SON, MUTE
-from .pomodoro_params import Params
-from ewmh import EWMH
+from schedulerlib.constants import CONFIG, CMAP, PATH_CONFIG, PATH_STATS, PLAY, \
+    STOP, PLUS, MOINS, TOMATE, PARAMS, GRAPH, active_color
+from .base_widget import BaseWidget
 
 
-class Pomodoro(Toplevel):
+class Pomodoro(BaseWidget):
     """ Chronometre de temps de travail pour plus d'efficacité """
     def __init__(self, master):
-        Toplevel.__init__(self, master)
-        self.attributes('-type', 'splash')
-        self.attributes('-alpha', CONFIG.get('General', 'alpha'))
+        BaseWidget.__init__(self, 'Pomodoro', master)
         self.minsize(190, 190)
-        # self.resizable(False, True)
+
         self.on = False  # is the timer on?
-
-        # control main menu checkbutton
-        self.variable = BooleanVar(self, False)
-
-        self._position = StringVar(self, CONFIG.get('Pomodoro', 'position'))
-        self._position.trace_add('write', lambda *x: CONFIG.set('Pomodoro', 'position', self._position.get()))
-
-        self.ewmh = EWMH()
-        self.title('scheduler.pomodoro')
-        self.withdraw()
 
         if not CONFIG.options("Tasks"):
             CONFIG.set("Tasks", _("Work"), CMAP[0])
+
         # --- colors
         self.background = {_("Work"): CONFIG.get("Pomodoro", "work_bg"),
                            _("Break"): CONFIG.get("Pomodoro", "break_bg"),
@@ -70,46 +58,6 @@ class Pomodoro(Toplevel):
         self.rowconfigure(1, weight=1)
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
-
-        # --- style
-        bg = CONFIG.get('Pomodoro', 'background')
-        self.configure(background=bg)
-        r, g, b = self.winfo_rgb(bg)
-        active_bg = active_color(r * 255 / 65535, g * 255 / 65535, b * 255 / 65535)
-        fg = CONFIG.get('Pomodoro', 'foreground')
-        self.style = Style(self)
-        self.style.theme_use('clam')
-        self.im_son = PhotoImage(master=self, file=SON)
-        self.im_mute = PhotoImage(master=self, file=MUTE)
-        self.style.element_create('mute', 'image', self.im_mute,
-                                  ('selected', self.im_son), border=2, sticky='')
-        self.style.layout('Mute',
-                          [('Mute.border',
-                            {'children': [('Mute.padding',
-                                           {'children': [('Mute.mute',
-                                                          {'sticky': 'nswe'})],
-                                            'sticky': 'nswe'})],
-                             'sticky': 'nswe'})])
-        self.style.configure('Mute', relief='raised')
-        self.style.map('son.TCheckbutton', image=[('selected', self.im_son)])
-        self.style.configure('title.TLabel', font='CMU\ Sans\ Serif\ Demi\ Condensed 12')
-        self.style.configure('ex.TLabel', background='white')
-        self.style.configure('timer.pomodoro.TLabel',
-                             foreground=self.foreground[_("Work")],
-                             background=self.background[_("Work")])
-        self.style.configure('pomodoro.TMenubutton', background=bg, relief='flat',
-                             foreground=fg, borderwidth=0, arrowcolor=fg)
-        self.style.configure('pomodoro.TButton', background=bg, relief='flat',
-                             foreground=fg, borderwidth=0)
-        self.style.configure('pomodoro.TLabel', background=bg,
-                             foreground=fg)
-        self.style.configure('pomodoro.TFrame', background=bg)
-        self.style.configure('pomodoro.TSizegrip', background=bg)
-        self.style.map('pomodoro.TSizegrip', background=[('active', active_bg)])
-        self.style.map('pomodoro.TButton', background=[('disabled', bg),
-                                                       ('!disabled', 'active', active_bg)])
-        self.style.map('pomodoro.TMenubutton', background=[('disabled', bg),
-                                                           ('!disabled', 'active', active_bg)])
 
         # nombre de séquence de travail effectuées d'affilée (pour
         # faire des pauses plus longues tous les 4 cycles)
@@ -125,18 +73,6 @@ class Pomodoro(Toplevel):
         self.im_tomate = PhotoImage(master=self, file=TOMATE)
         self.im_graph = PhotoImage(master=self, file=GRAPH)
 
-        # --- menu
-        self.menu = Menu(self, tearoff=False)
-        menu_pos = Menu(self.menu, tearoff=False)
-        menu_pos.add_radiobutton(label='Normal', value='normal',
-                                 variable=self._position, command=self._change_pos)
-        menu_pos.add_radiobutton(label='Above', value='above',
-                                 variable=self._position, command=self._change_pos)
-        menu_pos.add_radiobutton(label='Below', value='below',
-                                 variable=self._position, command=self._change_pos)
-        self.menu.add_cascade(label='Position', menu=menu_pos)
-        self.menu.add_command(label='Hide', command=self.hide)
-
         # --- tasks list
         tasks_frame = Frame(self, style='pomodoro.TFrame')
         tasks_frame.grid(row=3, column=0, columnspan=3, sticky="wnse")
@@ -151,31 +87,27 @@ class Pomodoro(Toplevel):
                                     compound="left", command=self.add_task)
         self.menu_tasks.add_command(label=_("Remove task"), image=self.im_moins,
                                     compound="left", command=self.del_task)
-        self.menu_tasks.add_command(label=_("Statistics"), image=self.im_graph,
-                                    compound="left", command=self.display_stats)
         self.choose_task = Menubutton(tasks_frame, textvariable=self.task,
                                       menu=self.menu_tasks, style='pomodoro.TMenubutton')
         Label(tasks_frame,
               text=_("Task: "),
               style='pomodoro.TLabel',
-              font="CMU\ Sans\ Serif\ Demi\ Condensed 12",
+              font="TkDefaultFont 12",
               width=6,
-              anchor="e").pack(side="left")
-        self.choose_task.pack(side="right", fill="x")
+              anchor="e").pack(side="left", padx=4)
+        self.choose_task.pack(side="right", fill="x", pady=4)
 
         # --- display
         self.tps = [CONFIG.getint("Pomodoro", "work_time"), 0]  # time: min, sec
         self.activite = StringVar(self, _("Work"))
         self.titre = Label(self,
                            textvariable=self.activite,
-                           font='CMU\ Sans\ Serif\ Demi\ Condensed 14',
+                           font='TkDefaultFont 14',
                            style='timer.pomodoro.TLabel',
                            anchor="center")
         self.titre.grid(row=0, column=0, columnspan=2, sticky="we", pady=(4, 0), padx=4)
         self.temps = Label(self,
                            text="{0:02}:{1:02}".format(self.tps[0], self.tps[1]),
-                           font="%s %i" % (CONFIG.get("Pomodoro", "font"),
-                                           CONFIG.getint("Pomodoro", "fontsize")),
                            style='timer.pomodoro.TLabel',
                            anchor="center")
         self.temps.grid(row=1, column=0, columnspan=2, sticky="nswe", padx=4)
@@ -183,25 +115,20 @@ class Pomodoro(Toplevel):
                                   padding=(20, 4, 20, 4),
                                   image=self.im_tomate, compound="left",
                                   style='timer.pomodoro.TLabel',
-                                  font='CMU\ Sans\ Serif\ Demi\ Condensed 14')
+                                  font='TkDefaultFont 14')
         self.aff_pomodori.grid(row=2, columnspan=2, sticky="ew", padx=4)
 
         # --- buttons
         self.b_go = Button(self, image=self.im_go, command=self.go,
                            style='pomodoro.TButton')
         self.b_go.grid(row=4, column=0, sticky="ew")
-        self.b_params = Button(self, image=self.im_params, command=self.params,
-                               style='pomodoro.TButton')
-        self.b_params.grid(row=4, column=1, sticky="ew")
+        self.b_stats = Button(self, image=self.im_graph,
+                              command=self.display_stats,
+                              style='pomodoro.TButton')
+        self.b_stats.grid(row=4, column=1, sticky="ew")
 
         self._corner = Sizegrip(self, style="pomodoro.TSizegrip")
         self._corner.place(relx=1, rely=1, anchor='se')
-
-        geometry = CONFIG.get('Pomodoro', 'geometry')
-        self.update_idletasks()
-        if geometry:
-            self.geometry(geometry)
-            self.deiconify()
 
         # --- bindings
         self.bind('<3>', lambda e: self.menu.tk_popup(e.x_root, e.y_root))
@@ -214,63 +141,46 @@ class Pomodoro(Toplevel):
         self.temps.bind('<ButtonPress-1>', self._start_move)
         self.temps.bind('<ButtonRelease-1>', self._stop_move)
         self.temps.bind('<B1-Motion>', self._move)
-        self.bind('<Configure>', self._on_configure)
-        self.temps.bind('<Unmap>', self._on_unmap)
-        self.temps.bind('<Map>', self._on_map)
-        self.b_go.bind('<Enter>', self._on_enter)
-        self.b_go.bind('<Leave>', self._on_leave)
+        self.b_stats.bind('<Enter>', self._on_enter)
+        self.b_stats.bind('<Leave>', self._on_leave)
+
+    def update_style(self):
+        self.attributes('-alpha', CONFIG.get(self.name, 'alpha'))
+        bg = CONFIG.get('Pomodoro', 'background')
+        fg = CONFIG.get('Pomodoro', 'foreground')
+        r, g, b = self.winfo_rgb(bg)
+        active_bg = active_color(r * 255 / 65535, g * 255 / 65535, b * 255 / 65535)
+        self.style.configure('pomodoro.TMenubutton', background=bg, relief='flat',
+                             foreground=fg, borderwidth=0, arrowcolor=fg)
+        self.style.configure('pomodoro.TButton', background=bg, relief='flat',
+                             foreground=fg, borderwidth=0)
+        self.style.configure('pomodoro.TLabel', background=bg,
+                             foreground=fg)
+        self.style.configure('pomodoro.TFrame', background=bg)
+        self.style.configure('pomodoro.TSizegrip', background=bg)
+        self.style.map('pomodoro.TSizegrip', background=[('active', active_bg)])
+        self.style.map('pomodoro.TButton', background=[('disabled', bg),
+                                                       ('!disabled', 'active', active_bg)])
+        self.style.map('pomodoro.TMenubutton', background=[('disabled', bg),
+                                                           ('!disabled', 'active', active_bg)])
+        self.configure(bg=bg)
+        self.background = {_("Work"): CONFIG.get("Pomodoro", "work_bg"),
+                           _("Break"): CONFIG.get("Pomodoro", "break_bg"),
+                           _("Rest"): CONFIG.get("Pomodoro", "rest_bg")}
+        self.foreground = {_("Work"): CONFIG.get("Pomodoro", "work_fg"),
+                           _("Break"): CONFIG.get("Pomodoro", "break_fg"),
+                           _("Rest"): CONFIG.get("Pomodoro", "rest_fg")}
+        act = self.activite.get()
+        self.style.configure('timer.pomodoro.TLabel',
+                             font=CONFIG.get("Pomodoro", "font"),
+                             foreground=self.foreground[act],
+                             background=self.background[act])
 
     def _on_enter(self, event=None):
         self._corner.state(('active',))
 
     def _on_leave(self, event=None):
         self._corner.state(('!active',))
-
-    def _on_map(self, event=None):
-        ''' make widget sticky '''
-        try:
-            pos = self._position.get()
-            if pos == 'above':
-                for w in self.ewmh.getClientList():
-                    if w.get_wm_name() == 'scheduler.pomodoro':
-                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_ABOVE')
-                        self.ewmh.setWmState(w, 0, '_NET_WM_STATE_BELOW')
-                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
-            elif pos == 'below':
-                for w in self.ewmh.getClientList():
-                    if w.get_wm_name() == 'scheduler.pomodoro':
-                        self.ewmh.setWmState(w, 0, '_NET_WM_STATE_ABOVE')
-                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_BELOW')
-                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
-            else:
-                for w in self.ewmh.getClientList():
-                    if w.get_wm_name() == 'scheduler.pomodoro':
-                        self.ewmh.setWmState(w, 0, '_NET_WM_STATE_BELOW')
-                        self.ewmh.setWmState(w, 0, '_NET_WM_STATE_ABOVE')
-                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
-            self.ewmh.display.flush()
-            self.variable.set(True)
-            save_config()
-        except TypeError:
-            pass
-
-    def _change_pos(self):
-        self.withdraw()
-        if self._position.get() == 'above':
-            self.overrideredirect(True)
-        else:
-            self.overrideredirect(False)
-        self.deiconify()
-
-    def _on_unmap(self, event):
-        CONFIG.set('Pomodoro', 'geometry', '')
-        self.variable.set(False)
-        save_config()
-
-    def _on_configure(self, event):
-        CONFIG.set('Pomodoro', 'geometry', self.geometry())
-        self.variable.set(True)
-        save_config()
 
     def _start_move(self, event):
         self.x = event.x
@@ -290,19 +200,10 @@ class Pomodoro(Toplevel):
             y = self.winfo_y() + deltay
             self.geometry("+%s+%s" % (x, y))
 
-    def set_config(self):
-        self.background = {_("Work"): CONFIG.get("Pomodoro", "work_bg"),
-                           _("Break"): CONFIG.get("Pomodoro", "break_bg"),
-                           _("Rest"): CONFIG.get("Pomodoro", "rest_bg")}
-        self.foreground = {_("Work"): CONFIG.get("Pomodoro", "work_fg"),
-                           _("Break"): CONFIG.get("Pomodoro", "break_fg"),
-                           _("Rest"): CONFIG.get("Pomodoro", "rest_fg")}
-        act = self.activite.get()
-        self.style.configure('timer.pomodoro.TLabel',
-                             foreground=self.foreground[act],
-                             background=self.background[act])
-        self.temps.configure(font="%s %i" % (CONFIG.get("Pomodoro", "font"),
-                                             CONFIG.getint("Pomodoro", "fontsize")))
+    def hide(self):
+        self.stats()
+        plt.close()
+        BaseWidget.hide(self)
 
     def add_task(self):
         def ajoute(event=None):
@@ -325,7 +226,7 @@ class Pomodoro(Toplevel):
         top.title(_("New task"))
         top.transient(self)
         top.grab_set()
-        nom = Entry(top, width=20)
+        nom = Entry(top, width=20, justify='center')
         nom.grid(row=0, columnspan=2, sticky="ew")
         nom.focus_set()
         nom.bind('<Key-Return>', ajoute)
@@ -481,6 +382,7 @@ class Pomodoro(Toplevel):
     def go(self):
         if self.on:
             self.on = False
+            self.b_go.configure(image=self.im_go)
             if self.activite.get() == _("Work"):
                 self.stop()
         else:
@@ -502,7 +404,6 @@ class Pomodoro(Toplevel):
             self.stats()
             self.pomodori.set(0)
             self.nb_cycles = 0
-            self.b_go.configure(image=self.im_go)
             self.tps = [CONFIG.getint("Pomodoro", "work_time"), 0]
             self.temps.configure(text="{0:02}:{1:02}".format(self.tps[0], self.tps[1]))
             act = _("Work")
@@ -551,19 +452,14 @@ class Pomodoro(Toplevel):
             self.temps.configure(text="{0:02}:{1:02}".format(*self.tps))
             self.after(1000, self.affiche)
 
-    def params(self):
-        on = self.on
-        self.on = False
-        self.b_go.configure(image=self.im_go)
-        p = Params(self)
-        self.wait_window(p)
-        if on:
-            self.on = True
-            self.choose_task.config(state="disabled")
-            self.b_go.configure(image=self.im_stop)
-            self.after(1000, self.affiche)
-
-    def hide(self):
-        self.stats()
-        plt.close()
-        self.withdraw()
+    # def params(self):
+        # on = self.on
+        # self.on = False
+        # self.b_go.configure(image=self.im_go)
+        # p = Params(self)
+        # self.wait_window(p)
+        # if on:
+            # self.on = True
+            # self.choose_task.config(state="disabled")
+            # self.b_go.configure(image=self.im_stop)
+            # self.after(1000, self.affiche)

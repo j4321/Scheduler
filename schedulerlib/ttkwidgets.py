@@ -23,7 +23,43 @@ Miscellaneous tkinter widgets.
 """
 
 
-from tkinter.ttk import Scrollbar, Frame, Label
+from tkinter.ttk import Scrollbar, Frame, Label, Checkbutton
+
+
+class ToggledFrame(Frame):
+    """
+    A frame that can be toggled to open and close
+    """
+
+    def __init__(self, master=None, text="", **kwargs):
+        Frame.__init__(self, master, **kwargs)
+        style_name = self.cget('style')
+        toggle_style_name = '%s.Toggle' % ('.'.join(style_name.split('.')[:-1]))
+        self.columnconfigure(1, weight=1)
+        self.rowconfigure(1, weight=1)
+        self.__checkbutton = Checkbutton(self,
+                                         style=toggle_style_name,
+                                         command=self.toggle,
+                                         cursor='arrow')
+        self.label = Label(self, text=text,
+                           style=style_name.replace('TFrame', 'TLabel'))
+        self.interior = Frame(self, style=style_name)
+        self.label.bind('<Configure>', self._wrap)
+        self._grid_widgets()
+
+    def _wrap(self, event):
+        self.label.configure(wraplength=self.label.winfo_width())
+
+    def _grid_widgets(self):
+        self.__checkbutton.grid(row=0, column=0)
+        self.label.grid(row=0, column=1, sticky="we")
+
+    def toggle(self):
+        if 'selected' not in self.__checkbutton.state():
+            self.interior.grid_forget()
+        else:
+            self.interior.grid(row=1, column=1, sticky="nswe", padx=(4, 0))
+
 
 class LabelFrame(Frame):
     """ LabelFrame with the text hiding part of the border
@@ -48,8 +84,8 @@ class LabelFrame(Frame):
 
     def _update(self, event=None):
         h = self._label.winfo_height()
-        self._label.place_configure(y=-int(h*0.5))
-        self.configure(padding=h//2)
+        self._label.place_configure(y=-int(h * 0.5))
+        self.configure(padding=h // 2)
 
         if self._layout == 'pack':
             pady = self.pack_info()['pady']
@@ -57,9 +93,9 @@ class LabelFrame(Frame):
             pady = self.grid_info()['pady']
 
         if type(pady) is tuple:
-            pady = (pady[0] + h//2, pady[1])
+            pady = (pady[0] + h // 2, pady[1])
         else:
-            pady = (pady + h//2, pady)
+            pady = (pady + h // 2, pady)
 
         if self._layout == 'grid':
             Frame.grid_configure(self, pady=pady)
@@ -80,9 +116,9 @@ class LabelFrame(Frame):
         pady = kw.pop('pady', 0)
         self._layout = 'pack'
         if type(pady) is tuple:
-            pady = (pady[0] + h//2, pady[1])
+            pady = (pady[0] + h // 2, pady[1])
         else:
-            pady = (pady + h//2, pady)
+            pady = (pady + h // 2, pady)
         Frame.pack(self, pady=pady)
 
     def pack_forget(self):
@@ -102,9 +138,9 @@ class LabelFrame(Frame):
         pady = kw.pop('pady', 0)
         self._layout = 'grid'
         if type(pady) is tuple:
-            pady = (pady[0] + h//2, pady[1])
+            pady = (pady[0] + h // 2, pady[1])
         else:
-            pady = (pady + h//2, pady)
+            pady = (pady + h // 2, pady)
         Frame.grid(self, pady=pady, **kw)
 
     def __getitem__(self, item):

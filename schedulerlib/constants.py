@@ -91,19 +91,20 @@ logging.basicConfig(level=logging.DEBUG,
                     handlers=[handler])
 logging.getLogger().addHandler(logging.StreamHandler())
 
-# --- config file
+# --- config
 CONFIG = ConfigParser()
 
 if not CONFIG.read(CONFIG_PATH):
     CONFIG.add_section('General')
     CONFIG.set('General', 'locale', '.'.join(locale.getdefaultlocale()))
-    CONFIG.set('General', 'alpha', '0.85')
     CONFIG.set('General', 'backups', '10')
     CONFIG.set('General', 'trayicon', '')
     CONFIG.set("General", "language", "")
 
     CONFIG.add_section('Events')
     CONFIG.set('Events', 'geometry', '')
+    CONFIG.set('Events', 'visible', 'True')
+    CONFIG.set('Events', 'alpha', '0.85')
     CONFIG.set('Events', 'font', 'Liberation\ Sans 10')
     CONFIG.set('Events', 'font_title', 'Liberation\ Sans 12 bold')
     CONFIG.set('Events', 'font_day', 'Liberation\ Sans 11 bold')
@@ -113,6 +114,8 @@ if not CONFIG.read(CONFIG_PATH):
 
     CONFIG.add_section('Tasks')
     CONFIG.set('Tasks', 'geometry', '')
+    CONFIG.set('Tasks', 'visible', 'True')
+    CONFIG.set('Tasks', 'alpha', '0.85')
     CONFIG.set('Tasks', 'font', 'Liberation\ Sans 10')
     CONFIG.set('Tasks', 'font_title', 'Liberation\ Sans 12 bold')
     CONFIG.set('Tasks', 'foreground', 'white')
@@ -122,6 +125,8 @@ if not CONFIG.read(CONFIG_PATH):
 
     CONFIG.add_section('Timer')
     CONFIG.set('Timer', 'geometry', '')
+    CONFIG.set('Timer', 'visible', 'True')
+    CONFIG.set('Timer', 'alpha', '0.85')
     CONFIG.set('Timer', 'font_time', 'FreeMono 26')
     CONFIG.set('Timer', 'font_intervals', 'FreeMono 12')
     CONFIG.set('Timer', 'foreground', 'white')
@@ -131,7 +136,9 @@ if not CONFIG.read(CONFIG_PATH):
     CONFIG.add_section('Calendar')
     CONFIG.set('Calendar', 'holidays', '')
     CONFIG.set('Calendar', 'geometry', '')
-    CONFIG.set('Calendar', 'font', '')
+    CONFIG.set('Calendar', 'visible', 'True')
+    CONFIG.set('Calendar', 'alpha', '0.85')
+    CONFIG.set('Calendar', 'font', 'TkDefaultFont 8')
     CONFIG.set('Calendar', 'background', '#424242')
     CONFIG.set('Calendar', 'foreground', '#ECECEC')
     CONFIG.set('Calendar', 'bordercolor', 'gray70')
@@ -156,11 +163,12 @@ if not CONFIG.read(CONFIG_PATH):
 
     CONFIG.add_section('Pomodoro')
     CONFIG.set('Pomodoro', 'geometry', '')
+    CONFIG.set('Pomodoro', 'visible', 'True')
+    CONFIG.set('Pomodoro', 'alpha', '0.85')
     CONFIG.set('Pomodoro', 'foreground', 'white')
     CONFIG.set('Pomodoro', 'background', 'gray10')
     CONFIG.set('Pomodoro', 'position', 'normal')
-    CONFIG.set("Pomodoro", "font", "TimeDisplay")
-    CONFIG.set("Pomodoro", "fontsize", "48")
+    CONFIG.set("Pomodoro", "font", "FreeMono 48")
     CONFIG.set("Pomodoro", "work_time", "25")
     CONFIG.set("Pomodoro", "work_bg", "#ffffff")
     CONFIG.set("Pomodoro", "work_fg", "#000000")
@@ -176,36 +184,49 @@ if not CONFIG.read(CONFIG_PATH):
 
     CONFIG.add_section("PomodoroTasks")
 
+
+def save_config():
+    CONFIG.set('Calendar', 'holidays', ', '.join(HOLIDAYS))
+    with open(CONFIG_PATH, 'w') as file:
+        CONFIG.write(file)
+
+
 # --- language
 locale.setlocale(locale.LC_ALL, CONFIG.get('General', 'locale'))
 
-LANGUES = {"en": "English", "fr": "Français"}
-LANGUE = CONFIG.get("General", "language")
-if LANGUE not in ["en", "fr"]:
-    # Check the default locale
-    lc = locale.getlocale()[0][:2]
-    # If we have a default, it's the first in the list
-    if lc == "fr":
-        LANGUE = "fr_FR"
-    else:
-        LANGUE = "en_US"
-    CONFIG.set("General", "language", LANGUE[:2])
+LANGUAGE = CONFIG.get('General', 'language', fallback='')
 
-gettext.bind_textdomain_codeset(APP_NAME, "UTF - 8")
+LANGUAGES = {"fr": "Français", "en": "English"}
+REV_LANGUAGES = {val: key for key, val in LANGUAGES.items()}
+
+if LANGUAGE not in LANGUAGES:
+    # Check the default locale
+    LANGUAGE = locale.getlocale()[0].split('_')[0]
+    if LANGUAGE in LANGUAGES:
+        CONFIG.set("General", "language", LANGUAGE)
+    else:
+        CONFIG.set("General", "language", "en")
+
+gettext.bind_textdomain_codeset(APP_NAME, "UTF-8")
 gettext.bindtextdomain(APP_NAME, PATH_LOCALE)
 gettext.textdomain(APP_NAME)
-LANG = gettext.translation(APP_NAME, PATH_LOCALE,
-                           languages=[LANGUE], fallback=True)
-LANG.install()
 
+gettext.translation(APP_NAME, PATH_LOCALE,
+                    languages=[LANGUAGE],
+                    fallback=True).install()
+
+
+# --- retrieve holidays
 HOLIDAYS = set(CONFIG.get('Calendar', 'holidays').split(', '))
 if '' in HOLIDAYS:
     HOLIDAYS.remove('')
 
+# --- default pomodoro task
 if not CONFIG.options("PomodoroTasks"):
     # task = color
     CONFIG.set("PomodoroTasks", _("Work"), CMAP[0])
 
+# --- default sound player
 if not CONFIG.get("Pomodoro", "player"):
     if os.path.exists("/usr/bin/aplay"):
         CONFIG.set("Pomodoro", "player", "aplay")
@@ -260,8 +281,6 @@ SCROLL_ALPHA = os.path.join(PATH_IMAGES, "scroll.png")
 
 TASK_STATE = {'Pending': '⌛', 'In Progress': '✎', 'Completed': '✔', 'Cancelled': '✗'}
 
-CATEGORIES = {cat: CONFIG.get('Categories', cat).split(', ')
-              for cat in CONFIG.options('Categories')}
 
 # --- matplotlib config
 matplotlib.rc("axes.formatter", use_locale=True)
@@ -322,12 +341,13 @@ if not TOOLKITS.get(GUI):
         else:
             GUI = 'tk'
     CONFIG.set("General", "trayicon", GUI)
-print('GUI', GUI)
 
 if GUI == 'tk':
     ICON = TKTRAY_ICON
 else:
     ICON = ICON_NAME
+
+save_config()
 
 
 # --- compatibility
@@ -520,12 +540,6 @@ def active_color(r, g, b, output='HTML'):
         return ("#%2.2x%2.2x%2.2x" % (round(r), round(g), round(b))).upper()
     else:
         return (round(r), round(g), round(b))
-
-
-def save_config():
-    CONFIG.set('Calendar', 'holidays', ', '.join(HOLIDAYS))
-    with open(CONFIG_PATH, 'w') as file:
-        CONFIG.write(file)
 
 
 def valide_entree_nb(d, S):
