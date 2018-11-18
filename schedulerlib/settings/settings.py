@@ -90,7 +90,7 @@ class Settings(tk.Toplevel):
         # --- Langue
         lang_frame = ttk.Frame(self.frames[_('General')])
         lang_frame.grid(pady=4, sticky="ew")
-        ttk.Label(lang_frame, text=_("Language:")).pack(side="left")
+        ttk.Label(lang_frame, text=_("Language"), style='subtitle.TLabel').pack(side="left")
 
         menu_lang = tk.Menu(lang_frame)
         for lang in REV_LANGUAGES:
@@ -101,8 +101,8 @@ class Settings(tk.Toplevel):
         # --- gui toolkit
         frame_gui = ttk.Frame(self.frames[_('General')])
         frame_gui.grid(pady=4, sticky="ew")
-        ttk.Label(frame_gui,
-                  text=_("GUI Toolkit for the system tray icon:")).pack(side="left")
+        ttk.Label(frame_gui, style='subtitle.TLabel',
+                  text=_("GUI Toolkit for the system tray icon")).pack(side="left")
         menu_gui = tk.Menu(frame_gui)
         ttk.Menubutton(frame_gui, menu=menu_gui, width=9,
                        textvariable=self.gui).pack(side="left", padx=4)

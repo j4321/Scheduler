@@ -4,6 +4,7 @@
 from setuptools import setup
 import os
 
+
 images = [os.path.join("schedulerlib/images/", img) for img in os.listdir("schedulerlib/images/")]
 sounds = [os.path.join("schedulerlib/sounds/", s) for s in os.listdir("schedulerlib/sounds/")]
 
@@ -12,6 +13,10 @@ data_files = [("/usr/share/pixmaps", ["scheduler.svg", "scheduler-tray.svg"]),
               ("/usr/share/scheduler/images/", images),
               ("/usr/share/scheduler/sounds/", sounds),
               ("/usr/share/applications", ["scheduler.desktop"])]
+for loc in os.listdir('schedulerlib/locale'):
+    data_files.append(("/usr/share/locale/{}/LC_MESSAGES/".format(loc),
+                       ["schedulerlib/locale/{}/LC_MESSAGES/scheduler.mo".format(loc)]))
+
 
 with open("schedulerlib/version.py") as f:
     exec(f.read())

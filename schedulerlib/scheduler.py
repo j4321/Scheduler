@@ -382,7 +382,6 @@ class EventScheduler(Tk):
             self.tree.selection_remove(*self.tree.selection())
 
     def _menu_widgets_trace(self, item):
-        print(item, self.widgets[item].variable.get())
         self.menu_widgets.set_item_value(item, self.widgets[item].variable.get())
 
     def display_hide_widget(self, item):
