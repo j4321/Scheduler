@@ -22,11 +22,12 @@ Settings GUI
 """
 
 import os
-from tkinter import BooleanVar, Canvas
+from tkinter import BooleanVar, Canvas, Toplevel
 from tkinter.ttk import Notebook, Style, Label, Separator, Frame, Entry, \
     Button, Checkbutton
-from tkinter.messagebox import showerror
-from schedulerlib.constants import COLOR, valide_entree_nb, CONFIG, askcolor, askopenfilename
+from tkinter.messagebox import showerror, askyesno
+from schedulerlib.constants import COLOR, valide_entree_nb, CONFIG, askcolor, \
+    askopenfilename, CMAP, PLUS, MOINS, PATH_STATS, save_config
 from schedulerlib.ttkwidgets import AutoScrollbar
 from PIL.ImageTk import PhotoImage
 from .color import ColorFrame
@@ -43,6 +44,8 @@ class PomodoroParams(Frame):
         self.onglets = Notebook(self)
         self.onglets.pack(fill='both', expand=True)
         self.im_color = PhotoImage(master=self, file=COLOR)
+        self.im_plus = PhotoImage(master=self, file=PLUS)
+        self.im_moins = PhotoImage(master=self, file=MOINS)
 
         self.okfct = self.register(valide_entree_nb)
 
@@ -196,20 +199,29 @@ class PomodoroParams(Frame):
         can.configure(yscrollcommand=scroll.set)
         can.grid(row=0, column=0, sticky='ewns')
         scroll.grid(row=0, column=1, sticky='ns')
-        task_frame = Frame(can)
-        can.create_window(0, 0, anchor='nw', window=task_frame)
+        Button(self.stats, image=self.im_plus, command=self.add_task).grid(row=1, column=0, sticky='w')
+        self.task_frame = Frame(can)
+        can.create_window(0, 0, anchor='nw', window=self.task_frame)
 
-        tasks = [t.capitalize() for t in CONFIG.options("PomodoroTasks")]
+        tasks = CONFIG.options("PomodoroTasks")
         cmap = [CONFIG.get("PomodoroTasks", task) for task in tasks]
         self.tasks = {}
-        for coul, task in zip(cmap, tasks):
-            self.tasks[task] = ColorFrame(task_frame, coul, task)
-            self.tasks[task].grid(sticky='e')
+        self._tasks_btns = {}
+        for i, (coul, task) in enumerate(zip(cmap, tasks)):
+            self.tasks[task] = ColorFrame(self.task_frame, coul, task.capitalize())
+            self.tasks[task].grid(row=i, column=0, sticky='e')
+            b = Button(self.task_frame, image=self.im_moins, padding=2,
+                       command=lambda t=task: self.del_task(t))
+            b.grid(row=i, column=1, sticky='w')
+            self._tasks_btns[task] = b
+        if len(tasks) == 1:
+            self._tasks_btns[tasks[0]].state(['disabled'])
         self.update_idletasks()
-        can.configure(width=task_frame.winfo_reqwidth())
+        can.configure(width=self.task_frame.winfo_reqwidth())
         can.configure(scrollregion=can.bbox('all'))
         can.bind('<4>', lambda e: self._scroll(e, -1))
         can.bind('<5>', lambda e: self._scroll(e, 1))
+        self.task_frame.bind('<Configure>', lambda e: can.configure(scrollregion=can.bbox('all')))
 
     def _scroll(self, event, delta):
         if event.widget.yview() != (0, 1):
@@ -268,6 +280,62 @@ class PomodoroParams(Frame):
         else:
             showerror(_("Error"), _("There is at least one invalid setting!"))
             return False
+
+    def del_task(self, task):
+        """ Suppression de tâches """
+        print(task)
+        rep = askyesno(_("Confirmation"),
+                       _("Are you sure you want to delete the task {task}? This action cannot be canceled.").format(task=task.capitalize()))
+        if rep:
+            print(CONFIG.options("PomodoroTasks"))
+            CONFIG.remove_option("PomodoroTasks", task)
+            # remove stats
+            chemin = os.path.join(PATH_STATS, "_".join(task.split(" ")))
+            if os.path.exists(chemin):
+                os.remove(chemin)
+            self.tasks[task].destroy()
+            self._tasks_btns[task].destroy()
+            del self.tasks[task]
+            del self._tasks_btns[task]
+
+            if len(CONFIG.options("PomodoroTasks")) == 1:
+                CONFIG.set("PomodoroTasks", _("Work"), CMAP[0])
+                self._tasks_btns[CONFIG.options("PomodoroTasks")[0]].state(['disabled'])
+            print(CONFIG.options("PomodoroTasks"))
+            save_config()
+
+    def add_task(self):
+
+        def ajoute(event=None):
+            task = nom.get().lower().strip()
+            if task in self.tasks:
+                showerror(_("Error"),
+                          _("The task {task} already exists.").format(task=task),
+                          parent=self)
+
+            elif task:
+                coul = CMAP[(len(self.tasks) + 1) % len(CMAP)]
+                i = self.task_frame.grid_size()[1] + 1
+                self.tasks[task] = ColorFrame(self.task_frame, coul, task.capitalize())
+                self.tasks[task].grid(row=i, column=0, sticky='e')
+                b = Button(self.task_frame, image=self.im_moins, padding=2,
+                           command=lambda t=task: self.del_task(t))
+                b.grid(row=i, column=1, sticky='w')
+                self._tasks_btns[task] = b
+                self._tasks_btns[CONFIG.options("PomodoroTasks")[0]].state(['!disabled'])
+            top.destroy()
+
+        top = Toplevel(self)
+        top.title(_("New task"))
+        top.transient(self)
+        top.grab_set()
+        nom = Entry(top, width=20, justify='center')
+        nom.grid(row=0, columnspan=2, sticky="ew")
+        nom.focus_set()
+        nom.bind('<Key-Return>', ajoute)
+        Button(top, text=_("Cancel"), command=top.destroy).grid(row=1, column=0)
+        Button(top, text=_("Ok"), command=ajoute).grid(row=1, column=1)
+        top.wait_window(top)
 
     def choix_son(self):
         filetypes = [(_("sound file"), '*.mp3|*.ogg|*.wav'),

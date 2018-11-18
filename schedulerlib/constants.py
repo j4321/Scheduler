@@ -81,7 +81,7 @@ if not os.path.exists(PATH_STATS):
     os.mkdir(PATH_STATS)
 
 # --- stat colors
-CMAP = ["blue", "green", "red", "cyan", "magenta", "yellow", "white", "black"]
+CMAP = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#17becf', '#ff00ff', '#7f7f7f', '#bcbd22', '#9467bd']
 
 # --- log
 handler = TimedRotatingFileHandler(LOG_PATH, when='midnight', backupCount=7)

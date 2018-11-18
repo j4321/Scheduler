@@ -407,8 +407,9 @@ class Settings(tk.Toplevel):
             cat = name.get().strip().lower()
             if cat in self.cats:
                 showerror(_("Error"),
-                          _("The category {category} already exists.").format(category=cat))
-            else:
+                          _("The category {category} already exists.").format(category=cat),
+                          parent=self)
+            elif cat:
                 i = self.cat_frame.grid_size()[1] + 1
                 col = 'white', '#186CBE'
                 l = ttk.Label(self.cat_frame, text=cat, style='subtitle.TLabel')
@@ -418,7 +419,7 @@ class Settings(tk.Toplevel):
                 l.grid(row=i, column=0, sticky='e', padx=4, pady=4)
                 bg.grid(row=i, column=1, sticky='e', padx=4, pady=4)
                 fg.grid(row=i, column=2, sticky='e', padx=4, pady=4)
-                top.destroy()
+            top.destroy()
 
         top = tk.Toplevel(self)
         top.resizable(True, False)

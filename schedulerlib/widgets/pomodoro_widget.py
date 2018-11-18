@@ -20,20 +20,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Pomodoro GUI
 """
-# TODO: change tasks CONFIG
-
 from subprocess import Popen
-from tkinter import Toplevel, StringVar, Menu, IntVar, PhotoImage
-from tkinter.ttk import Button, Label, Entry, Frame, Menubutton, \
-    Checkbutton, Sizegrip
+from tkinter import StringVar, Menu, IntVar, PhotoImage
+from tkinter.ttk import Button, Label, Frame, Menubutton, Sizegrip
 from tkinter.messagebox import askyesno
 import os
 import matplotlib.pyplot as plt
 from numpy import zeros, zeros_like, array, arange, concatenate, loadtxt
 import datetime as dt
-from schedulerlib.constants import CONFIG, CMAP, PATH_CONFIG, PATH_STATS, PLAY, \
-    STOP, PLUS, MOINS, TOMATE, PARAMS, GRAPH, active_color
+from schedulerlib.constants import CONFIG, CMAP, PATH_STATS, PLAY, \
+    STOP, TOMATE, PARAMS, GRAPH, active_color
 from .base_widget import BaseWidget
+
+# TODO: fix task deletion
 
 
 class Pomodoro(BaseWidget):
@@ -67,8 +66,6 @@ class Pomodoro(BaseWidget):
         # --- images
         self.im_go = PhotoImage(master=self, file=PLAY)
         self.im_stop = PhotoImage(master=self, file=STOP)
-        self.im_plus = PhotoImage(master=self, file=PLUS)
-        self.im_moins = PhotoImage(master=self, file=MOINS)
         self.im_params = PhotoImage(master=self, file=PARAMS)
         self.im_tomate = PhotoImage(master=self, file=TOMATE)
         self.im_graph = PhotoImage(master=self, file=GRAPH)
@@ -79,14 +76,6 @@ class Pomodoro(BaseWidget):
         tasks = [t.capitalize() for t in CONFIG.options("PomodoroTasks")]
         self.task = StringVar(self, tasks[0])
         self.menu_tasks = Menu(tasks_frame, tearoff=False)
-        for task in tasks:
-            self.menu_tasks.add_radiobutton(label=task,
-                                            value=task,
-                                            variable=self.task)
-        self.menu_tasks.add_command(label=_("New task"), image=self.im_plus,
-                                    compound="left", command=self.add_task)
-        self.menu_tasks.add_command(label=_("Remove task"), image=self.im_moins,
-                                    compound="left", command=self.del_task)
         self.choose_task = Menubutton(tasks_frame, textvariable=self.task,
                                       menu=self.menu_tasks, style='pomodoro.TMenubutton')
         Label(tasks_frame,
@@ -145,6 +134,15 @@ class Pomodoro(BaseWidget):
         self.b_stats.bind('<Leave>', self._on_leave)
 
     def update_style(self):
+        self.menu_tasks.delete(0, 'end')
+        tasks = [t.capitalize() for t in CONFIG.options('PomodoroTasks')]
+        for task in tasks:
+            self.menu_tasks.add_radiobutton(label=task, value=task,
+                                            variable=self.task)
+        if self.task.get() not in tasks:
+            self.stop(False)
+            self.task.set(tasks[0])
+
         self.attributes('-alpha', CONFIG.get(self.name, 'alpha', fallback=0.85))
         bg = CONFIG.get('Pomodoro', 'background')
         fg = CONFIG.get('Pomodoro', 'foreground')
@@ -204,85 +202,6 @@ class Pomodoro(BaseWidget):
         self.stats()
         plt.close()
         BaseWidget.hide(self)
-
-    def add_task(self):
-        def ajoute(event=None):
-            task = nom.get()
-            if task and not CONFIG.has_option("PomodoroTasks", task):
-                index = len(CONFIG.options("PomodoroTasks"))
-                self.menu_tasks.insert_radiobutton(index,
-                                                   label=task,
-                                                   value=task,
-                                                   variable=self.task)
-                CONFIG.set("PomodoroTasks", task, CMAP[index % len(CMAP)])
-                top.destroy()
-                with open(PATH_CONFIG, "w") as file:
-                    CONFIG.write(file)
-                self.menu_tasks.invoke(index)
-            else:
-                nom.delete(0, "end")
-
-        top = Toplevel(self)
-        top.title(_("New task"))
-        top.transient(self)
-        top.grab_set()
-        nom = Entry(top, width=20, justify='center')
-        nom.grid(row=0, columnspan=2, sticky="ew")
-        nom.focus_set()
-        nom.bind('<Key-Return>', ajoute)
-        Button(top, text=_("Cancel"), command=top.destroy).grid(row=1, column=0)
-        Button(top, text=_("Ok"), command=ajoute).grid(row=1, column=1)
-        top.wait_window(top)
-
-    def del_task(self):
-        """ Suppression de tâches """
-
-        def supprime():
-            rep = askyesno(_("Confirmation"),
-                           _("Are you sure you want to delete these tasks?"))
-            if rep:
-                for i in range(len(boutons) - 1, -1, -1):
-                    # l'ordre de parcours permet de supprimer les derniers
-                    # éléments en premier afin de ne pas modifier les index des
-                    # autres éléments lors des suppressions
-                    task = tasks[i]
-                    if "selected" in boutons[i].state():
-                        # suppression de la tâche de la liste des tâches
-                        CONFIG.remove_option("PomodoroTasks", task)
-                        tasks.remove(task)
-                        # suppression de l'entrée correspondante dans le menu
-                        self.menu_tasks.delete(i)
-                        if not tasks:
-                            CONFIG.set("PomodoroTasks", _("Work"), CMAP[0])
-                            tasks.append(_("Work"))
-                            self.menu_tasks.insert_radiobutton(0,
-                                                               label=_("Work"),
-                                                               value=_("Work"),
-                                                               variable=self.task)
-                        if self.task.get() == task:
-                            self.task.set(tasks[0])
-                        # suppression des stats associées
-                        chemin = PATH_STATS + "_" + "_".join(task.split(" "))
-                        if os.path.exists(chemin):
-                            os.remove(chemin)
-
-                top.destroy()
-                with open(PATH_CONFIG, "w") as file:
-                    CONFIG.write(file)
-            else:
-                top.destroy()
-
-        tasks = [t.capitalize() for t in CONFIG.options("Tasks")]
-        top = Toplevel(self)
-        top.title(_("Remove task"))
-        top.transient(self)
-        top.grab_set()
-        boutons = []
-        for i, task in enumerate(tasks):
-            boutons.append(Checkbutton(top, text=task))
-            boutons[-1].grid(row=i, columnspan=2, sticky="w")
-        Button(top, text=_("Cancel"), command=top.destroy).grid(row=i + 1, column=0)
-        Button(top, text=_("Delete"), command=supprime).grid(row=i + 1, column=1)
 
     def stats(self):
         """ Enregistre la durée de travail (en min) effectuée ce jour pour la
@@ -433,10 +352,12 @@ class Pomodoro(BaseWidget):
                         self.nb_cycles += 1
                         if self.nb_cycles % 4 == 0:
                             # pause longue
+                            self.stats()
                             self.activite.set(_("Rest"))
                             self.tps = [CONFIG.getint("Pomodoro", "rest_time"), 0]
                         else:
                             # pause courte
+                            self.stats()
                             self.activite.set(_("Break"))
                             self.tps = [CONFIG.getint("Pomodoro", "break_time"), 0]
                     else:
@@ -451,15 +372,3 @@ class Pomodoro(BaseWidget):
                 self.tps[1] = 59
             self.temps.configure(text="{0:02}:{1:02}".format(*self.tps))
             self.after(1000, self.affiche)
-
-    # def params(self):
-        # on = self.on
-        # self.on = False
-        # self.b_go.configure(image=self.im_go)
-        # p = Params(self)
-        # self.wait_window(p)
-        # if on:
-            # self.on = True
-            # self.choose_task.config(state="disabled")
-            # self.b_go.configure(image=self.im_stop)
-            # self.after(1000, self.affiche)
