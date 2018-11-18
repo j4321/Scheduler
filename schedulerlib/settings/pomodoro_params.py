@@ -208,6 +208,12 @@ class PomodoroParams(Frame):
         self.update_idletasks()
         can.configure(width=task_frame.winfo_reqwidth())
         can.configure(scrollregion=can.bbox('all'))
+        can.bind('<4>', lambda e: self._scroll(e, -1))
+        can.bind('<5>', lambda e: self._scroll(e, 1))
+
+    def _scroll(self, event, delta):
+        if event.widget.yview() != (0, 1):
+            event.widget.yview_scroll(delta, 'units')
 
     def choix_couleur(self, type_mode):
         """ sélection de la couleur du fond/texte pour chaque mode (travail/pause/repos) """

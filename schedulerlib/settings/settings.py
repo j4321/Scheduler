@@ -41,6 +41,7 @@ class Settings(tk.Toplevel):
         self.title(_('Settings'))
         self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
+        self.minsize(574, 565)
 
         frame = ttk.Frame(self, style='border.TFrame', relief='sunken',
                           border=1)
@@ -220,7 +221,13 @@ class Settings(tk.Toplevel):
         self.update_idletasks()
         can.configure(width=self.cat_frame.winfo_reqwidth())
         can.configure(scrollregion=can.bbox('all'))
+        can.bind('<4>', lambda e: self._scroll(e, -1))
+        can.bind('<5>', lambda e: self._scroll(e, 1))
         self.cat_frame.bind('<Configure>', lambda e: can.configure(scrollregion=can.bbox('all')))
+
+    def _scroll(self, event, delta):
+        if event.widget.yview() != (0, 1):
+            event.widget.yview_scroll(delta, 'units')
 
     def _init_events(self):
         self.frames[_('Events')].columnconfigure(0, weight=1)
