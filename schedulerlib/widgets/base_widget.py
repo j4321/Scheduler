@@ -68,8 +68,7 @@ class BaseWidget(Toplevel):
         self.bind('<Configure>', self._on_configure)
 
         if CONFIG.getboolean(self.name, 'visible', fallback=True):
-            self.deiconify()
-            self.variable.set(True)
+            self.show()
 
     def _populate_menu(self):
         menu_pos = Menu(self.menu)
@@ -103,6 +102,7 @@ class BaseWidget(Toplevel):
             pos = self._position.get()
             for w in self.ewmh.getClientList():
                 if w.get_wm_name() == self.title():
+                    found = True
                     if pos == 'above':
                         self.ewmh.setWmState(w, 1, '_NET_WM_STATE_ABOVE')
                         self.ewmh.setWmState(w, 0, '_NET_WM_STATE_BELOW')
