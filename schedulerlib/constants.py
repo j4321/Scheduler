@@ -161,6 +161,7 @@ if not CONFIG.read(CONFIG_PATH):
     CONFIG.add_section('Categories')
     CONFIG.set('Categories', 'default', 'white, #186CBE')
 
+if not CONFIG.has_section('Pomodoro'):
     CONFIG.add_section('Pomodoro')
     CONFIG.set('Pomodoro', 'geometry', '')
     CONFIG.set('Pomodoro', 'visible', 'True')

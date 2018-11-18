@@ -127,7 +127,7 @@ class Settings(tk.Toplevel):
         general.columnconfigure(1, weight=1)
         self.frames[_('Calendar')].add(general, text=_('General'))
         # --- --- opacity
-        self.cal_opacity = OpacityFrame(general, CONFIG.getfloat('Calendar', 'alpha'))
+        self.cal_opacity = OpacityFrame(general, CONFIG.getfloat('Calendar', 'alpha', fallback=0.85))
         self.cal_opacity.grid(row=0, columnspan=2, sticky='w', padx=4)
 
         ttk.Separator(general, orient='horizontal').grid(row=1, columnspan=2,
@@ -254,7 +254,7 @@ class Settings(tk.Toplevel):
         self.events_font.grid(row=5, column=1, padx=4, pady=4)
 
         # --- opacity
-        self.events_opacity = OpacityFrame(self.frames[_('Events')], CONFIG.getfloat("Events", "alpha"))
+        self.events_opacity = OpacityFrame(self.frames[_('Events')], CONFIG.getfloat("Events", "alpha", fallback=0.85))
 
         # --- colors
         frame_color = ttk.Frame(self.frames[_('Events')])
@@ -302,7 +302,7 @@ class Settings(tk.Toplevel):
         self.tasks_font.grid(row=5, column=1, padx=4, pady=4)
 
         # --- opacity
-        self.tasks_opacity = OpacityFrame(self.frames[_('Tasks')], CONFIG.getfloat("Tasks", "alpha"))
+        self.tasks_opacity = OpacityFrame(self.frames[_('Tasks')], CONFIG.getfloat("Tasks", "alpha", fallback=0.85))
 
         # --- colors
         frame_color = ttk.Frame(self.frames[_('Tasks')])
@@ -352,7 +352,7 @@ class Settings(tk.Toplevel):
         self.timer_font_intervals.grid(row=5, column=1, padx=4, pady=4)
 
         # --- opacity
-        self.timer_opacity = OpacityFrame(self.frames[_('Timer')], CONFIG.getfloat("Timer", "alpha"))
+        self.timer_opacity = OpacityFrame(self.frames[_('Timer')], CONFIG.getfloat("Timer", "alpha", fallback=0.85))
 
         # --- colors
         frame_color = ttk.Frame(self.frames[_('Timer')])

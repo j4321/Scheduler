@@ -66,7 +66,7 @@ class TaskWidget(BaseWidget):
         label.bind('<B1-Motion>', self._move)
 
     def update_style(self):
-        self.attributes('-alpha', CONFIG.get(self.name, 'alpha'))
+        self.attributes('-alpha', CONFIG.get(self.name, 'alpha', fallback=0.85))
         bg = CONFIG.get('Tasks', 'background')
         fg = CONFIG.get('Tasks', 'foreground')
         self.style.configure('Tasks.TFrame', background=bg)

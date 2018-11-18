@@ -67,7 +67,7 @@ class BaseWidget(Toplevel):
         # --- bindings
         self.bind('<Configure>', self._on_configure)
 
-        if CONFIG.getboolean(self.name, 'visible'):
+        if CONFIG.getboolean(self.name, 'visible', fallback=True):
             self.deiconify()
             self.variable.set(True)
 
@@ -83,8 +83,8 @@ class BaseWidget(Toplevel):
         self.menu.add_command(label='Hide', command=self.hide)
 
     def update_style(self):
-        self.attributes('-alpha', CONFIG.get(self.name, 'alpha'))
-        self.configure(bg=CONFIG.get(self.name, 'background'))
+        self.attributes('-alpha', CONFIG.get(self.name, 'alpha', fallback=0.85))
+        self.configure(bg=CONFIG.get(self.name, 'background', fallback='grey10'))
 
     def _on_configure(self, event):
         CONFIG.set(self.name, 'geometry', self.geometry())

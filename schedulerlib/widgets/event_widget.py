@@ -77,7 +77,7 @@ class EventWidget(BaseWidget):
     def update_style(self):
         bg = CONFIG.get('Events', 'background')
         fg = CONFIG.get('Events', 'foreground')
-        self.attributes('-alpha', CONFIG.get(self.name, 'alpha'))
+        self.attributes('-alpha', CONFIG.get(self.name, 'alpha', fallback=0.85))
         self.style.configure('Events.TFrame', background=bg)
         self.style.configure('Events.TSizegrip', background=bg)
         self.style.configure('Events.TSeparator', background=bg)

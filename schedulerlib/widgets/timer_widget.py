@@ -70,7 +70,7 @@ class Timer(BaseWidget):
         self.b_stop.bind('<Leave>', self._on_leave)
 
     def update_style(self):
-        self.attributes('-alpha', CONFIG.get(self.name, 'alpha'))
+        self.attributes('-alpha', CONFIG.get(self.name, 'alpha', fallback=0.85))
         bg = CONFIG.get('Timer', 'background')
         fg = CONFIG.get('Timer', 'foreground')
         r, g, b = self.winfo_rgb(bg)

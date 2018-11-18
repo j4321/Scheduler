@@ -55,8 +55,7 @@ class CalendarWidget(BaseWidget):
         self.bind('<B1-Motion>', self._move)
 
     def update_style(self):
-        self.attributes('-alpha', CONFIG.get(self.name, 'alpha'))
-        self.configure(bg=CONFIG.get(self.name, 'background'))
+        BaseWidget.update_style(self)
         keys = self._calendar.keys()
         opts = {opt: CONFIG.get('Calendar', opt) for opt in CONFIG.options('Calendar') if opt in keys}
         self._calendar.configure(**opts)
