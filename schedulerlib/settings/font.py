@@ -58,7 +58,9 @@ class FontFrame(ttk.Frame):
                   lambda *args: self._config_size(self.font_size, self.font))
 
         w = max([len(f) for f in self.fonts])
-        sizes = list(range(6, 17)) + list(range(18, 32, 2)) + [prop['size']]
+        sizes = list(range(6, 17)) + list(range(18, 32, 2))
+        if not prop['size'] in sizes:
+            sizes.append(prop['size'])
         sizes.sort()
         self.sizes = ["%i" % i for i in sizes]
 
