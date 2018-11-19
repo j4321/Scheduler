@@ -25,12 +25,11 @@ from tkinter import StringVar, Menu, IntVar, PhotoImage
 from tkinter.ttk import Button, Label, Frame, Menubutton, Sizegrip
 from tkinter.messagebox import askyesno
 import os
-import matplotlib.pyplot as plt
-from numpy import zeros, zeros_like, array, arange, concatenate, loadtxt
 import datetime as dt
 from schedulerlib.constants import CONFIG, CMAP, PATH_STATS, PLAY, \
     STOP, TOMATE, PARAMS, GRAPH, active_color
 from .base_widget import BaseWidget
+from schedulerlib.pomodoro_stats import Stats
 
 # TODO: fix task deletion
 
@@ -45,6 +44,8 @@ class Pomodoro(BaseWidget):
 
         if not CONFIG.options("Tasks"):
             CONFIG.set("Tasks", _("Work"), CMAP[0])
+
+        self._stats = None
 
         # --- colors
         self.background = {_("Work"): CONFIG.get("Pomodoro", "work_bg"),
@@ -199,7 +200,8 @@ class Pomodoro(BaseWidget):
             self.geometry("+%s+%s" % (x, y))
 
     def hide(self):
-        plt.close()
+        if self._stats is not None:
+            self._stats.destroy()
         BaseWidget.hide(self)
 
     def stats(self):
@@ -236,66 +238,11 @@ class Pomodoro(BaseWidget):
 
     def display_stats(self):
         """ affiche les statistiques """
-        plt.figure("Statistiques")
-        tasks = [t.capitalize() for t in CONFIG.options("PomodoroTasks")]
-        coul = [CONFIG.get("PomodoroTasks", task) for task in tasks]
-        stats_x = []
-        stats_y = []
+        self._stats = Stats(self)
+        self._stats.bind('<Destroy>', self._on_close_stats)
 
-        demain = dt.date.today().toordinal() + 1
-        min_x = demain
-
-        # récupération des données
-        no_data = True
-        for i, task in enumerate(tasks):
-            chemin = os.path.join(PATH_STATS, "_".join(task.split(" ")))
-            if os.path.exists(chemin):
-                no_data = False
-                stat = loadtxt(chemin, dtype=int)
-                if len(stat.shape) == 1:
-                    stat = stat.reshape(1, 4)
-                x = [dt.date(an, mois, jour).toordinal() for jour, mois, an in stat[:, :3]]
-                y = stat[:, -1] / 60  # temps de travail
-                min_x = min(x[0], min_x)
-                stats_x.append(x)
-                stats_y.append(y)
-            else:
-                # la taĉhe n'a jamais été travaillée
-                stats_x.append([demain - 1])
-                stats_y.append(array([0]))
-
-        # plots
-        xx = arange(min_x, demain, dtype=float)
-        yy0 = zeros_like(xx)  # pour empiler les stats
-        if not no_data:
-            for (i, task), x, y in zip(enumerate(tasks), stats_x, stats_y):
-                ax0 = plt.subplot(111)
-                plt.ylabel(_("time (h)"))
-                plt.xlabel(_("date"))
-                yy = array([], dtype=int)
-                # comble les trous par des 0
-                # ainsi, les jours où une tâche n'a pas été travaillée correspondent
-                # à des 0 sur le graph
-                xxx = arange(min_x, x[0])
-                yy = concatenate((yy, zeros_like(xxx, dtype=int)))
-                for j in range(len(x) - 1):
-                    xxx = arange(x[j], x[j + 1])
-                    yy = concatenate((yy, [y[j]], zeros(len(xxx) - 1, dtype=int)))
-                xxx = arange(x[-1], demain)
-                yy = concatenate((yy, [y[-1]], zeros(len(xxx) - 1, dtype=int)))
-                plt.bar(xx - 0.4, yy, bottom=yy0, width=0.8, label=task, color=coul[i])
-                yy0 += yy
-            axx = array([int(xt) for xt in ax0.get_xticks() if xt.is_integer()])
-            ax0.set_xticks(axx)
-            ax0.set_xticklabels([dt.date.fromordinal(i).strftime("%x") for i in axx])
-            plt.gcf().autofmt_xdate()
-            ax0.set_xlim(min_x - 0.5, demain - 0.5)
-            lgd = plt.legend(fontsize=10)
-            lgd.draggable()
-            plt.subplots_adjust(top=0.95)
-            max_y = yy0.max()
-            ax0.set_ylim(0, max_y + 0.1 * max_y)
-        plt.show()
+    def _on_close_stats(self, event):
+        self._stats = None
 
     def go(self):
         if self.on:

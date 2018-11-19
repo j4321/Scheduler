@@ -296,6 +296,7 @@ CLOSED = os.path.join(PATH_IMAGES, 'closed.png')
 OPENED = os.path.join(PATH_IMAGES, 'open.png')
 CLOSED_SEL = os.path.join(PATH_IMAGES, 'closed_sel.png')
 OPENED_SEL = os.path.join(PATH_IMAGES, 'open_sel.png')
+IM_LAYOUT = os.path.join(PATH_IMAGES, 'layout.png')
 SCROLL_ALPHA = os.path.join(PATH_IMAGES, "scroll.png")
 
 IM_ERROR_DATA = """
