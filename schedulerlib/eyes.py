@@ -23,20 +23,20 @@ Eyes' rest script
 """
 
 from subprocess import Popen
-from .constants import IM_EYE, IM_START, IM_STOP
+from .constants import IM_EYE, IM_START, IM_STOP, CONFIG
 from .trayicon import SubMenu
 
 
 class Eyes(SubMenu):
     def __init__(self, parent, tkwindow):
         SubMenu.__init__(self, parent=parent)
-        self.chrono = [0, 0]
-        self.marche = False
+        self.time = [0, 0]
+        self.is_on = False
         self.tkwindow = tkwindow
         self._after_id = None
 
-        self.add_command(label=_('Start'), command=self.lance, image=IM_START)
-        self.add_command(label=_('Status'), command=self.affiche)
+        self.add_command(label=_('Start'), command=self.start_stop, image=IM_START)
+        self.add_command(label=_('Status'), command=self.status)
 
     def quit(self):
         try:
@@ -44,37 +44,37 @@ class Eyes(SubMenu):
         except ValueError:
             pass
 
-    def lance(self):
-        if self.marche:
-            self.marche = False
-            self.chrono = [0, 0]
+    def start_stop(self):
+        if self.is_on:
+            self.is_on = False
+            self.time = [0, 0]
             self.set_item_image(0, _('Start'))
             self.set_item_image(0, IM_START)
         else:
-            self.marche = True
+            self.is_on = True
             Popen(["notify-send", "-i", IM_EYE, _("Scheduler"),
                    _("The eyes' rest script has been launched!")])
             self.set_item_label(0, _('Stop'))
             self.set_item_image(0, IM_STOP)
-            self._after_id = self.tkwindow.after(1000, self.compte)
+            self._after_id = self.tkwindow.after(1000, self.timer)
 
-    def compte(self):
-        if self.marche:
-            self.chrono[1] += 1
-            if self.chrono[1] == 60:
-                self.chrono[1] = 0
-                self.chrono[0] += 1
-                if self.chrono[0] == 20:
+    def timer(self):
+        if self.is_on:
+            self.time[1] += 1
+            if self.time[1] == 60:
+                self.time[1] = 0
+                self.time[0] += 1
+                if self.time[0] == CONFIG.getint("General", "eyes_interval", fallback=20):
                     Popen(["notify-send", "-i", IM_EYE, _("Eyes' rest"),
                            _("Look away from your screen for 20 s")])
-                    self.chrono[0] = 0
+                    self.time[0] = 0
 
-            self._after_id = self.tkwindow.after(1000, self.compte)
+            self._after_id = self.tkwindow.after(1000, self.timer)
 
-    def affiche(self):
-        if self.marche:
+    def status(self):
+        if self.is_on:
             Popen(["notify-send", "-i", IM_EYE, _("Scheduler"),
-                   _("Time since last eye rest: {min} min {sec} s").format(min=self.chrono[0], sec=self.chrono[1])])
+                   _("Time since last eye rest: {min} min {sec} s").format(min=self.time[0], sec=self.time[1])])
         else:
             Popen(["notify-send", "-i", IM_EYE, _("Scheduler"),
                    _("The eyes' rest' script is not active.")])

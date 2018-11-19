@@ -111,6 +111,7 @@ if not CONFIG.read(CONFIG_PATH):
     CONFIG.set('General', 'backups', '10')
     CONFIG.set('General', 'trayicon', '')
     CONFIG.set("General", "language", "")
+    CONFIG.set("General", "eyes_interval", "20")
 
     CONFIG.add_section('Events')
     CONFIG.set('Events', 'geometry', '')

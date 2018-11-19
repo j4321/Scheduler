@@ -29,7 +29,7 @@ from .color import ColorFrame
 from .opacity import OpacityFrame
 from .pomodoro_params import PomodoroParams
 from schedulerlib.constants import save_config, CONFIG, LANGUAGES, REV_LANGUAGES, \
-    TOOLKITS, IM_PLUS, IM_MOINS
+    TOOLKITS, IM_PLUS, IM_MOINS, valide_entree_nb
 from schedulerlib.messagebox import showerror, showinfo, askyesno
 from schedulerlib.ttkwidgets import AutoScrollbar
 from PIL.ImageTk import PhotoImage
@@ -86,28 +86,28 @@ class Settings(tk.Toplevel):
         frame_btns.grid(row=1, columnspan=2)
 
     def _init_general(self):
+        self.frames[_('General')].columnconfigure(0, weight=1)
         # --- variables
         self.gui = tk.StringVar(self, CONFIG.get("General", "trayicon").capitalize())
         self.lang = tk.StringVar(self, LANGUAGES[CONFIG.get("General", "language")])
 
         # --- Langue
         lang_frame = ttk.Frame(self.frames[_('General')])
-        lang_frame.grid(pady=4, sticky="ew")
+
         ttk.Label(lang_frame, text=_("Language"), style='subtitle.TLabel').pack(side="left")
 
         menu_lang = tk.Menu(lang_frame)
         for lang in REV_LANGUAGES:
             menu_lang.add_radiobutton(label=lang, variable=self.lang,
                                       value=lang, command=self.change_langue)
-        ttk.Menubutton(lang_frame, textvariable=self.lang,
+        ttk.Menubutton(lang_frame, textvariable=self.lang, padding=1,
                        menu=menu_lang).pack(side="left", padx=4)
         # --- gui toolkit
         frame_gui = ttk.Frame(self.frames[_('General')])
-        frame_gui.grid(pady=4, sticky="ew")
         ttk.Label(frame_gui, style='subtitle.TLabel',
                   text=_("GUI Toolkit for the system tray icon")).pack(side="left")
         menu_gui = tk.Menu(frame_gui)
-        ttk.Menubutton(frame_gui, menu=menu_gui, width=9,
+        ttk.Menubutton(frame_gui, menu=menu_gui, width=9, padding=1,
                        textvariable=self.gui).pack(side="left", padx=4)
 
         for toolkit, b in TOOLKITS.items():
@@ -117,13 +117,30 @@ class Settings(tk.Toplevel):
                                          variable=self.gui,
                                          command=self.change_gui)
         # --- Update checks
-        self.confirm_update = ttk.Checkbutton(self.frames[_('General')],
-                                              text=_("Check for updates on start-up"))
-        self.confirm_update.grid(pady=4, sticky='w')
-        if CONFIG.getboolean('General', 'check_update', fallback=True):
-            self.confirm_update.state(('selected', '!alternate'))
-        else:
-            self.confirm_update.state(('!selected', '!alternate'))
+        # self.confirm_update = ttk.Checkbutton(self.frames[_('General')],
+                                              # text=_("Check for updates on start-up"))
+        # if CONFIG.getboolean('General', 'check_update', fallback=True):
+            # self.confirm_update.state(('selected', '!alternate'))
+        # else:
+            # self.confirm_update.state(('!selected', '!alternate'))
+
+        # --- eyes
+        frame_eyes = ttk.Frame(self.frames[_('General')])
+        valid_entry_nb = self.register(valide_entree_nb)
+        ttk.Label(frame_eyes, style='subtitle.TLabel',
+                  text=_("Interval between two eyes' rest (min)")).pack(side="left", padx=4)
+        self.eyes_interval = ttk.Entry(frame_eyes, width=4, justify='center',
+                                       validate='key',
+                                       validatecommand=(valid_entry_nb, '%d', '%S'))
+        self.eyes_interval.insert(0, CONFIG.get("General", "eyes_interval", fallback='20'))
+        self.eyes_interval.pack(side="left", padx=4)
+
+        # --- placement
+        lang_frame.grid(pady=4, sticky="ew")
+        frame_gui.grid(pady=4, sticky="ew")
+        # self.confirm_update.grid(pady=4, sticky='w')
+        ttk.Separator(self.frames[_('General')], orient='horizontal').grid(sticky='ew', pady=10)
+        frame_eyes.grid(pady=4, sticky="ew")
 
     def _init_calendar(self):
         # --- general config
@@ -457,7 +474,11 @@ class Settings(tk.Toplevel):
         # --- General
         CONFIG.set("General", "language", REV_LANGUAGES[self.lang.get()])
         CONFIG.set("General", "trayicon", self.gui.get().lower())
-        CONFIG.set("General", "check_update", str('selected' in self.confirm_update.state()))
+        # CONFIG.set("General", "check_update", str('selected' in self.confirm_update.state()))
+        eyes = self.eyes_interval.get()
+        if not eyes:
+            eyes = 20
+        CONFIG.set("General", "eyes_interval", str(eyes))
 
         # --- Calendar
         CONFIG.set("Calendar", "alpha", "%.2f" % (self.cal_opacity.get_opacity()))

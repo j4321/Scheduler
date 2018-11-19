@@ -66,7 +66,7 @@ class EventScheduler(Tk):
         # --- menu
         self.menu_widgets = SubMenu(parent=self.icon.menu)
         self.menu_eyes = Eyes(self.icon.menu, self)
-        self.icon.menu.add_checkbutton(label='Manager', command=self.display_hide)
+        self.icon.menu.add_checkbutton(label=_('Manager'), command=self.display_hide)
         self.icon.menu.add_cascade(label=_('Widgets'), menu=self.menu_widgets)
         self.icon.menu.add_cascade(label=_("Eyes' rest"), menu=self.menu_eyes)
         self.icon.menu.add_command(label=_('Settings'), command=self.settings)
@@ -78,8 +78,8 @@ class EventScheduler(Tk):
         add_trace(self._visible, 'write', self._visibility_trace)
 
         self.menu = Menu(self, tearoff=False)
-        self.menu.add_command(label='Edit', command=self._edit_menu)
-        self.menu.add_command(label='Delete', command=self._delete_menu)
+        self.menu.add_command(label=_('Edit'), command=self._edit_menu)
+        self.menu.add_command(label=_('Delete'), command=self._delete_menu)
         self.right_click_iid = None
 
         self.menu_task = Menu(self.menu, tearoff=False)
@@ -205,15 +205,15 @@ class EventScheduler(Tk):
         self.tree.column('Start', width=150, stretch=False)
         self.tree.column('End', width=150, stretch=False)
         self.tree.column('Category', width=100)
-        self.tree.heading('Summary', text='Summary', anchor="w",
+        self.tree.heading('Summary', text=_('Summary'), anchor="w",
                           command=lambda: self._sort_by_desc('Summary', False))
-        self.tree.heading('Place', text='Place', anchor="w",
+        self.tree.heading('Place', text=_('Place'), anchor="w",
                           command=lambda: self._sort_by_desc('Place', False))
-        self.tree.heading('Start', text='Start', anchor="w",
+        self.tree.heading('Start', text=_('Start'), anchor="w",
                           command=lambda: self._sort_by_date('Start', False))
-        self.tree.heading('End', text='End', anchor="w",
+        self.tree.heading('End', text=_('End'), anchor="w",
                           command=lambda: self._sort_by_date('End', False))
-        self.tree.heading('Category', text='Category', anchor="w",
+        self.tree.heading('Category', text=_('Category'), anchor="w",
                           command=lambda: self._sort_by_desc('Category', False))
 
         self.tree.tag_configure('0', background='#ececec')
@@ -409,13 +409,13 @@ class EventScheduler(Tk):
         self.deiconify()
 
     def _visibility_trace(self, *args):
-        self.icon.menu.set_item_value('Manager', self._visible.get())
+        self.icon.menu.set_item_value(_('Manager'), self._visible.get())
 
     def display_hide(self, toggle=False):
-        value = self.icon.menu.get_item_value('Manager')
+        value = self.icon.menu.get_item_value(_('Manager'))
         if toggle:
             value = not value
-            self.icon.menu.set_item_value('Manager', value)
+            self.icon.menu.set_item_value(_('Manager'), value)
         self._visible.set(value)
         if not value:
             self.withdraw()
@@ -608,8 +608,8 @@ class EventScheduler(Tk):
         return next_ev
 
     def get_tasks(self):
-        # --- TODO: find events with repetition in the week
-        # --- TODO: better handling of events on several days
+        # TODO: find events with repetition in the week
+        # TODO: better handling of events on several days
         tasks = []
         for event in self.events.values():
             if event['Task']:
