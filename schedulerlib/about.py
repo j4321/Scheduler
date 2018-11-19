@@ -44,7 +44,7 @@ class About(Toplevel):
         Label(self, image=self.image).grid(row=0, columnspan=2, pady=10)
 
         Label(self,
-                  text=_("Scheduler %(version)s")
+                  text="Scheduler %(version)s"
                   % ({"version": __version__})).grid(row=1, columnspan=2)
         Label(self, text=_("Task scheduling and calendar")).grid(row=2, columnspan=2, padx=10)
         Label(self, text="Copyright (C) Juliette Monsel 2017").grid(row=3, columnspan=2)

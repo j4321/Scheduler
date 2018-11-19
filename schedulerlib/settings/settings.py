@@ -175,7 +175,7 @@ class Settings(tk.Toplevel):
                                  _('Foreground'))
         self.cal_bd = ColorFrame(frame_color,
                                  CONFIG.get('Calendar', 'bordercolor'),
-                                 _('Bordercolor'))
+                                 _('Border'))
         self.cal_bg.grid(row=0, column=1, sticky='e', padx=4, pady=4)
         self.cal_fg.grid(row=0, column=2, sticky='e', padx=4, pady=4)
         self.cal_bd.grid(row=1, column=1, sticky='e', padx=4, pady=4)

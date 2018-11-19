@@ -73,8 +73,8 @@ class Eyes(SubMenu):
 
     def status(self):
         if self.is_on:
-            Popen(["notify-send", "-i", IM_EYE, _("Scheduler"),
-                   _("Time since last eye rest: {min} min {sec} s").format(min=self.time[0], sec=self.time[1])])
+            Popen(["notify-send", "-i", IM_EYE, "Scheduler",
+                   _("Time since last eyes' rest: {min} min {sec} s").format(min=self.time[0], sec=self.time[1])])
         else:
-            Popen(["notify-send", "-i", IM_EYE, _("Scheduler"),
-                   _("The eyes' rest' script is not active.")])
+            Popen(["notify-send", "-i", IM_EYE, "Scheduler",
+                   _("The eyes' rest script is not active.")])
