@@ -204,37 +204,36 @@ class Pomodoro(BaseWidget):
             self._stats.destroy()
         BaseWidget.hide(self)
 
-    def stats(self):
+    def stats(self, time=None):
         """ Enregistre la durée de travail (en min) effectuée ce jour pour la
             tâche qui vient d'être interrompue.
             Seul les pomodori complets sont pris en compte. """
+        if time is None:
+            time = CONFIG.getint("Pomodoro", "work_time")
         # TODO: translate, correct date/time format
-        pom = self.pomodori.get()
-        if pom:
-            # la tâche en cours a été travaillée, il faut enregistrer les stats
-            date = dt.date.today()
-            task = self.task.get()
-            chemin = os.path.join(PATH_STATS, "_".join(task.split(" ")))
-            if not os.path.exists(chemin):
-                with open(chemin, 'w') as fich:
-                    fich.write("# tâche : %s\n# jour\tmois\tannée\ttemps de travail (min)\n" % task)
-            with open(chemin, 'r') as fich:
-                stats = fich.readlines()
-            if len(stats) > 2:
-                last = stats[-1][:10], stats[-1][:-1].split("\t")[-1]
-            else:
-                last = "", 0
-            if last[0] != date.strftime("%d\t%m\t%Y"):
-                with open(chemin, 'a') as fich:
-                    fich.write("%s\t%i\n" % (date.strftime("%d\t%m\t%Y"),
-                                             CONFIG.getint("Pomodoro", "work_time")))
-            else:
-                # un nombre a déjà été enregistré plus tôt dans la journée
-                # il faut les additioner
-                with open(chemin, 'w') as fich:
-                    fich.writelines(stats[:-1])
-                    fich.write("%s\t%i\n" % (date.strftime("%d\t%m\t%Y"),
-                                             CONFIG.getint("Pomodoro", "work_time") + int(last[1])))
+        # la tâche en cours a été travaillée, il faut enregistrer les stats
+        date = dt.date.today()
+        task = self.task.get()
+        chemin = os.path.join(PATH_STATS, "_".join(task.split(" ")))
+        if not os.path.exists(chemin):
+            with open(chemin, 'w') as fich:
+                fich.write("# tâche : %s\n# jour\tmois\tannée\ttemps de travail (min)\n" % task)
+        with open(chemin, 'r') as fich:
+            stats = fich.readlines()
+        if len(stats) > 2:
+            last = stats[-1][:10], stats[-1][:-1].split("\t")[-1]
+        else:
+            last = "", 0
+        if last[0] != date.strftime("%d\t%m\t%Y"):
+            with open(chemin, 'a') as fich:
+                fich.write("%s\t%i\n" % (date.strftime("%d\t%m\t%Y"), time))
+        else:
+            # un nombre a déjà été enregistré plus tôt dans la journée
+            # il faut les additioner
+            with open(chemin, 'w') as fich:
+                fich.writelines(stats[:-1])
+                fich.write("%s\t%i\n" % (date.strftime("%d\t%m\t%Y"),
+                           time + int(last[1])))
 
     def display_stats(self):
         """ affiche les statistiques """
@@ -259,6 +258,7 @@ class Pomodoro(BaseWidget):
     def stop(self, confirmation=True):
         """ Arrête le décompte du temps et le réinitialise,
             demande une confirmation avant de le faire si confirmation=True """
+        tps = int(CONFIG.getint("Pomodoro", "work_time") - self.tps[0] - self.tps[1] / 60)
         self.on = False
         if confirmation:
             rep = askyesno(title=_("Confirmation"),
@@ -266,6 +266,8 @@ class Pomodoro(BaseWidget):
         else:
             rep = True
         if rep:
+            if self.activite.get() == _("Work"):
+                self.stats(tps)
             self.pomodori.set(0)
             self.nb_cycles = 0
             self.tps = [CONFIG.getint("Pomodoro", "work_time"), 0]
