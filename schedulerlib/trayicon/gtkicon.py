@@ -41,19 +41,17 @@ class SubMenu(Gtk.Menu):
     def __init__(self, *args, **kwargs):
         """Create a SubMenu instance."""
         Gtk.Menu.__init__(self)
-        #self._images = []
 
     def add_command(self, label="", command=None, image=None):
         """Add an item with given label and associated to given command to the menu."""
         img = None
         if image is not None:
             img = Gtk.Image.new_from_file(image)
-            #self._images.append(img)
         item = Gtk.ImageMenuItem(label=label, image=img)
         self.append(item)
         if command is not None:
             item.connect("activate", lambda *args: command())
-        item.show_all()
+        item.show()
 
     def add_cascade(self, label="", menu=None, image=None):
         """Add a submenu (SubMenu instance) with given label to the menu."""
@@ -65,7 +63,7 @@ class SubMenu(Gtk.Menu):
         self.append(item)
         if menu is not None:
             item.set_submenu(menu)
-        item.show_all()
+        item.show()
 
     def add_checkbutton(self, label="", command=None):
         """
@@ -181,6 +179,9 @@ class TrayIcon:
 
         icon_exists = Gtk.IconTheme.get_default().has_icon(icon)
 
+        self._click_bindings = {'left': lambda: None, 'double': lambda: None,
+                                'middle': lambda: None}
+
         if APPIND_SUPPORT == 1:
             if icon_exists:
                 self.tray_icon = AppIndicator3.Indicator.new(appid, icon,
@@ -198,15 +199,18 @@ class TrayIcon:
             else:
                 self.tray_icon = Gtk.StatusIcon.new_from_file(fallback_icon_path)
             self.tray_icon.connect('popup-menu', self._on_popup_menu)
+            self.tray_icon.connect('button-press-event', self._callbacks)
             self.change_icon = self._change_icon_fallback
 
     def _on_popup_menu(self, icon, button, time):
         self.menu.popup(None, None, Gtk.StatusIcon.position_menu, icon, button, time)
 
-    def _change_icon_appind(self, icon, desc):
+    def _change_icon_appind(self, icon, desc=''):
+        """Change icon."""
         self.tray_icon.set_icon_full(icon, desc)
 
-    def _change_icon_fallback(self, icon, desc):
+    def _change_icon_fallback(self, icon, desc=''):
+        """Change icon."""
         self.tray_icon.set_from_file(icon)
 
     def loop(self, tk_window):
@@ -215,7 +219,23 @@ class TrayIcon:
             Gtk.main_iteration()
         tk_window.loop_id = tk_window.after(10, self.loop, tk_window)
 
-    def bind_left_click(self, command):
-        if not APPIND_SUPPORT:
-            self.tray_icon.connect('activate', lambda *args: command())
+    def _callbacks(self, data, event):
+        if event.button == 1:
+            if event.type is Gdk.EventType._2BUTTON_PRESS:
+                self._click_bindings['double']()
+            else:
+                self._click_bindings['left']()
+        elif event.button == 2:
+            self._click_bindings['middle']()
 
+    def bind_left_click(self, command):
+        """Bind command to left click on the icon."""
+        self._click_bindings['left'] = command
+
+    def bind_double_click(self, command):
+        """Bind command to middle click on the icon."""
+        self._click_bindings['double'] = command
+
+    def bind_middle_click(self, command):
+        """Bind command to double left click on the icon."""
+        self._click_bindings['middle'] = command

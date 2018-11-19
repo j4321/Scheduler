@@ -30,11 +30,18 @@ from PIL.ImageTk import PhotoImage
 
 
 class SubMenu(tkinter.Menu):
+    """
+    Menu or submenu for the system tray icon TrayIcon.
+
+    Tk Version.
+    """
     def __init__(self, *args, parent=None, tearoff=False, **kwarg):
+        """Create a SubMenu instance."""
         tkinter.Menu.__init__(self, parent, tearoff=tearoff)
         self._images = {}
 
     def add_command(self, label="", command=None, image=None):
+        """Add an item with given label and associated to given command to the menu."""
         img = None
         if image is not None:
             img = PhotoImage(file=image, master=self)
@@ -43,6 +50,7 @@ class SubMenu(tkinter.Menu):
                                  compound='left')
 
     def add_cascade(self, label="", menu=None, image=None):
+        """Add a submenu (SubMenu instance) with given label to the menu."""
         img = None
         if image is not None:
             img = PhotoImage(file=image, master=self)
@@ -51,15 +59,46 @@ class SubMenu(tkinter.Menu):
                                  compound='left')
 
     def add_checkbutton(self, label="", command=None):
+        """
+        Add a checkbutton item with given label and associated to given command to the menu.
+
+        The checkbutton state can be obtained/changed using the ``get_item_value``/``set_item_value`` methods.
+        """
         tkinter.Menu.add_checkbutton(self, label=label, command=command)
 
-    def get_item_label(self, item):
-        return self.entrycget(self.index(item), 'label')
+    def delete(self, item1, item2=None):
+        """
+        Delete all items between item1 and item2.
+        
+        If item2 is None, delete only the item corresponding to item1. 
+        """
+        if item2 == "end":
+            item2 = tkinter.Menu.index(self, "end")
+        tkinter.Menu.delete(self, item1, item2)
 
-    def set_item_label(self, item, label):
-        self.entryconfigure(self.index(item), label=label)
+    def index(self, item):
+        """
+        Return the index of item.
 
+        item can be an integer corresponding to the entry number in the menu,
+        the label of a menu entry or "end". In the fisrt case, the returned index will
+        be identical to item.
+        """
+        try:
+            i = tkinter.Menu.index(self, item)
+        except tkinter.TclError:
+            raise ValueError("%r not in menu" % item)
+        else:
+            if item == 'end':
+                if i is not None:
+                    return i + 1
+                else:
+                    return 0
+            else:
+                return i
+    
     def set_item_image(self, item, image):
+        """Set the item's image to given image (path to file)."""
         ind = self.index(item)
         try:
             del self._images[self.entrycget(ind, 'image')]
@@ -71,21 +110,41 @@ class SubMenu(tkinter.Menu):
             self._images[str(img)] = img
         self.entryconfigure(ind, image=img)
 
-    def set_item_menu(self, item, menu):
-        self.entryconfigure(self.index(item), menu=menu)
+    def get_item_label(self, item):
+        """Return item's label."""
+        return self.entrycget(self.index(item), 'label')
+
+    def set_item_label(self, item, label):
+        """Set the item's label to given label."""
+        self.entryconfigure(self.index(item), label=label)
 
     def get_item_menu(self, item):
+        """
+        Return item's menu.
+
+        It is assumed that the item is a cascade.
+        """
         menu_name = str(self.entrycget(self.index(item), 'menu'))
         return self.nametowidget(menu_name)
 
+    def set_item_menu(self, item, menu):
+        """
+        Set item's menu to given menu (SubMenu instance).
+
+        It is assumed that the item is a cascade.
+        """
+        self.entryconfigure(self.index(item), menu=menu)
+
     def disable_item(self, item):
+        """Put item in disabled (unresponsive) state."""
         self.entryconfigure(self.index(item), state='disabled')
 
     def enable_item(self, item):
+        """Put item in normal (responsive) state."""
         self.entryconfigure(self.index(item), state='normal')
 
     def get_item_value(self, item):
-        """Return item value (True/False) if item is a checkbutton."""
+        """Return item's value (True/False) if item is a checkbutton."""
         try:
             var = self.entrycget(self.index(item), 'variable')
             onvalue = self.entrycget(self.index(item), 'onvalue')
@@ -95,35 +154,17 @@ class SubMenu(tkinter.Menu):
             return self.getvar(var) == onvalue
 
     def set_item_value(self, item, value):
-        """Set item value if item is a checkbutton."""
+        """Set item's value if item is a checkbutton."""
         try:
             var = self.entrycget(self.index(item), 'variable')
             self.setvar(var, value)
         except tkinter.TclError:
             raise TypeError("Menu entry {item} is not a checkbutton".format(item=item))
 
-    def index(self, index):
-        try:
-            i = tkinter.Menu.index(self, index)
-        except tkinter.TclError:
-            raise ValueError("%r not in menu" % index)
-        else:
-            if index == 'end':
-                if i is not None:
-                    return i + 1
-                else:
-                    return 0
-            else:
-                return i
-
-    def delete(self, index1, index2=None):
-        if index2 == "end":
-            index2 = tkinter.Menu.index(self, "end")
-        tkinter.Menu.delete(self, index1, index2)
-
 
 class TrayIcon(tkinter.BaseWidget, tkinter.Wm):
-    def __init__(self, icon, master=None, fallback_icon_path=None, cnf={}, **kw):
+    """System tray icon, Tk version."""
+    def __init__(self, icon, fallback_icon_path, master=None, cnf={}, **kw):
         '''
             Create a new icon for the system tray. The application managing the
             system tray is notified about the new icon. It normally results in the
@@ -250,13 +291,28 @@ class TrayIcon(tkinter.BaseWidget, tkinter.Wm):
             x = 5
         self.menu.tk_popup(x, y)
 
-    def change_icon(self, icon, desc):
+    def change_icon(self, icon, desc=''):
+        """Change icon."""
         self._icon.configure(file=icon)
         self.update()
 
     def loop(self, tk_window):
+        """
+        Periodically force icon update inside tkinter mainloop.
+
+        Otherwise the icon can be unresponsive.
+        """
         self.update_idletasks()
         tk_window.loop_id = tk_window.after(10, self.loop, tk_window)
 
     def bind_left_click(self, command):
+        """Bind command to left click on the icon."""
         self.bind('<1>', lambda e: command())
+
+    def bind_middle_click(self, command):
+        """Bind command to middle click on the icon."""
+        self.bind('<2>', lambda e: command())
+
+    def bind_double_click(self, command):
+        """Bind command to double left click on the icon."""
+        self.bind('<Double-1>', lambda e: command())
