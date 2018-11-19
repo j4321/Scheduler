@@ -32,23 +32,6 @@ except ValueError:
     APPIND_SUPPORT = 0
 
 
-class ImageMenuItem(Gtk.MenuItem):
-    def __init__(self, label='', image=None):
-        Gtk.MenuItem.__init__(self)
-        self.box = Gtk.Box(spacing=6)
-        self.label = Gtk.Label(label=label)
-        self.image = Gtk.Image()
-        if image is not None:
-            print(image)
-            self.image.set_from_file(image)
-        self.add(self.box)
-        self.box.pack_start(self.image, False, False, 0)
-        self.box.pack_start(self.label, False, False, 0)
-
-        self.set_label = self.label.set_label
-        self.get_label = self.label.get_label
-
-
 class SubMenu(Gtk.Menu):
     """
     Menu or submenu for the system tray icon TrayIcon.
@@ -58,10 +41,15 @@ class SubMenu(Gtk.Menu):
     def __init__(self, *args, **kwargs):
         """Create a SubMenu instance."""
         Gtk.Menu.__init__(self)
+        #self._images = []
 
     def add_command(self, label="", command=None, image=None):
         """Add an item with given label and associated to given command to the menu."""
-        item = ImageMenuItem(label=label, image=image)
+        img = None
+        if image is not None:
+            img = Gtk.Image.new_from_file(image)
+            #self._images.append(img)
+        item = Gtk.ImageMenuItem(label=label, image=img)
         self.append(item)
         if command is not None:
             item.connect("activate", lambda *args: command())
@@ -69,7 +57,11 @@ class SubMenu(Gtk.Menu):
 
     def add_cascade(self, label="", menu=None, image=None):
         """Add a submenu (SubMenu instance) with given label to the menu."""
-        item = ImageMenuItem(label=label, image=image)
+        img = None
+        if image is not None:
+            img = Gtk.Image.new_from_file(image)
+            #self._images.append(img)
+        item = Gtk.ImageMenuItem(label=label, image=img)
         self.append(item)
         if menu is not None:
             item.set_submenu(menu)
@@ -134,8 +126,9 @@ class SubMenu(Gtk.Menu):
 
     def set_item_image(self, item, image):
         item = self.get_children()[self.index(item)]
+        img = item.get_image()
         if image is not None:
-            item.image.set_from_file(image)
+            img.set_from_file(image)
 
     def get_item_label(self, item):
         """Return item's label."""

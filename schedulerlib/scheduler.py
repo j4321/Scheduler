@@ -117,6 +117,8 @@ class EventScheduler(Tk):
         self.style.configure("Treeview.Heading", font="TkDefaultFont")
         self.style.map("TCombobox", fieldbackground=[("readonly", "white")],
                        foreground=[("readonly", "black")])
+        self.style.map('TMenubutton',
+                       arrowcolor=[('disabled', self.style.lookup('TMenubutton', 'foreground', ['disabled']))])
         bg = self.style.lookup('TFrame', 'background', default='#ececec')
         self.configure(bg=bg)
         self.option_add('*Toplevel.background', bg)
