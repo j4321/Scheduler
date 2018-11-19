@@ -24,14 +24,14 @@ Settings
 
 import tkinter as tk
 from tkinter import ttk
-from schedulerlib.constants import COLOR, askcolor
+from schedulerlib.constants import IM_COLOR, askcolor
 from PIL.ImageTk import PhotoImage
 
 
 class ColorFrame(ttk.Frame):
     def __init__(self, master=None, color='white', label='Color'):
         ttk.Frame.__init__(self, master)
-        self._im_color = PhotoImage(master=self, file=COLOR)
+        self._im_color = PhotoImage(master=self, file=IM_COLOR)
         frame = ttk.Frame(self, border=1, relief='groove')
         self.preview = tk.Frame(frame, width=23, height=23, bg=color)
         self.preview.pack()

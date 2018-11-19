@@ -37,14 +37,18 @@ class SubMenu(QMenu):
             QMenu.__init__(self, parent)
         else:
             QMenu.__init__(self, label, parent)
+        self._images = []
 
     def add_separator(self):
         self.addSeparator()
 
-    def add_command(self, label="", command=None):
+    def add_command(self, label="", command=None, image=None):
         action = QAction(label, self)
         if command is not None:
             action.triggered.connect(lambda *args: command())
+        if image is not None:
+            self._images.append(QIcon(image))
+            action.setIcon(self._images[-1])
         self.addAction(action)
 
     def add_checkbutton(self, label="", command=None):
@@ -54,11 +58,14 @@ class SubMenu(QMenu):
             action.triggered.connect(lambda *args: command())
         self.addAction(action)
 
-    def add_cascade(self, label="", menu=None):
+    def add_cascade(self, label="", menu=None, image=None):
         if menu is None:
             menu = SubMenu(label, self)
         action = QAction(label, self)
         action.setMenu(menu)
+        if image is not None:
+            self._images.append(QIcon(image))
+            action.setIcon(self._images[-1])
         self.addAction(action)
 
     def delete(self, item1, item2=None):
@@ -82,6 +89,15 @@ class SubMenu(QMenu):
             except ValueError:
                 raise ValueError("%r not in menu" % index)
             return i
+
+    def set_item_image(self, item, image):
+        i = self.actions()[self.index(item)]
+        try:
+            self._images.remove(i.icon())
+        except ValueError:
+            pass
+        self._images.append(QIcon(image))
+        i.setIcon(self._images[-1])
 
     def get_item_label(self, item):
         return self.actions()[self.index(item)].text()

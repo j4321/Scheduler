@@ -29,7 +29,7 @@ from .color import ColorFrame
 from .opacity import OpacityFrame
 from .pomodoro_params import PomodoroParams
 from schedulerlib.constants import save_config, CONFIG, LANGUAGES, REV_LANGUAGES, \
-    TOOLKITS, PLUS, MOINS
+    TOOLKITS, IM_PLUS, IM_MOINS
 from schedulerlib.messagebox import showerror, showinfo, askyesno
 from schedulerlib.ttkwidgets import AutoScrollbar
 from PIL.ImageTk import PhotoImage
@@ -43,8 +43,8 @@ class Settings(tk.Toplevel):
         self.rowconfigure(0, weight=1)
         self.minsize(574, 565)
 
-        self._im_plus = PhotoImage(master=self, file=PLUS)
-        self._im_moins = PhotoImage(master=self, file=MOINS)
+        self._im_plus = PhotoImage(master=self, file=IM_PLUS)
+        self._im_moins = PhotoImage(master=self, file=IM_MOINS)
 
         frame = ttk.Frame(self, style='border.TFrame', relief='sunken',
                           border=1)
@@ -149,7 +149,7 @@ class Settings(tk.Toplevel):
         self.cal_colors = {}
 
         ttk.Label(frame_color, style='subtitle.TLabel',
-                  text=_('General')).grid(row=0, column=0, sticky='e')
+                  text=_('General')).grid(row=0, column=0, sticky='w')
         self.cal_bg = ColorFrame(frame_color,
                                  CONFIG.get('Calendar', 'background'),
                                  _('Background'))
@@ -159,9 +159,9 @@ class Settings(tk.Toplevel):
         self.cal_bd = ColorFrame(frame_color,
                                  CONFIG.get('Calendar', 'bordercolor'),
                                  _('Bordercolor'))
-        self.cal_bg.grid(row=0, column=1, sticky='e')
-        self.cal_fg.grid(row=0, column=2, sticky='e')
-        self.cal_bd.grid(row=1, column=1, sticky='e')
+        self.cal_bg.grid(row=0, column=1, sticky='e', padx=4, pady=4)
+        self.cal_fg.grid(row=0, column=2, sticky='e', padx=4, pady=4)
+        self.cal_bd.grid(row=1, column=1, sticky='e', padx=4, pady=4)
 
         cal_colors = {'normal': _('Normal day'),
                       'weekend': _('Weekend'),
@@ -185,10 +185,10 @@ class Settings(tk.Toplevel):
                                                                  columnspan=4,
                                                                  pady=10,
                                                                  sticky='ew')
-            ttk.Label(frame_color, style='subtitle.TLabel',
-                      text=label).grid(row=3 + 2 * i, column=0, sticky='e', padx=(0, 4))
-            bg.grid(row=3 + 2 * i, column=1, sticky='e')
-            fg.grid(row=3 + 2 * i, column=2, sticky='e')
+            ttk.Label(frame_color, style='subtitle.TLabel', wraplength=110,
+                      text=label).grid(row=3 + 2 * i, column=0, sticky='w', padx=(0, 4))
+            bg.grid(row=3 + 2 * i, column=1, sticky='e', padx=4, pady=4)
+            fg.grid(row=3 + 2 * i, column=2, sticky='e', padx=4, pady=4)
 
         # --- Categories
         categories = ttk.Frame(self.frames[_('Calendar')], padding=4)
@@ -216,7 +216,7 @@ class Settings(tk.Toplevel):
             col = CONFIG.get('Categories', cat).split(', ')
             bg = ColorFrame(self.cat_frame, col[1].strip(), _('Background'))
             fg = ColorFrame(self.cat_frame, col[0].strip(), _('Foreground'))
-            b = ttk.Button(self.cat_frame, image=self._im_moins,
+            b = ttk.Button(self.cat_frame, image=self._im_moins, padding=2,
                            command=lambda c=cat: self.del_cat(c))
             self.cats[cat] = [l, bg, fg, b]
             l.grid(row=i, column=0, sticky='e', padx=4, pady=4)
@@ -243,7 +243,7 @@ class Settings(tk.Toplevel):
                   style='title.TLabel').grid(row=0, column=0, sticky='w', padx=4, pady=4)
         # --- --- title
         ttk.Label(frame_font, style='subtitle.TLabel',
-                  text=_('Title')).grid(row=1, column=0, sticky='e', padx=4, pady=4)
+                  text=_('Title')).grid(row=1, column=0, sticky='ne', padx=4, pady=8)
         self.events_font_title = FontFrame(frame_font,
                                            CONFIG.get('Events', 'font_title'),
                                            True)
@@ -252,7 +252,7 @@ class Settings(tk.Toplevel):
                       orient='horizontal').grid(row=2, columnspan=3, padx=10, pady=4, sticky='ew')
         # --- --- day
         ttk.Label(frame_font, style='subtitle.TLabel',
-                  text=_('Day')).grid(row=3, column=0, sticky='e', padx=4, pady=4)
+                  text=_('Day')).grid(row=3, column=0, sticky='ne', padx=4, pady=8)
         self.events_font_day = FontFrame(frame_font,
                                          CONFIG.get('Events', 'font_day'), True)
         self.events_font_day.grid(row=3, column=1, padx=4, pady=4)
@@ -260,7 +260,7 @@ class Settings(tk.Toplevel):
                       orient='horizontal').grid(row=4, columnspan=3, padx=10, pady=4, sticky='ew')
         # --- --- text
         ttk.Label(frame_font, style='subtitle.TLabel',
-                  text=_('Text')).grid(row=5, column=0, sticky='e', padx=4, pady=4)
+                  text=_('Text')).grid(row=5, column=0, sticky='ne', padx=4, pady=8)
         self.events_font = FontFrame(frame_font,
                                      CONFIG.get('Events', 'font'))
         self.events_font.grid(row=5, column=1, padx=4, pady=4)
@@ -276,11 +276,11 @@ class Settings(tk.Toplevel):
         self.events_bg = ColorFrame(frame_color,
                                     CONFIG.get('Events', 'background'),
                                     _('Background'))
-        self.events_bg.grid(row=0, column=1, sticky='e')
+        self.events_bg.grid(row=0, column=1, sticky='e', padx=4, pady=4)
         self.events_fg = ColorFrame(frame_color,
                                     CONFIG.get('Events', 'foreground'),
                                     _('Foreground'))
-        self.events_fg.grid(row=1, column=1, sticky='e')
+        self.events_fg.grid(row=0, column=2, sticky='e', padx=4, pady=4)
 
         # --- placement
         frame_font.grid(sticky='ew')
@@ -299,7 +299,7 @@ class Settings(tk.Toplevel):
                   style='title.TLabel').grid(row=0, column=0, sticky='w', padx=4, pady=4)
         # --- --- title
         ttk.Label(frame_font, style='subtitle.TLabel',
-                  text=_('Title')).grid(row=1, column=0, sticky='w', padx=4, pady=4)
+                  text=_('Title')).grid(row=1, column=0, sticky='nw', padx=4, pady=8)
         self.tasks_font_title = FontFrame(frame_font,
                                           CONFIG.get('Tasks', 'font_title'),
                                           True)
@@ -308,7 +308,7 @@ class Settings(tk.Toplevel):
                       orient='horizontal').grid(row=2, columnspan=3, padx=10, pady=4, sticky='ew')
         # --- --- text
         ttk.Label(frame_font, style='subtitle.TLabel',
-                  text=_('Text')).grid(row=5, column=0, sticky='w', padx=4, pady=4)
+                  text=_('Text')).grid(row=5, column=0, sticky='nw', padx=4, pady=8)
         self.tasks_font = FontFrame(frame_font,
                                     CONFIG.get('Tasks', 'font'))
         self.tasks_font.grid(row=5, column=1, padx=4, pady=4)
@@ -324,21 +324,21 @@ class Settings(tk.Toplevel):
         self.tasks_bg = ColorFrame(frame_color,
                                    CONFIG.get('Tasks', 'background'),
                                    _('Background'))
-        self.tasks_bg.grid(row=0, column=1, sticky='e')
+        self.tasks_bg.grid(row=0, column=1, sticky='e', padx=4, pady=4)
         self.tasks_fg = ColorFrame(frame_color,
                                    CONFIG.get('Tasks', 'foreground'),
                                    _('Foreground'))
-        self.tasks_fg.grid(row=1, column=1, sticky='e')
+        self.tasks_fg.grid(row=0, column=2, sticky='e', padx=4, pady=4)
 
         # --- placement
-        ttk.Checkbutton(self.frames[_('Tasks')], text=_('Hide completed tasks'),
-                        variable=self.tasks_hide_comp).grid(sticky='w', padx=4, pady=4)
-        ttk.Separator(self.frames[_('Tasks')], orient='horizontal').grid(sticky='ew', pady=8)
-        frame_font.grid(sticky='w')
+        frame_font.grid(sticky='ew')
         ttk.Separator(self.frames[_('Tasks')], orient='horizontal').grid(sticky='ew', pady=8)
         self.tasks_opacity.grid(sticky='w', padx=4)
         ttk.Separator(self.frames[_('Tasks')], orient='horizontal').grid(sticky='ew', pady=8)
         frame_color.grid(sticky='w')
+        ttk.Separator(self.frames[_('Tasks')], orient='horizontal').grid(sticky='ew', pady=8)
+        ttk.Checkbutton(self.frames[_('Tasks')], text=_('Hide completed tasks'),
+                        variable=self.tasks_hide_comp).grid(sticky='w', padx=4, pady=4)
 
     def _init_timer(self):
         self.frames[_('Timer')].columnconfigure(0, weight=1)
@@ -349,7 +349,7 @@ class Settings(tk.Toplevel):
                   style='title.TLabel').grid(row=0, column=0, sticky='w', padx=4, pady=4)
         # --- --- time
         ttk.Label(frame_font, style='subtitle.TLabel',
-                  text=_('Time')).grid(row=1, column=0, sticky='w', padx=4, pady=4)
+                  text=_('Time')).grid(row=1, column=0, sticky='nw', padx=4, pady=8)
         self.timer_font_time = FontFrame(frame_font,
                                          CONFIG.get('Timer', 'font_time'),
                                          sample_text="02:17")
@@ -358,7 +358,7 @@ class Settings(tk.Toplevel):
                       orient='horizontal').grid(row=2, columnspan=3, padx=10, pady=4, sticky='ew')
         # --- --- intervals
         ttk.Label(frame_font, style='subtitle.TLabel',
-                  text=_('Intervals')).grid(row=5, column=0, sticky='w', padx=4, pady=4)
+                  text=_('Intervals')).grid(row=5, column=0, sticky='nw', padx=4, pady=8)
         self.timer_font_intervals = FontFrame(frame_font,
                                               CONFIG.get('Timer', 'font_intervals'), sample_text="02:17")
         self.timer_font_intervals.grid(row=5, column=1, padx=4, pady=4)
@@ -378,10 +378,10 @@ class Settings(tk.Toplevel):
         self.timer_fg = ColorFrame(frame_color,
                                    CONFIG.get('Timer', 'foreground'),
                                    _('Foreground'))
-        self.timer_fg.grid(row=1, column=1, sticky='e')
+        self.timer_fg.grid(row=0, column=2, sticky='e')
 
         # --- placement
-        frame_font.grid(sticky='w')
+        frame_font.grid(sticky='ew')
         ttk.Separator(self.frames[_('Timer')], orient='horizontal').grid(sticky='ew', pady=8)
         self.timer_opacity.grid(sticky='w', padx=4)
         ttk.Separator(self.frames[_('Timer')], orient='horizontal').grid(sticky='ew', pady=8)
@@ -430,7 +430,7 @@ class Settings(tk.Toplevel):
                 l = ttk.Label(self.cat_frame, text=cat, style='subtitle.TLabel')
                 bg = ColorFrame(self.cat_frame, col[1].strip(), _('Background'))
                 fg = ColorFrame(self.cat_frame, col[0].strip(), _('Foreground'))
-                b = ttk.Button(self.cat_frame, image=self._im_moins,
+                b = ttk.Button(self.cat_frame, image=self._im_moins, padding=2,
                                command=lambda c=cat: self.del_cat(c))
                 self.cats[cat] = [l, bg, fg, b]
                 l.grid(row=i, column=0, sticky='e', padx=4, pady=4)

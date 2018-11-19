@@ -8,7 +8,7 @@ Created on Thu Jun 15 13:02:41 2017
 
 from tkinter import Menu, PhotoImage, Text
 from tkinter.ttk import Button, Label, Sizegrip
-from schedulerlib.constants import PLAY, PAUSE, STOP, CONFIG, active_color
+from schedulerlib.constants import IM_PLAY, IM_PAUSE, STOP, CONFIG, active_color
 from .base_widget import BaseWidget
 
 
@@ -22,8 +22,8 @@ class Timer(BaseWidget):
         self._on = False
         self._after_id = ''
 
-        self.img_play = PhotoImage(master=self, file=PLAY)
-        self.img_pause = PhotoImage(master=self, file=PAUSE)
+        self.img_play = PhotoImage(master=self, file=IM_PLAY)
+        self.img_pause = PhotoImage(master=self, file=IM_PAUSE)
         self.img_stop = PhotoImage(master=self, file=STOP)
 
         self.rowconfigure(2, weight=1)

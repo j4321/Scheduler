@@ -2,15 +2,15 @@
 # -*-coding:Utf-8 -*
 
 """
-WorkHourGlass - Enhance your efficiency by timing your work and breaks
+Scheduler - Task scheduling and calendar
 Copyright 2015-2018 Juliette Monsel <j_4321@protonmail.com>
 
-WorkHourGlass is free software: you can redistribute it and/or modify
+Scheduler is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-WorkHourGlass  is distributed in the hope that it will be useful,
+Scheduler  is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
@@ -18,7 +18,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Pomodoro GUI
+Pomodoro widget
 """
 from subprocess import Popen
 from tkinter import StringVar, Menu, IntVar, PhotoImage
@@ -26,8 +26,8 @@ from tkinter.ttk import Button, Label, Frame, Menubutton, Sizegrip
 from tkinter.messagebox import askyesno
 import os
 import datetime as dt
-from schedulerlib.constants import CONFIG, CMAP, PATH_STATS, PLAY, \
-    STOP, TOMATE, PARAMS, GRAPH, active_color
+from schedulerlib.constants import CONFIG, CMAP, PATH_STATS, IM_PLAY, \
+    STOP, IM_POMODORO, IM_PARAMS, IM_GRAPH, active_color
 from .base_widget import BaseWidget
 from schedulerlib.pomodoro_stats import Stats
 
@@ -65,11 +65,11 @@ class Pomodoro(BaseWidget):
         self.pomodori = IntVar(self, 0)
 
         # --- images
-        self.im_go = PhotoImage(master=self, file=PLAY)
+        self.im_go = PhotoImage(master=self, file=IM_PLAY)
         self.im_stop = PhotoImage(master=self, file=STOP)
-        self.im_params = PhotoImage(master=self, file=PARAMS)
-        self.im_tomate = PhotoImage(master=self, file=TOMATE)
-        self.im_graph = PhotoImage(master=self, file=GRAPH)
+        self.im_params = PhotoImage(master=self, file=IM_PARAMS)
+        self.im_tomate = PhotoImage(master=self, file=IM_POMODORO)
+        self.im_graph = PhotoImage(master=self, file=IM_GRAPH)
 
         # --- tasks list
         tasks_frame = Frame(self, style='pomodoro.TFrame')

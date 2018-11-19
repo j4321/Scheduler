@@ -18,14 +18,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-SCROLL_ALPHA is a modified version of the slider-vert.png assets from
-the arc-theme https://github.com/horst3180/arc-theme
-Copyright 2015 horst3180 (https://github.com/horst3180)
-
-The png icons are modified versions of icons from the elementary project
-(the xfce fork to be precise https://github.com/shimmerproject/elementary-xfce)
-Copyright 2007-2013 elementary LLC.
-
 The images in ICONS were taken from "icons.tcl":
 
     A set of stock icons for use in Tk dialogs. The icons used here
@@ -279,25 +271,28 @@ you can install mpg123.")).grid(row=0, columnspan=2)
 ICON_NAME = "scheduler-tray"  # gtk / qt tray icon
 ICON48 = os.path.join(PATH_IMAGES, 'icon48.png')
 TKTRAY_ICON = os.path.join(PATH_IMAGES, 'scheduler.png')
-BELL = os.path.join(PATH_IMAGES, 'bell.png')
-MOINS = os.path.join(PATH_IMAGES, 'moins.png')
-PLUS = os.path.join(PATH_IMAGES, 'plus.png')
-DOT = os.path.join(PATH_IMAGES, 'dot.png')
-PLAY = os.path.join(PATH_IMAGES, 'play.png')
-PAUSE = os.path.join(PATH_IMAGES, 'pause.png')
+IM_BELL = os.path.join(PATH_IMAGES, 'bell.png')
+IM_MOINS = os.path.join(PATH_IMAGES, 'moins.png')
+IM_PLUS = os.path.join(PATH_IMAGES, 'plus.png')
+IM_DOT = os.path.join(PATH_IMAGES, 'dot.png')
+IM_PLAY = os.path.join(PATH_IMAGES, 'play.png')
+IM_PAUSE = os.path.join(PATH_IMAGES, 'pause.png')
 STOP = os.path.join(PATH_IMAGES, 'stop.png')
-TOMATE = os.path.join(PATH_IMAGES, "tomate.png")
-GRAPH = os.path.join(PATH_IMAGES, "graph.png")
-PARAMS = os.path.join(PATH_IMAGES, "params.png")
-COLOR = os.path.join(PATH_IMAGES, "color.png")
-SON = os.path.join(PATH_IMAGES, "son.png")
-MUTE = os.path.join(PATH_IMAGES, "mute.png")
-CLOSED = os.path.join(PATH_IMAGES, 'closed.png')
-OPENED = os.path.join(PATH_IMAGES, 'open.png')
-CLOSED_SEL = os.path.join(PATH_IMAGES, 'closed_sel.png')
-OPENED_SEL = os.path.join(PATH_IMAGES, 'open_sel.png')
+IM_POMODORO = os.path.join(PATH_IMAGES, "tomate.png")
+IM_GRAPH = os.path.join(PATH_IMAGES, "graph.png")
+IM_PARAMS = os.path.join(PATH_IMAGES, "params.png")
+IM_COLOR = os.path.join(PATH_IMAGES, "color.png")
+IM_SOUND = os.path.join(PATH_IMAGES, "son.png")
+IM_MUTE = os.path.join(PATH_IMAGES, "mute.png")
+IM_CLOSED = os.path.join(PATH_IMAGES, 'closed.png')
+IM_OPENED = os.path.join(PATH_IMAGES, 'open.png')
+IM_CLOSED_SEL = os.path.join(PATH_IMAGES, 'closed_sel.png')
+IM_OPENED_SEL = os.path.join(PATH_IMAGES, 'open_sel.png')
 IM_LAYOUT = os.path.join(PATH_IMAGES, 'layout.png')
-SCROLL_ALPHA = os.path.join(PATH_IMAGES, "scroll.png")
+IM_SCROLL_ALPHA = os.path.join(PATH_IMAGES, "scroll.png")
+IM_EYE = os.path.join(PATH_IMAGES, "yeux.svg")
+IM_START = os.path.join(PATH_IMAGES, "start.png")
+IM_STOP= os.path.join(PATH_IMAGES, "stop_m.png")
 
 IM_ERROR_DATA = """
 iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAABiRJREFU

@@ -26,8 +26,8 @@ from tkinter import BooleanVar, Canvas, Toplevel
 from tkinter.ttk import Notebook, Style, Label, Separator, Frame, Entry, \
     Button, Checkbutton
 from tkinter.messagebox import showerror, askyesno
-from schedulerlib.constants import COLOR, valide_entree_nb, CONFIG, askcolor, \
-    askopenfilename, CMAP, PLUS, MOINS, PATH_STATS, save_config
+from schedulerlib.constants import IM_COLOR, valide_entree_nb, CONFIG, askcolor, \
+    askopenfilename, CMAP, IM_PLUS, IM_MOINS, PATH_STATS, save_config
 from schedulerlib.ttkwidgets import AutoScrollbar
 from PIL.ImageTk import PhotoImage
 from .color import ColorFrame
@@ -43,9 +43,9 @@ class PomodoroParams(Frame):
 
         self.onglets = Notebook(self)
         self.onglets.pack(fill='both', expand=True)
-        self.im_color = PhotoImage(master=self, file=COLOR)
-        self.im_plus = PhotoImage(master=self, file=PLUS)
-        self.im_moins = PhotoImage(master=self, file=MOINS)
+        self.im_color = PhotoImage(master=self, file=IM_COLOR)
+        self.im_plus = PhotoImage(master=self, file=IM_PLUS)
+        self.im_moins = PhotoImage(master=self, file=IM_MOINS)
 
         self.okfct = self.register(valide_entree_nb)
 
@@ -101,10 +101,14 @@ class PomodoroParams(Frame):
         self.opacity = OpacityFrame(self.general)
         self.opacity.grid(row=5, columnspan=2, sticky='w', padx=(2, 4), pady=4)
 
-        # --- Son
-        self.son = Frame(self.onglets, padding=10)
+        Separator(self.general,
+                  orient='horizontal').grid(row=6, columnspan=2,
+                                            sticky="ew", pady=10)
+
+        # --- --- Son
+        self.son = Frame(self.general)
         self.son.columnconfigure(1, weight=1)
-        self.onglets.add(self.son, text=_("Sound"))
+        self.son.grid(row=7, columnspan=2, sticky='ew', pady=4)
 
         Label(self.son, text=_("Sound"),
               style='title.TLabel').grid(row=0, pady=4, padx=(2, 10), sticky="w")
@@ -113,26 +117,24 @@ class PomodoroParams(Frame):
         b_son = Checkbutton(self.son, variable=self.mute, style='Mute')
         b_son.grid(row=0, column=1, sticky="w", pady=4, padx=10)
         self.son_frame = Frame(self.son)
-        self.son_frame.grid(row=1, sticky="ew", columnspan=2)
+        self.son_frame.grid(row=1, sticky="ew", columnspan=2, pady=4)
         self.bip = Entry(self.son_frame)
         self.bip.insert(0, CONFIG.get("Pomodoro", "beep"))
         self.bip.pack(side="left", fill="both", expand=True)
         Button(self.son_frame, text="...", width=2, padding=0,
                command=self.choix_son).pack(side="right", padx=(2, 4))
 
-        Separator(self.son, orient='horizontal').grid(row=2, columnspan=2,
-                                                      sticky="ew", pady=10)
         son_frame2 = Frame(self.son)
-        son_frame2.grid(row=3, sticky="ew", columnspan=2)
+        son_frame2.grid(row=3, sticky="ew", columnspan=2, pady=4)
         Label(son_frame2, text=_("Audio player"),
-              style='title.TLabel').pack(side="left", padx=(2, 10))
+              style='subtitle.TLabel').pack(side="left", padx=(2, 10))
         self.player = Entry(son_frame2, justify='center')
         self.player.insert(0, CONFIG.get("Pomodoro", "player"))
         self.player.pack(side="right", fill="both", expand=True, padx=4)
 
         # --- Couleurs
         self.couleurs = Frame(self.onglets, padding=10)
-        self.couleurs.columnconfigure(2, weight=1)
+        self.couleurs.columnconfigure(3, weight=1)
         self.onglets.add(self.couleurs, text=_("Colors"))
 
         self.bg = ColorFrame(self.couleurs,
@@ -163,35 +165,35 @@ class PomodoroParams(Frame):
         Label(self.couleurs, text=_("General"),
               style='title.TLabel').grid(row=0, column=0, pady=4,
                                          padx=(2, 10), sticky="w")
-        self.bg.grid(row=0, column=1, sticky='e')
-        self.fg.grid(row=1, column=1, sticky='e')
-        Separator(self.couleurs, orient='horizontal').grid(row=2, sticky="ew",
-                                                           pady=10, columnspan=3)
+        self.bg.grid(row=0, column=1, sticky='e', padx=4, pady=4)
+        self.fg.grid(row=0, column=2, sticky='e', padx=4, pady=4)
+        Separator(self.couleurs, orient='horizontal').grid(row=1, sticky="ew",
+                                                           pady=10, columnspan=4)
         Label(self.couleurs, text=_("Work"),
-              style='title.TLabel').grid(row=3, column=0, pady=4,
+              style='title.TLabel').grid(row=2, column=0, pady=4,
                                          padx=(2, 10), sticky="w")
-        self.work_bg.grid(row=3, column=1, sticky='e')
-        self.work_fg.grid(row=4, column=1, sticky='e')
-        Separator(self.couleurs, orient='horizontal').grid(row=5, sticky="ew",
-                                                           pady=10, columnspan=3)
+        self.work_bg.grid(row=2, column=1, sticky='e', padx=4, pady=4)
+        self.work_fg.grid(row=2, column=2, sticky='e', padx=4, pady=4)
+        Separator(self.couleurs, orient='horizontal').grid(row=3, sticky="ew",
+                                                           pady=10, columnspan=4)
         Label(self.couleurs, text=_("Break"),
+              style='title.TLabel').grid(row=4, column=0, pady=4,
+                                         padx=(2, 10), sticky="w")
+        self.break_bg.grid(row=4, column=1, sticky='e', padx=4, pady=4)
+        self.break_fg.grid(row=4, column=2, sticky='e', padx=4, pady=4)
+        Separator(self.couleurs, orient='horizontal').grid(row=5, sticky="ew",
+                                                           pady=10, columnspan=4)
+        Label(self.couleurs, text=_("Rest"),
               style='title.TLabel').grid(row=6, column=0, pady=4,
                                          padx=(2, 10), sticky="w")
-        self.break_bg.grid(row=6, column=1, sticky='e')
-        self.break_fg.grid(row=7, column=1, sticky='e')
-        Separator(self.couleurs, orient='horizontal').grid(row=8, sticky="ew",
-                                                           pady=10, columnspan=3)
-        Label(self.couleurs, text=_("Rest"),
-              style='title.TLabel').grid(row=9, column=0, pady=4,
-                                         padx=(2, 10), sticky="w")
-        self.rest_bg.grid(row=9, column=1, sticky='e')
-        self.rest_fg.grid(row=10, column=1, sticky='e')
+        self.rest_bg.grid(row=6, column=1, sticky='e', padx=4, pady=4)
+        self.rest_fg.grid(row=6, column=2, sticky='e', padx=4, pady=4)
 
-        # --- Stats
+        # --- Tasks
         self.stats = Frame(self.onglets, padding=10)
         self.stats.columnconfigure(0, weight=1)
         self.stats.rowconfigure(0, weight=1)
-        self.onglets.add(self.stats, text=_("Statistics"))
+        self.onglets.add(self.stats, text=_("Tasks"))
         can = Canvas(self.stats, bg=self.style.lookup('TFrame', 'background'),
                      highlightthickness=0, width=1,
                      relief='flat')
@@ -209,10 +211,10 @@ class PomodoroParams(Frame):
         self._tasks_btns = {}
         for i, (coul, task) in enumerate(zip(cmap, tasks)):
             self.tasks[task] = ColorFrame(self.task_frame, coul, task.capitalize())
-            self.tasks[task].grid(row=i, column=0, sticky='e')
+            self.tasks[task].grid(row=i, column=0, sticky='e', padx=4, pady=4)
             b = Button(self.task_frame, image=self.im_moins, padding=2,
                        command=lambda t=task: self.del_task(t))
-            b.grid(row=i, column=1, sticky='w')
+            b.grid(row=i, column=1, sticky='w', padx=4, pady=4)
             self._tasks_btns[task] = b
         if len(tasks) == 1:
             self._tasks_btns[tasks[0]].state(['disabled'])
@@ -316,10 +318,10 @@ class PomodoroParams(Frame):
                 coul = CMAP[(len(self.tasks) + 1) % len(CMAP)]
                 i = self.task_frame.grid_size()[1] + 1
                 self.tasks[task] = ColorFrame(self.task_frame, coul, task.capitalize())
-                self.tasks[task].grid(row=i, column=0, sticky='e')
+                self.tasks[task].grid(row=i, column=0, sticky='e', padx=4, pady=4)
                 b = Button(self.task_frame, image=self.im_moins, padding=2,
                            command=lambda t=task: self.del_task(t))
-                b.grid(row=i, column=1, sticky='w')
+                b.grid(row=i, column=1, sticky='w', padx=4, pady=4)
                 self._tasks_btns[task] = b
                 self._tasks_btns[CONFIG.options("PomodoroTasks")[0]].state(['!disabled'])
             top.destroy()

@@ -29,9 +29,9 @@ from schedulerlib.messagebox import showerror
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers import SchedulerNotRunningError
 from datetime import datetime, timedelta
-from schedulerlib.constants import ICON48, ICON, PLUS, CONFIG, DOT, JOBSTORE, \
-    DATA_PATH, BACKUP_PATH, SCROLL_ALPHA, active_color, backup, add_trace, \
-    SON, MUTE, CLOSED, OPENED, CLOSED_SEL, OPENED_SEL
+from schedulerlib.constants import ICON48, ICON, IM_PLUS, CONFIG, IM_DOT, JOBSTORE, \
+    DATA_PATH, BACKUP_PATH, IM_SCROLL_ALPHA, active_color, backup, add_trace, \
+    IM_SOUND, IM_MUTE, IM_CLOSED, IM_OPENED, IM_CLOSED_SEL, IM_OPENED_SEL
 from schedulerlib.trayicon import TrayIcon, SubMenu
 from schedulerlib.form import Form
 from schedulerlib.event import Event
@@ -39,6 +39,7 @@ from schedulerlib.widgets import EventWidget, Timer, TaskWidget, Pomodoro, Calen
 from schedulerlib.settings import Settings
 from schedulerlib.ttkwidgets import AutoScrollbar
 from schedulerlib.about import About
+from schedulerlib.eyes import Eyes
 import os
 import shutil
 from pickle import Pickler, Unpickler
@@ -54,15 +55,20 @@ class EventScheduler(Tk):
         logging.info('Start')
         self.protocol("WM_DELETE_WINDOW", self.hide)
         self._visible = BooleanVar(self, False)
+        self.withdraw()
 
         self.icon_img = PhotoImage(master=self, file=ICON48)
         self.iconphoto(True, self.icon_img)
+
         # --- systray icon
         self.icon = TrayIcon(ICON, fallback_icon_path=ICON48)
+
+        # --- menu
         self.menu_widgets = SubMenu(parent=self.icon.menu)
+        self.menu_eyes = Eyes(self.icon.menu, self)
         self.icon.menu.add_checkbutton(label='Manager', command=self.display_hide)
-        self.withdraw()
         self.icon.menu.add_cascade(label=_('Widgets'), menu=self.menu_widgets)
+        self.icon.menu.add_cascade(label=_("Eyes' rest"), menu=self.menu_eyes)
         self.icon.menu.add_command(label=_('Settings'), command=self.settings)
         self.icon.menu.add_separator()
         self.icon.menu.add_command(label=_('About'), command=lambda: About(self))
@@ -117,10 +123,10 @@ class EventScheduler(Tk):
         self.option_add('*Menu.background', bg)
         self.option_add('*Menu.tearOff', False)
         # toggle text
-        self._open_image = PhotoImage(name='img_opened', file=OPENED, master=self)
-        self._closed_image = PhotoImage(name='img_closed', file=CLOSED, master=self)
-        self._open_image_sel = PhotoImage(name='img_opened_sel', file=OPENED_SEL, master=self)
-        self._closed_image_sel = PhotoImage(name='img_closed_sel', file=CLOSED_SEL, master=self)
+        self._open_image = PhotoImage(name='img_opened', file=IM_OPENED, master=self)
+        self._closed_image = PhotoImage(name='img_closed', file=IM_CLOSED, master=self)
+        self._open_image_sel = PhotoImage(name='img_opened_sel', file=IM_OPENED_SEL, master=self)
+        self._closed_image_sel = PhotoImage(name='img_closed_sel', file=IM_CLOSED_SEL, master=self)
         self.style.element_create("toggle", "image", "img_closed",
                                   ("selected", "!disabled", "img_opened"),
                                   ("active", "!selected", "!disabled", "img_closed_sel"),
@@ -135,8 +141,8 @@ class EventScheduler(Tk):
                                             'sticky': 'nswe'})],
                              'sticky': 'nswe'})])
         # toggle sound
-        self._im_son = PhotoImage(master=self, file=SON)
-        self._im_mute = PhotoImage(master=self, file=MUTE)
+        self._im_son = PhotoImage(master=self, file=IM_SOUND)
+        self._im_mute = PhotoImage(master=self, file=IM_MUTE)
         self.style.element_create('mute', 'image', self._im_son,
                                   ('selected', self._im_mute), border=2, sticky='')
         self.style.layout('Mute',
@@ -152,7 +158,7 @@ class EventScheduler(Tk):
         self._im_slider_vert = {}
         self._im_slider_vert_prelight = {}
         self._im_slider_vert_active = {}
-        self._slider_alpha = Image.open(SCROLL_ALPHA)
+        self._slider_alpha = Image.open(IM_SCROLL_ALPHA)
         vmax = self.winfo_rgb('white')[0]
         for widget in ['Events', 'Tasks']:
             bg = CONFIG.get(widget, 'background', fallback='gray10')
@@ -217,7 +223,7 @@ class EventScheduler(Tk):
 
         # --- toolbar
         toolbar = Frame(self)
-        self.img_plus = PhotoImage(master=self, file=PLUS)
+        self.img_plus = PhotoImage(master=self, file=IM_PLUS)
         Button(toolbar, image=self.img_plus, padding=1,
                command=self.add).pack(side="left", padx=4)
         Label(toolbar, text="Filter by").pack(side="left", padx=4)
@@ -459,7 +465,7 @@ class EventScheduler(Tk):
             if state:
                 self._task_var.set(state)
                 if '%' in state:
-                    self._img_dot = PhotoImage(master=self, file=DOT)
+                    self._img_dot = PhotoImage(master=self, file=IM_DOT)
                 else:
                     self._img_dot = tkPhotoImage(master=self)
                 self.menu_task.entryconfigure(1, image=self._img_dot)
@@ -475,7 +481,7 @@ class EventScheduler(Tk):
             self.events[self.right_click_iid]['Task'] = self._task_var.get()
             self.widgets['Tasks'].display_tasks()
             if '%' in self._task_var.get():
-                self._img_dot = PhotoImage(master=self, file=DOT)
+                self._img_dot = PhotoImage(master=self, file=IM_DOT)
             else:
                 self._img_dot = PhotoImage(master=self)
             self.menu_task.entryconfigure(1, image=self._img_dot)
@@ -545,6 +551,7 @@ class EventScheduler(Tk):
 
     def exit(self):
         self.save()
+        self.menu_eyes.quit()
         self.after_cancel(self.after_id)
         try:
             self.scheduler.shutdown()

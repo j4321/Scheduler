@@ -32,16 +32,33 @@ except ValueError:
     APPIND_SUPPORT = 0
 
 
+class ImageMenuItem(Gtk.MenuItem):
+    def __init__(self, label='', image=None):
+        Gtk.MenuItem.__init__(self)
+        self.box = Gtk.Box(spacing=6)
+        self.label = Gtk.Label(label=label)
+        self.image = Gtk.Image()
+        if image is not None:
+            print(image)
+            self.image.set_from_file(image)
+        self.add(self.box)
+        self.box.pack_start(self.image, False, False, 0)
+        self.box.pack_start(self.label, False, False, 0)
+
+        self.set_label = self.label.set_label
+        self.get_label = self.label.get_label
+
+
 class SubMenu(Gtk.Menu):
     def __init__(self, *args, **kwargs):
         Gtk.Menu.__init__(self)
 
-    def add_command(self, label="", command=None):
-        item = Gtk.MenuItem(label=label)
+    def add_command(self, label="", command=None, image=None):
+        item = ImageMenuItem(label=label, image=image)
         self.append(item)
         if command is not None:
             item.connect("activate", lambda *args: command())
-        item.show()
+        item.show_all()
 
     def add_checkbutton(self, label="", command=None):
         item = Gtk.CheckMenuItem(label=label)
@@ -50,12 +67,12 @@ class SubMenu(Gtk.Menu):
             item.connect("activate", lambda *args: command())
         item.show()
 
-    def add_cascade(self, label="", menu=None):
-        item = Gtk.MenuItem(label=label)
+    def add_cascade(self, label="", menu=None, image=None):
+        item = ImageMenuItem(label=label, image=image)
         self.append(item)
         if menu is not None:
             item.set_submenu(menu)
-        item.show()
+        item.show_all()
 
     def add_separator(self):
         sep = Gtk.SeparatorMenuItem()
@@ -83,6 +100,11 @@ class SubMenu(Gtk.Menu):
             except ValueError:
                 raise ValueError("%r not in menu" % index)
             return i
+
+    def set_item_image(self, item, image):
+        item = self.get_children()[self.index(item)]
+        if image is not None:
+            item.image.set_from_file(image)
 
     def get_item_label(self, item):
         return self.get_children()[self.index(item)].get_label()

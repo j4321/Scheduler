@@ -32,12 +32,23 @@ from PIL.ImageTk import PhotoImage
 class SubMenu(tkinter.Menu):
     def __init__(self, *args, parent=None, tearoff=False, **kwarg):
         tkinter.Menu.__init__(self, parent, tearoff=tearoff)
+        self._images = {}
 
-    def add_command(self, label="", command=None):
-        tkinter.Menu.add_command(self, label=label, command=command)
+    def add_command(self, label="", command=None, image=None):
+        img = None
+        if image is not None:
+            img = PhotoImage(file=image, master=self)
+            self._images[str(img)] = img
+        tkinter.Menu.add_command(self, label=label, command=command, image=img,
+                                 compound='left')
 
-    def add_cascade(self, label="", menu=None):
-        tkinter.Menu.add_cascade(self, label=label, menu=menu)
+    def add_cascade(self, label="", menu=None, image=None):
+        img = None
+        if image is not None:
+            img = PhotoImage(file=image, master=self)
+            self._images[str(img)] = img
+        tkinter.Menu.add_cascade(self, label=label, menu=menu, image=img,
+                                 compound='left')
 
     def add_checkbutton(self, label="", command=None):
         tkinter.Menu.add_checkbutton(self, label=label, command=command)
@@ -47,6 +58,18 @@ class SubMenu(tkinter.Menu):
 
     def set_item_label(self, item, label):
         self.entryconfigure(self.index(item), label=label)
+
+    def set_item_image(self, item, image):
+        ind = self.index(item)
+        try:
+            del self._images[self.entrycget(ind, 'image')]
+        except KeyError:
+            pass
+        img = None
+        if image is not None:
+            img = PhotoImage(file=image, master=self)
+            self._images[str(img)] = img
+        self.entryconfigure(ind, image=img)
 
     def set_item_menu(self, item, menu):
         self.entryconfigure(self.index(item), menu=menu)
