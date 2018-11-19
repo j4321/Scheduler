@@ -52,7 +52,7 @@ class Eyes(SubMenu):
             self.set_item_image(0, IM_START)
         else:
             self.is_on = True
-            Popen(["notify-send", "-i", IM_EYE, _("Scheduler"),
+            Popen(["notify-send", "-i", IM_EYE, "Scheduler",
                    _("The eyes' rest script has been launched!")])
             self.set_item_label(0, _('Stop'))
             self.set_item_image(0, IM_STOP)

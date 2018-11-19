@@ -37,7 +37,7 @@ class About(Toplevel):
     """ About diaog """
     def __init__(self, master):
         """ create About dialog """
-        Toplevel.__init__(self, master, class_='Scheduler')
+        Toplevel.__init__(self, master)
 
         self.title(_("About Scheduler"))
         self.image = PhotoImage(file=ICON48, master=self)

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-11-19 23:04+0100\n"
+"POT-Creation-Date: 2018-11-19 23:27+0100\n"
 "PO-Revision-Date: 2015-10-05 22:20+0200\n"
 "Last-Translator: Juliette Monsel <j_4321@protonmail.com>>\n"
 "Language-Team: French\n"
@@ -16,6 +16,58 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: schedulerlib/about.py:42
+msgid "About Scheduler"
+msgstr "À propos de Scheduler"
+
+#: schedulerlib/about.py:49
+msgid "Task scheduling and calendar"
+msgstr "Gestion de tâches et calendrier"
+
+#: schedulerlib/about.py:52 schedulerlib/about.py:76
+msgid "License"
+msgstr "Licence"
+
+#: schedulerlib/about.py:53 schedulerlib/about.py:102
+msgid "Close"
+msgstr "Fermer"
+
+#: schedulerlib/about.py:85
+msgid ""
+"Scheduler is free software: you can redistribute it and/or modify it under "
+"the terms of the GNU General Public License as published by the Free "
+"Software Foundation, either version 3 of the License, or (at your option) "
+"any later version.\n"
+"\n"
+msgstr ""
+"Scheduler est un logiciel libre ; vous pouvez le diffuser et/ou le modifier "
+"suivant les termes de la Licence Publique Générale GNU telle que publiée par "
+"la Free Software Foundation ; soit la version 3 de cette licence, soit (à "
+"votre convenance) une version ultérieure.\n"
+"\n"
+
+#: schedulerlib/about.py:87
+msgid ""
+"Scheduler is distributed in the hope that it will be useful, but WITHOUT ANY "
+"WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS "
+"FOR A PARTICULAR PURPOSE. See the GNU General Public License for more "
+"details.\n"
+"\n"
+msgstr ""
+"Scheduler est diffusé dans l'espoir qu'il sera utile, mais SANS AUCUNE "
+"GARANTIE ; sans même une garantie implicite de COMMERCIALISATION ou "
+"d'ADÉQUATION À UN USAGE PARTICULIER. Voyez la Licence Publique Générale GNU "
+"pour plus de détails.\n"
+"\n"
+
+#: schedulerlib/about.py:89
+msgid ""
+"You should have received a copy of the GNU General Public License along with "
+"this program. If not, see http://www.gnu.org/licenses/."
+msgstr ""
+"Vous devriez avoir reçu une copie de la Licence Publique Générale GNU avec "
+"ce programme. Sinon, consultez http://www.gnu.org/licenses/."
 
 #: schedulerlib/widgets/pomodoro_widget.py:46
 #: schedulerlib/widgets/pomodoro_widget.py:51
@@ -260,8 +312,8 @@ msgid ""
 "Are you sure you want to delete the category {category}? This action cannot "
 "be undone."
 msgstr ""
-"Voulez-vous vraiment supprimer la catégorie {category}? Cette action ne "
-"peut pas être annulée."
+"Voulez-vous vraiment supprimer la catégorie {category}? Cette action ne peut "
+"pas être annulée."
 
 #: schedulerlib/settings/settings.py:441
 #: schedulerlib/settings/pomodoro_params.py:283
@@ -304,8 +356,8 @@ msgid ""
 "Are you sure you want to delete the task {task}? This action cannot be "
 "undone."
 msgstr ""
-"Voulez-vous vraiment supprimer la tâche {task}? Cette action ne "
-"peut pas être annulée."
+"Voulez-vous vraiment supprimer la tâche {task}? Cette action ne peut pas "
+"être annulée."
 
 #: schedulerlib/settings/pomodoro_params.py:314
 #, python-brace-format
@@ -328,15 +380,15 @@ msgstr "Opacité"
 msgid "Sample text"
 msgstr "Exemple de texte"
 
-#: schedulerlib/settings/font.py:91
+#: schedulerlib/settings/font.py:93
 msgid "Bold"
 msgstr "Gras"
 
-#: schedulerlib/settings/font.py:94
+#: schedulerlib/settings/font.py:96
 msgid "Italic"
 msgstr "Italique"
 
-#: schedulerlib/settings/font.py:97
+#: schedulerlib/settings/font.py:99
 msgid "Underline"
 msgstr "Souligné"
 
@@ -451,7 +503,7 @@ msgstr "Non"
 msgid "Status"
 msgstr "État"
 
-#: schedulerlib/eyes.py:55 schedulerlib/eyes.py:76 schedulerlib/eyes.py:79
+#: schedulerlib/eyes.py:55
 msgid "Scheduler"
 msgstr ""
 
@@ -487,133 +539,12 @@ msgid ""
 "command line soundplayer installed on your system. If you do not know, you "
 "can install mpg123."
 msgstr ""
-"La détection automatique du lecteur audio en ligne de commande a échoué. "
-"Si vous voulez entendre les bips entre les sessions de travail et les "
-"pauses, merci de renseignez un lecteur audio en ligne de commande "
-"installé sur votre système. Si vous ne savez pas quoi mettre, vous pouvez "
-"installer mpg123 (linux)."
+"La détection automatique du lecteur audio en ligne de commande a échoué. Si "
+"vous voulez entendre les bips entre les sessions de travail et les pauses, "
+"merci de renseignez un lecteur audio en ligne de commande installé sur votre "
+"système. Si vous ne savez pas quoi mettre, vous pouvez installer mpg123 "
+"(linux)."
 
 #: schedulerlib/constants.py:575
 msgid "Open"
 msgstr "Ouvrir"
-
-#: schedulerlib/about.py:42
-msgid "About Scheduler"
-msgstr "À propos de Scheduler"
-
-#: schedulerlib/about.py:47
-#, python-format
-msgid "Scheduler %(version)s"
-msgstr ""
-
-#: schedulerlib/about.py:49
-msgid "Task scheduling and calendar"
-msgstr "Gestion de tâches et calendrier"
-
-#: schedulerlib/about.py:52 schedulerlib/about.py:76
-msgid "License"
-msgstr "Licence"
-
-#: schedulerlib/about.py:53 schedulerlib/about.py:102
-msgid "Close"
-msgstr "Fermer"
-
-#: schedulerlib/about.py:85
-msgid ""
-"Scheduler is free software: you can redistribute it and/or modify it under "
-"the terms of the GNU General Public License as published by the Free "
-"Software Foundation, either version 3 of the License, or (at your option) "
-"any later version.\n"
-"\n"
-msgstr ""
-"Scheduler est un logiciel libre ; vous pouvez le diffuser et/ou le modifier "
-"suivant les termes de la Licence Publique Générale GNU telle que publiée par "
-"la Free Software Foundation ; soit la version 3 de cette licence, soit (à "
-"votre convenance) une version ultérieure.\n"
-"\n"
-
-#: schedulerlib/about.py:87
-msgid ""
-"Scheduler is distributed in the hope that it will be useful, but WITHOUT ANY "
-"WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS "
-"FOR A PARTICULAR PURPOSE. See the GNU General Public License for more "
-"details.\n"
-"\n"
-msgstr ""
-"Scheduler est diffusé dans l'espoir qu'il sera utile, mais SANS AUCUNE "
-"GARANTIE ; sans même une garantie implicite de COMMERCIALISATION ou "
-"d'ADÉQUATION À UN USAGE PARTICULIER. Voyez la Licence Publique Générale GNU "
-"pour plus de détails.\n"
-"\n"
-
-#: schedulerlib/about.py:89
-msgid ""
-"You should have received a copy of the GNU General Public License along with "
-"this program. If not, see http://www.gnu.org/licenses/."
-msgstr ""
-"Vous devriez avoir reçu une copie de la Licence Publique Générale GNU avec "
-"ce programme. Sinon, consultez http://www.gnu.org/licenses/."
-
-#~ msgid ""
-#~ "The automatic detection of command line soundplayer has failed. If you "
-#~ "want to hear the beep between work sessions and breaks, please give the "
-#~ "name of a command line soundplayer installed on your system. If you do "
-#~ "not know, you can install mpg123 (linux)."
-#~ msgstr ""
-#~ "La détection automatique du lecteur audio en ligne de commande a échoué. "
-#~ "Si vous voulez entendre les bips entre les sessions de travail et les "
-#~ "pauses, merci de renseignez un lecteur audio en ligne de commande "
-#~ "installé sur votre système. Si vous ne savez pas quoi mettre, vous pouvez "
-#~ "installer mpg123 (linux)."
-
-#~ msgid "Remove task"
-#~ msgstr "Supprimer des tâches"
-
-#~ msgid "Statistics"
-#~ msgstr "Statistiques"
-
-#~ msgid "Are you sure you want to delete these tasks?"
-#~ msgstr "Voulez-vous vraiment supprimer cette tâche ?"
-
-#~ msgid ""
-#~ "You should not interrupt your work if you want to be efficient. Do you "
-#~ "still want to suspend the timer?"
-#~ msgstr ""
-#~ "Pour plus d'efficacité, vous ne devriez pas interrompre votre travail. "
-#~ "Voulez-vous toujours mettre le minuteur en pause ?"
-
-#~ msgid "Times:"
-#~ msgstr "Temps :"
-
-#~ msgid "Work: "
-#~ msgstr "Travail : "
-
-#~ msgid "Break: "
-#~ msgstr "Pause : "
-
-#~ msgid "Rest: "
-#~ msgstr "Repos : "
-
-#~ msgid "Family: "
-#~ msgstr "Famille : "
-
-#~ msgid "Size: "
-#~ msgstr "Taille : "
-
-#~ msgid "Language:"
-#~ msgstr "Langue : "
-
-#~ msgid "Sound:"
-#~ msgstr "Son : "
-
-#~ msgid "Audio player: "
-#~ msgstr "Lecteur audio : "
-
-#~ msgid "Background: "
-#~ msgstr "Fond : "
-
-#~ msgid "Text: "
-#~ msgstr "Texte : "
-
-#~ msgid "Statistics:"
-#~ msgstr "Statistiques : "
