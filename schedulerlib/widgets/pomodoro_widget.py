@@ -199,7 +199,6 @@ class Pomodoro(BaseWidget):
             self.geometry("+%s+%s" % (x, y))
 
     def hide(self):
-        self.stats()
         plt.close()
         BaseWidget.hide(self)
 
@@ -226,14 +225,14 @@ class Pomodoro(BaseWidget):
             if last[0] != date.strftime("%d\t%m\t%Y"):
                 with open(chemin, 'a') as fich:
                     fich.write("%s\t%i\n" % (date.strftime("%d\t%m\t%Y"),
-                                             pom * CONFIG.getint("Pomodoro", "work_time")))
+                                             CONFIG.getint("Pomodoro", "work_time")))
             else:
                 # un nombre a déjà été enregistré plus tôt dans la journée
                 # il faut les additioner
                 with open(chemin, 'w') as fich:
                     fich.writelines(stats[:-1])
                     fich.write("%s\t%i\n" % (date.strftime("%d\t%m\t%Y"),
-                                             pom * CONFIG.getint("Pomodoro", "work_time") + int(last[1])))
+                                             CONFIG.getint("Pomodoro", "work_time") + int(last[1])))
 
     def display_stats(self):
         """ affiche les statistiques """
@@ -320,7 +319,6 @@ class Pomodoro(BaseWidget):
         else:
             rep = True
         if rep:
-            self.stats()
             self.pomodori.set(0)
             self.nb_cycles = 0
             self.tps = [CONFIG.getint("Pomodoro", "work_time"), 0]

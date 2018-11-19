@@ -283,9 +283,8 @@ class PomodoroParams(Frame):
 
     def del_task(self, task):
         """ Suppression de tâches """
-        print(task)
         rep = askyesno(_("Confirmation"),
-                       _("Are you sure you want to delete the task {task}? This action cannot be canceled.").format(task=task.capitalize()))
+                       _("Are you sure you want to delete the task {task}? This action cannot be undone.").format(task=task.capitalize()))
         if rep:
             print(CONFIG.options("PomodoroTasks"))
             CONFIG.remove_option("PomodoroTasks", task)

@@ -29,8 +29,8 @@ from .color import ColorFrame
 from .opacity import OpacityFrame
 from .pomodoro_params import PomodoroParams
 from schedulerlib.constants import save_config, CONFIG, LANGUAGES, REV_LANGUAGES, \
-    TOOLKITS, PLUS
-from schedulerlib.messagebox import showerror, showinfo
+    TOOLKITS, PLUS, MOINS
+from schedulerlib.messagebox import showerror, showinfo, askyesno
 from schedulerlib.ttkwidgets import AutoScrollbar
 from PIL.ImageTk import PhotoImage
 
@@ -42,6 +42,9 @@ class Settings(tk.Toplevel):
         self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
         self.minsize(574, 565)
+
+        self._im_plus = PhotoImage(master=self, file=PLUS)
+        self._im_moins = PhotoImage(master=self, file=MOINS)
 
         frame = ttk.Frame(self, style='border.TFrame', relief='sunken',
                           border=1)
@@ -201,7 +204,6 @@ class Settings(tk.Toplevel):
         can.grid(row=0, column=0, sticky='ewns')
         scroll.grid(row=0, column=1, sticky='ns')
 
-        self._im_plus = PhotoImage(master=self, file=PLUS)
         ttk.Button(categories, image=self._im_plus,
                    command=self.add_cat).grid(row=1, column=0, sticky='w', pady=4)
 
@@ -214,10 +216,13 @@ class Settings(tk.Toplevel):
             col = CONFIG.get('Categories', cat).split(', ')
             bg = ColorFrame(self.cat_frame, col[1].strip(), _('Background'))
             fg = ColorFrame(self.cat_frame, col[0].strip(), _('Foreground'))
-            self.cats[cat] = [l, bg, fg]
+            b = ttk.Button(self.cat_frame, image=self._im_moins,
+                           command=lambda c=cat: self.del_cat(c))
+            self.cats[cat] = [l, bg, fg, b]
             l.grid(row=i, column=0, sticky='e', padx=4, pady=4)
             bg.grid(row=i, column=1, sticky='e', padx=4, pady=4)
             fg.grid(row=i, column=2, sticky='e', padx=4, pady=4)
+            b.grid(row=i, column=3, sticky='e', padx=4, pady=4)
         self.update_idletasks()
         can.configure(width=self.cat_frame.winfo_reqwidth())
         can.configure(scrollregion=can.bbox('all'))
@@ -401,6 +406,16 @@ class Settings(tk.Toplevel):
                  _("The GUI Toolkit setting will take effect after restarting the application"),
                  parent=self)
 
+    def del_cat(self, cat):
+        rep = askyesno(_("Confirmation"),
+                       _("Are you sure you want to delete the category {category}? This action cannot be undone.").format(category=cat))
+        if rep:
+            CONFIG.remove_option("Categories", cat)
+            for w in self.cats[cat]:
+                w.destroy()
+            del self.cats[cat]
+            save_config()
+
     def add_cat(self):
 
         def ok(event):
@@ -415,10 +430,13 @@ class Settings(tk.Toplevel):
                 l = ttk.Label(self.cat_frame, text=cat, style='subtitle.TLabel')
                 bg = ColorFrame(self.cat_frame, col[1].strip(), _('Background'))
                 fg = ColorFrame(self.cat_frame, col[0].strip(), _('Foreground'))
-                self.cats[cat] = [l, bg, fg]
+                b = ttk.Button(self.cat_frame, image=self._im_moins,
+                               command=lambda c=cat: self.del_cat(c))
+                self.cats[cat] = [l, bg, fg, b]
                 l.grid(row=i, column=0, sticky='e', padx=4, pady=4)
                 bg.grid(row=i, column=1, sticky='e', padx=4, pady=4)
                 fg.grid(row=i, column=2, sticky='e', padx=4, pady=4)
+                b.grid(row=i, column=3, sticky='e', padx=4, pady=4)
             top.destroy()
 
         top = tk.Toplevel(self)
@@ -453,7 +471,7 @@ class Settings(tk.Toplevel):
         for name, widget in self.cal_colors.items():
             CONFIG.set("Calendar", name, widget.get_color())
 
-        for cat, (l, bg, fg) in self.cats.items():
+        for cat, (l, bg, fg, b) in self.cats.items():
             CONFIG.set("Categories", cat, "{}, {}".format(fg.get_color(), bg.get_color()))
 
         # --- Events

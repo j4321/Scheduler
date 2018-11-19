@@ -539,7 +539,6 @@ class EventScheduler(Tk):
     def save(self):
         logging.info('Save event database')
         data = [ev.to_dict() for ev in self.events.values()]
-        self.widgets['Pomodoro'].stats()
         with open(DATA_PATH, 'wb') as file:
             pick = Pickler(file)
             pick.dump(data)
