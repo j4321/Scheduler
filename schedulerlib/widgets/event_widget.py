@@ -38,7 +38,7 @@ class EventWidget(BaseWidget):
         self.columnconfigure(0, weight=1)
 
         # --- elements
-        label = Label(self, text='EVENTS', style='title.Events.TLabel',
+        label = Label(self, text=_('Events').upper(), style='title.Events.TLabel',
                       anchor='center')
         label.grid(row=0, columnspan=2, pady=4, sticky='ew')
         Separator(self, style='Events.TSeparator').grid(row=1, columnspan=2, sticky='we')

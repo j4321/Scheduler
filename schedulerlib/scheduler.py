@@ -115,8 +115,53 @@ class EventScheduler(Tk):
         self.style.configure('white.TLabel', background='white')
         self.style.configure('border.TFrame', background='white', border=1, relief='sunken')
         self.style.configure("Treeview.Heading", font="TkDefaultFont")
-        self.style.map("TCombobox", fieldbackground=[("readonly", "white")],
-                       foreground=[("readonly", "black")])
+        # self.style.map("TCombobox", fieldbackground=[("readonly", "white")],
+                       # foreground=[("readonly", "black")])
+        bgc = self.style.lookup("TButton", "background")
+        bga = self.style.lookup("TButton", "background", ("active",))
+        self.style.map('TCombobox',
+                       fieldbackground=[('readonly', 'white'),
+                                        ('readonly', 'focus', 'white')],
+                       background=[("disabled", "active", "readonly", bgc),
+                                   ("!disabled", "active", "readonly", bga)],
+                       foreground=[('readonly', '!disabled', 'black'),
+                                   ('readonly', '!disabled', 'focus', 'black'),
+                                   ('readonly', 'disabled', 'gray40'),
+                                   ('readonly', 'disabled', 'focus', 'gray40')],
+                       arrowcolor=[("disabled", "gray40")])
+        self.style.map('DateEntry', arrowcolor=[("disabled", "gray40")])
+        self.style.configure('cal.TFrame', background='#424242')
+        self.style.configure('month.TLabel', background='#424242', foreground='white')
+        self.style.configure('R.TButton', background='#424242',
+                             arrowcolor='white', bordercolor='#424242',
+                             lightcolor='#424242', darkcolor='#424242')
+        self.style.configure('L.TButton', background='#424242',
+                             arrowcolor='white', bordercolor='#424242',
+                             lightcolor='#424242', darkcolor='#424242')
+        active_bg = self.style.lookup('TEntry', 'selectbackground', ('focus',))
+        self.style.map('R.TButton', background=[('active', active_bg)],
+                       bordercolor=[('active', active_bg)],
+                       darkcolor=[('active', active_bg)],
+                       lightcolor=[('active', active_bg)])
+        self.style.map('L.TButton', background=[('active', active_bg)],
+                       bordercolor=[('active', active_bg)],
+                       darkcolor=[('active', active_bg)],
+                       lightcolor=[('active', active_bg)])
+        self.style.configure('txt.TFrame', background='white')
+        self.style.layout('down.TButton',
+                          [('down.TButton.downarrow',
+                            {'side': 'right', 'sticky': 'ns'})])
+        self.style.map('TRadiobutton',
+                       indicatorforeground=[('disabled', 'gray40')])
+        self.style.map('TCheckbutton',
+                       indicatorforeground=[('disabled', 'gray40')],
+                       indicatorbackground=[('pressed', '#dcdad5'),
+                                            ('!disabled', 'alternate', 'white'),
+                                            ('disabled', 'alternate', '#a0a0a0'),
+                                            ('disabled', '#dcdad5')])
+        self.style.map('down.TButton',
+                       arrowcolor=[("disabled", "gray40")])
+
         self.style.map('TMenubutton',
                        arrowcolor=[('disabled', self.style.lookup('TMenubutton', 'foreground', ['disabled']))])
         bg = self.style.lookup('TFrame', 'background', default='#ececec')
@@ -228,11 +273,11 @@ class EventScheduler(Tk):
         self.img_plus = PhotoImage(master=self, file=IM_PLUS)
         Button(toolbar, image=self.img_plus, padding=1,
                command=self.add).pack(side="left", padx=4)
-        Label(toolbar, text="Filter by").pack(side="left", padx=4)
+        Label(toolbar, text=_("Filter by")).pack(side="left", padx=4)
         # --- TODO: add filter by start date (after date)
         self.filter_col = Combobox(toolbar, state="readonly",
                                    # values=("",) + self.tree.cget('columns')[1:],
-                                   values=("", "Category"),
+                                   values=("", _("Category")),
                                    exportselection=False)
         self.filter_col.pack(side="left", padx=4)
         self.filter_val = Combobox(toolbar, state="readonly",
@@ -300,9 +345,9 @@ class EventScheduler(Tk):
         self._setup_style()
 
         for item, widget in self.widgets.items():
-            self.menu_widgets.add_checkbutton(label=item,
+            self.menu_widgets.add_checkbutton(label=_(item),
                                               command=lambda i=item: self.display_hide_widget(i))
-            self.menu_widgets.set_item_value(item, widget.variable.get())
+            self.menu_widgets.set_item_value(_(item), widget.variable.get())
             add_trace(widget.variable, 'write',
                       lambda *args, i=item: self._menu_widgets_trace(i))
 
@@ -390,10 +435,10 @@ class EventScheduler(Tk):
             self.tree.selection_remove(*self.tree.selection())
 
     def _menu_widgets_trace(self, item):
-        self.menu_widgets.set_item_value(item, self.widgets[item].variable.get())
+        self.menu_widgets.set_item_value(_(item), self.widgets[item].variable.get())
 
     def display_hide_widget(self, item):
-        value = self.menu_widgets.get_item_value(item)
+        value = self.menu_widgets.get_item_value(_(item))
         if value:
             self.widgets[item].show()
         else:

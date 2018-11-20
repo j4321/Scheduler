@@ -39,7 +39,7 @@ class TaskWidget(BaseWidget):
         self.hide_completed = CONFIG.getboolean('Tasks', 'hide_completed')
 
         # --- elements
-        label = Label(self, text='TASKS', style='title.Tasks.TLabel',
+        label = Label(self, text=_('Tasks').upper(), style='title.Tasks.TLabel',
                       anchor='center')
         label.grid(row=0, columnspan=2, pady=4, sticky='ew')
         Separator(self, style='Tasks.TSeparator').grid(row=1, columnspan=2, sticky='we')

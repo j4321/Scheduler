@@ -25,7 +25,7 @@ Task editor
 from tkinter import Toplevel, PhotoImage, Text, Spinbox, BooleanVar, StringVar
 from tkinter.ttk import Entry, Label, Button, Frame, Style, Combobox
 from tkinter.ttk import Radiobutton, Checkbutton, Notebook
-from schedulerlib.constants import IM_BELL, IM_MOINS, CONFIG
+from schedulerlib.constants import IM_BELL, IM_MOINS, CONFIG, TASK_REV_TRANSLATION
 from schedulerlib.ttkcalendar import DateEntry, get_calendar
 from schedulerlib.ttkwidgets import LabelFrame
 from datetime import timedelta, time, datetime
@@ -37,7 +37,7 @@ def only_nb(text):
 
 class Form(Toplevel):
     def __init__(self, master, event, new=False):
-        Toplevel.__init__(self, master, class_='Scheduler')
+        Toplevel.__init__(self, master)
         self.minsize(410, 402)
         if master.winfo_ismapped():
             self.transient(master)
@@ -47,86 +47,40 @@ class Form(Toplevel):
 
         self.event = event
         if new:
-            self.title('New Event')
+            self.title(_('New Event'))
         else:
-            self.title('Edit Event')
+            self.title(_('Edit Event'))
         self._new = new
         self._task = BooleanVar(self, bool(event['Task']))
         self._whole_day = BooleanVar(self, event['WholeDay'])
 
         # --- style
-        self.style = Style(self)
-        self.style.theme_use('clam')
-        bgc = self.style.lookup("TButton", "background")
-        bga = self.style.lookup("TButton", "background", ("active",))
-        self.style.map('TCombobox',
-                       fieldbackground=[('readonly', 'white'),
-                                        ('readonly', 'focus', 'white')],
-                       background=[("disabled", "active", "readonly", bgc),
-                                   ("!disabled", "active", "readonly", bga)],
-                       foreground=[('readonly', '!disabled', 'black'),
-                                   ('readonly', '!disabled', 'focus', 'black'),
-                                   ('readonly', 'disabled', 'gray40'),
-                                   ('readonly', 'disabled', 'focus', 'gray40')],
-                       arrowcolor=[("disabled", "gray40")])
-        self.style.map('DateEntry',
-                       arrowcolor=[("disabled", "gray40")])
-        self.style.configure('cal.TFrame', background='#424242')
-        self.style.configure('month.TLabel', background='#424242', foreground='white')
-        self.style.configure('R.TButton', background='#424242',
-                             arrowcolor='white', bordercolor='#424242',
-                             lightcolor='#424242', darkcolor='#424242')
-        self.style.configure('L.TButton', background='#424242',
-                             arrowcolor='white', bordercolor='#424242',
-                             lightcolor='#424242', darkcolor='#424242')
-        active_bg = self.style.lookup('TEntry', 'selectbackground', ('focus',))
-        self.style.map('R.TButton', background=[('active', active_bg)],
-                       bordercolor=[('active', active_bg)],
-                       darkcolor=[('active', active_bg)],
-                       lightcolor=[('active', active_bg)])
-        self.style.map('L.TButton', background=[('active', active_bg)],
-                       bordercolor=[('active', active_bg)],
-                       darkcolor=[('active', active_bg)],
-                       lightcolor=[('active', active_bg)])
-        self.style.configure('txt.TFrame', background='white')
-        self.style.layout('down.TButton',
-                          [('down.TButton.downarrow',
-                            {'side': 'right', 'sticky': 'ns'})])
-        self.style.map('TRadiobutton',
-                       indicatorforeground=[('disabled', 'gray40')])
-        self.style.map('TCheckbutton',
-                       indicatorforeground=[('disabled', 'gray40')],
-                       indicatorbackground=[('pressed', '#dcdad5'),
-                                            ('!disabled', 'alternate', 'white'),
-                                            ('disabled', 'alternate', '#a0a0a0'),
-                                            ('disabled', '#dcdad5')])
-        self.style.map('down.TButton',
-                       arrowcolor=[("disabled", "gray40")])
-        self.configure(bg=self.style.lookup('TFrame', 'background'))
+        style = Style(self)
+        active_bg = style.lookup('TEntry', 'selectbackground', ('focus',))
 
         self.alarms = []
 
         notebook = Notebook(self)
         notebook.pack(fill='both', expand=True)
-        Button(self, text='Ok', command=self.ok).pack(pady=(10, 6), padx=4)
+        Button(self, text=_('Ok'), command=self.ok).pack(pady=(10, 6), padx=4)
 
         # --- event settings
         frame_event = Frame(notebook)
-        notebook.add(frame_event, text='Event', sticky='eswn', padding=4)
+        notebook.add(frame_event, text=_('Event'), sticky='eswn', padding=4)
         frame_event.columnconfigure(1, weight=1)
         frame_event.rowconfigure(5, weight=1)
 
         self.img_moins = PhotoImage(master=self, file=IM_MOINS)
         self.img_bell = PhotoImage(master=self, file=IM_BELL)
-        Label(frame_event, text='Summary').grid(row=0, column=0, padx=4, pady=6, sticky='e')
-        Label(frame_event, text='Place').grid(row=1, column=0, padx=4, pady=6, sticky='e')
-        Label(frame_event, text='Start').grid(row=2, column=0, padx=4, pady=6, sticky='e')
-        self._end_label = Label(frame_event, text='End')
+        Label(frame_event, text=_('Summary')).grid(row=0, column=0, padx=4, pady=6, sticky='e')
+        Label(frame_event, text=_('Place')).grid(row=1, column=0, padx=4, pady=6, sticky='e')
+        Label(frame_event, text=_('Start')).grid(row=2, column=0, padx=4, pady=6, sticky='e')
+        self._end_label = Label(frame_event, text=_('End'))
         self._end_label.grid(row=3, column=0, padx=4, pady=6, sticky='e')
         frame_task = Frame(frame_event)
         frame_task.grid(row=4, column=1, padx=4, pady=6, sticky='w')
-        Label(frame_event, text='Description').grid(row=5, column=0, padx=4, pady=6, sticky='e')
-        Label(frame_event, text='Category').grid(row=6, column=0, padx=4, pady=6, sticky='e')
+        Label(frame_event, text=_('Description')).grid(row=5, column=0, padx=4, pady=6, sticky='e')
+        Label(frame_event, text=_('Category')).grid(row=6, column=0, padx=4, pady=6, sticky='e')
         Button(frame_event, image=self.img_bell, command=self.add_reminder,
                padding=0).grid(row=7, column=0, padx=4, pady=6, sticky='en')
 
@@ -157,24 +111,24 @@ class Form(Toplevel):
         self.frame_alarms.grid(row=7, column=1, sticky='w')
 
         # --- *--- task
-        Checkbutton(frame_task, text='Task', command=self._change_label,
+        Checkbutton(frame_task, text=_('Task'), command=self._change_label,
                     variable=self._task).pack(side='left')
 
         self.task_progress = Combobox(frame_task, state='readonly', width=9,
-                                      values=('Pending', 'In Progress',
-                                              'Completed', 'Cancelled'))
+                                      values=(_('Pending'), _('In Progress'),
+                                              _('Completed'), _('Cancelled')))
         self.task_progress.pack(side='left', padx=(8, 4))
         self.in_progress = Combobox(frame_task, state='readonly', width=5,
                                     values=['{}%'.format(i) for i in range(0, 110, 10)])
         self.in_progress.pack(side='left', padx=4)
         if not event['Task']:
-            self.task_progress.set('Pending')
+            self.task_progress.set(_('Pending'))
             self.in_progress.set('0%')
         elif '%' in event['Task']:
-            self.task_progress.set('In Progress')
+            self.task_progress.set(_('In Progress'))
             self.in_progress.set(event['Task'])
         else:
-            self.task_progress.set(event['Task'])
+            self.task_progress.set(_(event['Task']))
             self.in_progress.set('0%')
 
         # calendar settings
@@ -203,7 +157,7 @@ class Form(Toplevel):
         self.start_hour.pack(side='left', padx=(4, 0))
         Label(frame_start, text=':').pack(side='left')
         self.start_min.pack(side='left', padx=(0, 4))
-        Checkbutton(frame_start, text="whole day", variable=self._whole_day,
+        Checkbutton(frame_start, text=_("whole day"), variable=self._whole_day,
                     command=self._toggle_whole_day).pack(side='left', padx=4)
 
         # --- *--- end date
@@ -235,7 +189,7 @@ class Form(Toplevel):
 
         # --- repetition settings
         frame_rep = Frame(notebook)
-        notebook.add(frame_rep, text='Repetition', padding=4, sticky='eswn')
+        notebook.add(frame_rep, text=_('Repetition'), padding=4, sticky='eswn')
         frame_rep.columnconfigure(0, weight=1)
         frame_rep.columnconfigure(1, weight=1)
         frame_rep.rowconfigure(1, weight=1)
@@ -246,18 +200,18 @@ class Form(Toplevel):
         repeat.update(self.event['Repeat'])
 
         self._repeat_freq = StringVar(self, repeat['Frequency'])
-        Checkbutton(frame_rep, text='Repeat event', variable=self._repeat,
+        Checkbutton(frame_rep, text=_('Repeat event'), variable=self._repeat,
                     command=self._toggle_rep).grid(row=0, column=0, columnspan=2,
                                                    padx=4, pady=6, sticky='w')
         # --- *--- Frequency
-        frame_freq = LabelFrame(frame_rep, text='Frequency')
+        frame_freq = LabelFrame(frame_rep, text=_('Frequency'))
         frame_freq.grid(row=1, column=0, sticky='eswn', padx=(0, 3))
-        self._lfreq = Label(frame_freq, text='Every:')
+        self._lfreq = Label(frame_freq, text=_('Every:'))
         self._lfreq.grid(row=0, column=0, padx=4, pady=2, sticky='e')
 
         self._freqs = []
         for i, val in enumerate(['Year', 'Month', 'Week']):
-            r = Radiobutton(frame_freq, text=val, variable=self._repeat_freq,
+            r = Radiobutton(frame_freq, text=_(val), variable=self._repeat_freq,
                             value=val.lower(), command=self._toggle_wd)
             r.grid(row=i, column=1, padx=4, pady=2, sticky='nw')
             self._freqs.append(r)
@@ -276,16 +230,16 @@ class Form(Toplevel):
             self._week_days[int(d)].state(('selected',))
 
         # --- *--- Limit
-        frame_lim = LabelFrame(frame_rep, text='Limit')
+        frame_lim = LabelFrame(frame_rep, text=_('Limit'))
         frame_lim.grid(row=1, column=1, sticky='eswn', padx=(3, 0))
         self._repeat_lim = StringVar(self, repeat['Limit'])
 
         # always
-        r1 = Radiobutton(frame_lim, text='Always', value='always',
+        r1 = Radiobutton(frame_lim, text=_('Always'), value='always',
                          variable=self._repeat_lim, command=self._toggle_lim)
         r1.grid(row=0, column=0, sticky='w')
         # until
-        r2 = Radiobutton(frame_lim, text='Until', value='until',
+        r2 = Radiobutton(frame_lim, text=_('Until'), value='until',
                          variable=self._repeat_lim, command=self._toggle_lim)
         r2.grid(row=1, column=0, sticky='w')
         until_date = repeat['EndDate']
@@ -299,7 +253,7 @@ class Form(Toplevel):
                               padx=(4, 10), pady=2)
 
         # after
-        r3 = Radiobutton(frame_lim, text='After', value='after',
+        r3 = Radiobutton(frame_lim, text=_('After'), value='after',
                          variable=self._repeat_lim, command=self._toggle_lim)
         r3.grid(row=2, column=0, sticky='w')
         frame_after = Frame(frame_lim, style='txt.TFrame', relief='sunken', border=1)
@@ -311,7 +265,7 @@ class Form(Toplevel):
         self.s_after.delete(0, 'end')
         self.s_after.insert(0, str(repeat['NbTimes']))
         frame_after.grid(row=2, column=1, padx=4, pady=2, sticky='w')
-        self._llim = Label(frame_lim, text='times')
+        self._llim = Label(frame_lim, text=_('times'))
         self._llim.grid(row=2, column=2, padx=0, pady=2, sticky='w')
 
         self._rb_lim = [r1, r2, r3]
@@ -397,11 +351,11 @@ class Form(Toplevel):
         if self._task.get():
             self.task_progress.state(('!disabled',))
             self._toggle_in_progress()
-            self._end_label.configure(text='Deadline')
+            self._end_label.configure(text=_('Deadline'))
         else:
             self.task_progress.state(('disabled',))
             self.in_progress.state(('disabled',))
-            self._end_label.configure(text='End')
+            self._end_label.configure(text=_('End'))
 
     def _on_move(self, event):
         self.start_cal.withdraw()
@@ -487,7 +441,7 @@ class Form(Toplevel):
 
         self.alarms.append((when, what))
 
-        Label(rem, text='Reminder:').pack(side='left', padx=4, pady=4)
+        Label(rem, text=_('Reminder:')).pack(side='left', padx=4, pady=4)
         frame_when.pack(side='left', pady=4, padx=4)
         what.pack(side='left', pady=4, padx=4)
         Button(rem, image=self.img_moins, padding=0,
@@ -509,10 +463,10 @@ class Form(Toplevel):
             self.event['Task'] = False
         else:
             prog = self.task_progress.get()
-            if prog == 'In Progress':
+            if prog == _('In Progress'):
                 self.event['Task'] = self.in_progress.get()
             else:
-                self.event['Task'] = prog
+                self.event['Task'] = TASK_REV_TRANSLATION[prog]
 
         self.event["WholeDay"] = self._whole_day.get()
 

@@ -39,7 +39,7 @@ class Timer(BaseWidget):
                               inactiveselectbackground=self.style.lookup('TEntry', 'selectbackground'))
         self.intervals.tag_configure('center', justify='center')
         self.intervals.configure(state='disabled')
-        self.b_interv = Button(self, text='Interval', style='timer.TButton',
+        self.b_interv = Button(self, text=_('Interval'), style='timer.TButton',
                                command=self.add_interval)
         self.b_interv.state(('disabled',))
 
@@ -50,7 +50,7 @@ class Timer(BaseWidget):
 
         # --- placement
         self.display.grid(row=0, columnspan=2, sticky='ew', padx=8, pady=(4, 0))
-        Label(self, text='Intervals:',
+        Label(self, text=_('Intervals:'),
               style='timer.TLabel').grid(row=1, columnspan=2, sticky='w', padx=4)
         self.intervals.grid(row=2, columnspan=2, sticky='eswn')
         self.b_interv.grid(row=3, columnspan=2, sticky='ew')
