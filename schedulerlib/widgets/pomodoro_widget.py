@@ -254,12 +254,13 @@ class Pomodoro(BaseWidget):
     def go(self):
         if self.on:
             self.on = False
+            self.choose_task.state(["!disabled"])
             self.b_go.configure(image=self.im_go)
             if self.activite.get() == _("Work"):
                 self.stop()
         else:
             self.on = True
-            self.choose_task.config(state="disabled")
+            self.choose_task.state(["disabled"])
             self.b_go.configure(image=self.im_stop)
             self.after(1000, self.affiche)
 
@@ -285,7 +286,6 @@ class Pomodoro(BaseWidget):
             self.style.configure('timer.pomodoro.TLabel',
                                  background=self.background[act],
                                  foreground=self.foreground[act])
-            self.choose_task.config(state="normal")
         else:
             self.on = True
             self.affiche()
