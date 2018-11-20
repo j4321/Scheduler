@@ -6,7 +6,7 @@ Created on Thu Jun 15 13:02:41 2017
 @author: juliette
 """
 
-from tkinter import Menu, PhotoImage, Text
+from tkinter import PhotoImage, Text
 from tkinter.ttk import Button, Label, Sizegrip
 from schedulerlib.constants import IM_PLAY, IM_PAUSE, STOP, CONFIG, active_color
 from .base_widget import BaseWidget
@@ -76,6 +76,10 @@ class Timer(BaseWidget):
         r, g, b = self.winfo_rgb(bg)
         active_bg = active_color(r * 255 / 65535, g * 255 / 65535, b * 255 / 65535)
         self.configure(bg=bg)
+        self.menu.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
+                            activebackground=active_bg)
+        self.menu_pos.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
+                                activebackground=active_bg)
         self.display.configure(font=CONFIG.get('Timer', 'font_time'))
         self.intervals.configure(bg=bg, fg=fg,
                                  font=CONFIG.get('Timer', 'font_intervals'))
@@ -88,30 +92,19 @@ class Timer(BaseWidget):
         self.style.map('timer.TButton', background=[('disabled', bg),
                                                     ('!disabled', 'active', active_bg)])
 
-    def _populate_menu(self):
-        menu_pos = Menu(self.menu)
-        menu_pos.add_radiobutton(label='Normal', value='normal',
-                                 variable=self._position, command=self._change_pos)
-        menu_pos.add_radiobutton(label='Above', value='above',
-                                 variable=self._position, command=self._change_pos)
-        menu_pos.add_radiobutton(label='Below', value='below',
-                                 variable=self._position, command=self._change_pos)
-        self.menu.add_cascade(label='Position', menu=menu_pos)
-        self.menu.add_command(label='Hide', command=self.hide)
-
     def _on_enter(self, event=None):
         self._corner.state(('active',))
 
     def _on_leave(self, event=None):
         self._corner.state(('!active',))
 
-    def _change_pos(self):
+    def show(self):
         self.withdraw()
         if self._position.get() == 'above':
             self.overrideredirect(True)
         else:
             self.overrideredirect(False)
-        self.deiconify()
+        BaseWidget.show(self)
 
     def _run(self):
         if self._on:

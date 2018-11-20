@@ -25,7 +25,7 @@ Base desktop widget class
 
 from tkinter import Toplevel, BooleanVar, StringVar, Menu
 from tkinter.ttk import Style
-from schedulerlib.constants import CONFIG, save_config
+from schedulerlib.constants import CONFIG, save_config, active_color
 from ewmh import EWMH
 
 
@@ -52,7 +52,7 @@ class BaseWidget(Toplevel):
         self.variable = BooleanVar(self, False)
 
         # --- menu
-        self.menu = Menu(self)
+        self.menu = Menu(self, relief='sunken', activeborderwidth=0)
         self._populate_menu()
 
         # --- geometry
@@ -71,19 +71,27 @@ class BaseWidget(Toplevel):
             self.show()
 
     def _populate_menu(self):
-        menu_pos = Menu(self.menu)
-        menu_pos.add_radiobutton(label='Normal', value='normal',
-                                 variable=self._position, command=self.show)
-        menu_pos.add_radiobutton(label='Above', value='above',
-                                 variable=self._position, command=self.show)
-        menu_pos.add_radiobutton(label='Below', value='below',
-                                 variable=self._position, command=self.show)
-        self.menu.add_cascade(label='Position', menu=menu_pos)
+        self.menu_pos = Menu(self.menu, relief='sunken', activeborderwidth=0)
+        self.menu_pos.add_radiobutton(label='Normal', value='normal',
+                                      variable=self._position, command=self.show)
+        self.menu_pos.add_radiobutton(label='Above', value='above',
+                                      variable=self._position, command=self.show)
+        self.menu_pos.add_radiobutton(label='Below', value='below',
+                                      variable=self._position, command=self.show)
+        self.menu.add_cascade(label='Position', menu=self.menu_pos)
         self.menu.add_command(label='Hide', command=self.hide)
 
     def update_style(self):
+        bg = CONFIG.get(self.name, 'background', fallback='grey10')
+        fg = CONFIG.get(self.name, 'foreground', fallback='white')
+        r, g, b = self.winfo_rgb(bg)
+        active_bg = active_color(r * 255 / 65535, g * 255 / 65535, b * 255 / 65535)
         self.attributes('-alpha', CONFIG.get(self.name, 'alpha', fallback=0.85))
-        self.configure(bg=CONFIG.get(self.name, 'background', fallback='grey10'))
+        self.configure(bg=bg)
+        self.menu.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
+                            activebackground=active_bg)
+        self.menu_pos.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
+                                activebackground=active_bg)
 
     def _on_configure(self, event):
         CONFIG.set(self.name, 'geometry', self.geometry())
@@ -102,7 +110,6 @@ class BaseWidget(Toplevel):
             pos = self._position.get()
             for w in self.ewmh.getClientList():
                 if w.get_wm_name() == self.title():
-                    found = True
                     if pos == 'above':
                         self.ewmh.setWmState(w, 1, '_NET_WM_STATE_ABOVE')
                         self.ewmh.setWmState(w, 0, '_NET_WM_STATE_BELOW')
