@@ -206,6 +206,7 @@ class PomodoroParams(Frame):
         can.create_window(0, 0, anchor='nw', window=self.task_frame)
 
         tasks = CONFIG.options("PomodoroTasks")
+        tasks.sort()
         cmap = [CONFIG.get("PomodoroTasks", task) for task in tasks]
         self.tasks = {}
         self._tasks_btns = {}

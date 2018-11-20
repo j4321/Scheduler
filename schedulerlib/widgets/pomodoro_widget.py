@@ -137,6 +137,7 @@ class Pomodoro(BaseWidget):
     def update_style(self):
         self.menu_tasks.delete(0, 'end')
         tasks = [t.capitalize() for t in CONFIG.options('PomodoroTasks')]
+        tasks.sort()
         for task in tasks:
             self.menu_tasks.add_radiobutton(label=task, value=task,
                                             variable=self.task)
