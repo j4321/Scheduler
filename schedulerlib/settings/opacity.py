@@ -23,6 +23,7 @@ Settings
 """
 
 from tkinter import ttk
+from schedulerlib.ttkwidgets import ScaleEntry
 
 
 class OpacityFrame(ttk.Frame):
@@ -30,20 +31,13 @@ class OpacityFrame(ttk.Frame):
         ttk.Frame.__init__(self, master, **kw)
 
         self.columnconfigure(1, weight=1)
-        self.opacity_scale = ttk.Scale(self, orient="horizontal", length=300,
-                                       from_=0, to=100,
-                                       value=int(value * 100),
-                                       command=self.display_label)
-        self.opacity_label = ttk.Label(self,
-                                       text="{val}%".format(val=self.opacity_scale.get()))
+        self.opacity_scale = ScaleEntry(self, orient="horizontal", scalewidth=300,
+                                        from_=0, to=100, entryscalepad=10,
+                                        value=int(value * 100))
         ttk.Label(self, style='title.TLabel',
                   text=_("Opacity")).grid(row=0, column=0, sticky="w", padx=(0, 4), pady=4)
-        self.opacity_scale.grid(row=0, column=1, padx=(4, 50), pady=4)
-        self.opacity_label.place(in_=self.opacity_scale, relx=1, rely=0.5,
-                                 anchor="w", bordermode="outside")
-
-    def display_label(self, value):
-        self.opacity_label.configure(text=" {val} %".format(val=int(float(value))))
+        self.opacity_scale.grid(row=0, column=1, padx=4, pady=4)
+        ttk.Label(self, text='%').grid(row=0, column=2, sticky="w", padx=(0, 4), pady=4)
 
     def get_opacity(self):
-        return int(float(self.opacity_scale.get())) / 100
+        return int(float(self.opacity_scale.value)) / 100
