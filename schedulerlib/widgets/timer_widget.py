@@ -120,6 +120,7 @@ class Timer(BaseWidget):
                 self._time[2] = 0
                 self._time[1] += 1
                 if self._time[1] == 60:
+                    self._time[1] = 0
                     self._time[0] += 1
             self.display.configure(text='%i:%.2i:%.2i' % tuple(self._time))
             self._after_id = self.after(1000, self._run)
