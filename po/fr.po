@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-11-20 15:40+0100\n"
+"POT-Creation-Date: 2018-11-21 23:08+0100\n"
 "PO-Revision-Date: 2018-11-20 16:17+0100\n"
 "Last-Translator: Unknown <juliette@Juliette-MacBook>\n"
 "Language-Team: French\n"
@@ -17,82 +17,225 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: scheduler.py:25 schedulerlib/settings/pomodoro_params.py:284
-#: schedulerlib/settings/pomodoro_params.py:314
-#: schedulerlib/settings/settings.py:441 schedulerlib/navtoolbar.py:96
-msgid "Error"
-msgstr "Erreur"
+#: schedulerlib/about.py:39
+msgid "About Scheduler"
+msgstr "À propos de Scheduler"
 
-#: scheduler.py:26
-#, python-brace-format
-msgid "Scheduler is already running. If not deletes {pidfile}"
-msgstr "Scheduler est déjà lancé, si ce n'est pas le cas, supprimez {pidfile}"
+#: schedulerlib/about.py:45
+msgid "Task scheduling and calendar"
+msgstr "Gestion de tâches et calendrier"
 
-#: schedulerlib/scheduler.py:69 schedulerlib/scheduler.py:412
-#: schedulerlib/scheduler.py:415 schedulerlib/scheduler.py:418
-msgid "Manager"
-msgstr "Gestionnaire"
+#: schedulerlib/about.py:48 schedulerlib/about.py:72
+msgid "License"
+msgstr "Licence"
 
-#: schedulerlib/scheduler.py:70
-msgid "Widgets"
-msgstr "Widgets"
+#: schedulerlib/about.py:49 schedulerlib/about.py:98
+msgid "Close"
+msgstr "Fermer"
 
-#: schedulerlib/scheduler.py:71 schedulerlib/eyes.py:68
-msgid "Eyes' rest"
-msgstr "Repos des yeux"
+#: schedulerlib/about.py:81
+msgid ""
+"Scheduler is free software: you can redistribute it and/or modify it under "
+"the terms of the GNU General Public License as published by the Free "
+"Software Foundation, either version 3 of the License, or (at your option) "
+"any later version.\n"
+"\n"
+msgstr ""
+"Scheduler est un logiciel libre ; vous pouvez le diffuser et/ou le modifier "
+"suivant les termes de la Licence Publique Générale GNU telle que publiée par "
+"la Free Software Foundation ; soit la version 3 de cette licence, soit (à "
+"votre convenance) une version ultérieure.\n"
+"\n"
 
-#: schedulerlib/scheduler.py:72 schedulerlib/settings/settings.py:41
-msgid "Settings"
-msgstr "Paramètres"
+#: schedulerlib/about.py:83
+msgid ""
+"Scheduler is distributed in the hope that it will be useful, but WITHOUT ANY "
+"WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS "
+"FOR A PARTICULAR PURPOSE. See the GNU General Public License for more "
+"details.\n"
+"\n"
+msgstr ""
+"Scheduler est diffusé dans l'espoir qu'il sera utile, mais SANS AUCUNE "
+"GARANTIE ; sans même une garantie implicite de COMMERCIALISATION ou "
+"d'ADÉQUATION À UN USAGE PARTICULIER. Voyez la Licence Publique Générale GNU "
+"pour plus de détails.\n"
+"\n"
 
-#: schedulerlib/scheduler.py:74
-msgid "About"
-msgstr "À propos"
+#: schedulerlib/about.py:85
+msgid ""
+"You should have received a copy of the GNU General Public License along with "
+"this program. If not, see http://www.gnu.org/licenses/."
+msgstr ""
+"Vous devriez avoir reçu une copie de la Licence Publique Générale GNU avec "
+"ce programme. Sinon, consultez http://www.gnu.org/licenses/."
 
-#: schedulerlib/scheduler.py:75
-msgid "Quit"
-msgstr "Quitter"
+#: schedulerlib/form.py:51 schedulerlib/event_calendar.py:511
+msgid "New Event"
+msgstr "Nouvel événement"
 
-#: schedulerlib/scheduler.py:81
-msgid "Edit"
-msgstr "Éditer"
+#: schedulerlib/form.py:53
+msgid "Edit Event"
+msgstr "Éditer l'événement"
 
-#: schedulerlib/scheduler.py:82
-msgid "Delete"
-msgstr "Supprimer"
+#: schedulerlib/form.py:66 schedulerlib/messagebox.py:32
+#: schedulerlib/messagebox.py:95 schedulerlib/messagebox.py:327
+#: schedulerlib/messagebox.py:393 schedulerlib/messagebox.py:395
+#: schedulerlib/constants.py:269 schedulerlib/settings/pomodoro_params.py:339
+#: schedulerlib/settings/settings.py:84
+msgid "Ok"
+msgstr "Ok"
 
-#: schedulerlib/scheduler.py:208
+#: schedulerlib/form.py:70
+msgid "Event"
+msgstr "Événément"
+
+#: schedulerlib/form.py:76 schedulerlib/scheduler.py:253
 msgid "Summary"
 msgstr "Résumé"
 
-#: schedulerlib/scheduler.py:210
+#: schedulerlib/form.py:77 schedulerlib/scheduler.py:255
 msgid "Place"
 msgstr "Lieu"
 
-#: schedulerlib/scheduler.py:212 schedulerlib/eyes.py:38
-#: schedulerlib/eyes.py:51
+#: schedulerlib/form.py:78 schedulerlib/eyes.py:38 schedulerlib/eyes.py:51
+#: schedulerlib/scheduler.py:257
 msgid "Start"
 msgstr "Début"
 
-#: schedulerlib/scheduler.py:214
+#: schedulerlib/form.py:79 schedulerlib/form.py:359
+#: schedulerlib/scheduler.py:259
 msgid "End"
 msgstr "Fin"
 
-#: schedulerlib/scheduler.py:216 schedulerlib/settings/settings.py:466
+#: schedulerlib/form.py:83
+msgid "Description"
+msgstr "Description"
+
+#: schedulerlib/form.py:84 schedulerlib/settings/settings.py:466
+#: schedulerlib/scheduler.py:261 schedulerlib/scheduler.py:280
 msgid "Category"
 msgstr "Catégorie"
 
-#: schedulerlib/pomodoro_stats.py:38
-msgid "Pomodoro - statistics"
-msgstr "Pomodoro - statistiques"
+#: schedulerlib/form.py:115
+msgid "Task"
+msgstr "Tâche"
 
-#: schedulerlib/pomodoro_stats.py:106
-msgid "time (h)"
-msgstr "temps (h)"
+#: schedulerlib/form.py:119 schedulerlib/form.py:126
+msgid "Pending"
+msgstr "En attente"
 
-#: schedulerlib/pomodoro_stats.py:107
-msgid "date"
-msgstr "date"
+#: schedulerlib/form.py:119 schedulerlib/form.py:129 schedulerlib/form.py:467
+msgid "In Progress"
+msgstr "En cours"
+
+#: schedulerlib/form.py:120
+msgid "Completed"
+msgstr "Terminée"
+
+#: schedulerlib/form.py:120
+msgid "Cancelled"
+msgstr "Annulée"
+
+#: schedulerlib/form.py:161
+msgid "whole day"
+msgstr "journé entière"
+
+#: schedulerlib/form.py:193
+msgid "Repetition"
+msgstr "Répétition"
+
+#: schedulerlib/form.py:204
+msgid "Repeat event"
+msgstr "Répéter l'événement"
+
+#: schedulerlib/form.py:208
+msgid "Frequency"
+msgstr "Fréquence"
+
+#: schedulerlib/form.py:210
+msgid "Every:"
+msgstr "Tous les :"
+
+#: schedulerlib/form.py:234
+msgid "Limit"
+msgstr "Limite"
+
+#: schedulerlib/form.py:239
+msgid "Always"
+msgstr "Toujours"
+
+#: schedulerlib/form.py:243
+msgid "Until"
+msgstr "Jusqu'au"
+
+#: schedulerlib/form.py:257
+msgid "After"
+msgstr "Après"
+
+#: schedulerlib/form.py:269
+msgid "times"
+msgstr "fois"
+
+#: schedulerlib/form.py:355
+msgid "Deadline"
+msgstr "Date butoire"
+
+#: schedulerlib/form.py:418 schedulerlib/form.py:438 schedulerlib/form.py:441
+#: schedulerlib/constants.py:231
+msgid "minutes"
+msgstr "minutes"
+
+#: schedulerlib/form.py:418 schedulerlib/form.py:431
+#: schedulerlib/constants.py:231
+msgid "hours"
+msgstr "heures"
+
+#: schedulerlib/form.py:418 schedulerlib/form.py:426
+#: schedulerlib/constants.py:231
+msgid "days"
+msgstr "jours"
+
+#: schedulerlib/form.py:445
+msgid "Reminder:"
+msgstr "Rappel :"
+
+#: schedulerlib/navtoolbar.py:42
+msgid "Reset original view"
+msgstr "Réinitialiser la vue"
+
+#: schedulerlib/navtoolbar.py:43
+msgid "Back to previous view"
+msgstr "Retour à la vue précédente"
+
+#: schedulerlib/navtoolbar.py:44
+msgid "Forward to next view"
+msgstr "Aller à la vue suivante"
+
+#: schedulerlib/navtoolbar.py:46
+msgid "Pan axes with left mouse, zoom with right"
+msgstr "Faire défiler des axes avec le clic gauche, zoomer avec le droit"
+
+#: schedulerlib/navtoolbar.py:47
+msgid "Zoom to rectangle"
+msgstr "Zoomer"
+
+#: schedulerlib/navtoolbar.py:48
+msgid "Configure subplots"
+msgstr "Configurer les subplots"
+
+#: schedulerlib/navtoolbar.py:49
+msgid "Tight layout"
+msgstr "Ajuster la mise en page"
+
+#: schedulerlib/navtoolbar.py:51
+msgid "Save the figure"
+msgstr "Enregistrer la figure"
+
+#: schedulerlib/navtoolbar.py:96 schedulerlib/settings/pomodoro_params.py:284
+#: schedulerlib/settings/pomodoro_params.py:314
+#: schedulerlib/settings/settings.py:441 scheduler.py:25
+msgid "Error"
+msgstr "Erreur"
 
 #: schedulerlib/widgets/event_widget.py:41 schedulerlib/settings/settings.py:60
 #: schedulerlib/settings/settings.py:255 schedulerlib/settings/settings.py:257
@@ -101,38 +244,20 @@ msgstr "date"
 msgid "Events"
 msgstr "Événements"
 
-#: schedulerlib/widgets/timer_widget.py:42
-msgid "Interval"
-msgstr ""
-
-#: schedulerlib/widgets/timer_widget.py:53
-msgid "Intervals:"
-msgstr ""
-
-#: schedulerlib/widgets/task_widget.py:42
-#: schedulerlib/settings/pomodoro_params.py:196
-#: schedulerlib/settings/settings.py:61 schedulerlib/settings/settings.py:310
-#: schedulerlib/settings/settings.py:313 schedulerlib/settings/settings.py:334
-#: schedulerlib/settings/settings.py:337 schedulerlib/settings/settings.py:352
-#: schedulerlib/settings/settings.py:354 schedulerlib/settings/settings.py:356
-#: schedulerlib/settings/settings.py:357
-msgid "Tasks"
-msgstr "Tâches"
-
 #: schedulerlib/widgets/pomodoro_widget.py:46
 #: schedulerlib/widgets/pomodoro_widget.py:51
 #: schedulerlib/widgets/pomodoro_widget.py:54
 #: schedulerlib/widgets/pomodoro_widget.py:93
 #: schedulerlib/widgets/pomodoro_widget.py:174
 #: schedulerlib/widgets/pomodoro_widget.py:177
-#: schedulerlib/widgets/pomodoro_widget.py:258
-#: schedulerlib/widgets/pomodoro_widget.py:277
-#: schedulerlib/widgets/pomodoro_widget.py:283
+#: schedulerlib/widgets/pomodoro_widget.py:259
+#: schedulerlib/widgets/pomodoro_widget.py:278
+#: schedulerlib/widgets/pomodoro_widget.py:284
 #: schedulerlib/widgets/pomodoro_widget.py:305
-#: schedulerlib/widgets/pomodoro_widget.py:319
+#: schedulerlib/widgets/pomodoro_widget.py:319 schedulerlib/constants.py:241
 #: schedulerlib/settings/pomodoro_params.py:66
 #: schedulerlib/settings/pomodoro_params.py:172
-#: schedulerlib/settings/pomodoro_params.py:304 schedulerlib/constants.py:240
+#: schedulerlib/settings/pomodoro_params.py:304
 msgid "Work"
 msgstr "Travail"
 
@@ -160,15 +285,33 @@ msgstr "Repos"
 msgid "Task: "
 msgstr "Tâche : "
 
-#: schedulerlib/widgets/pomodoro_widget.py:272
+#: schedulerlib/widgets/pomodoro_widget.py:273
 #: schedulerlib/settings/pomodoro_params.py:289
 #: schedulerlib/settings/settings.py:427
 msgid "Confirmation"
 msgstr "Confirmation"
 
-#: schedulerlib/widgets/pomodoro_widget.py:273
+#: schedulerlib/widgets/pomodoro_widget.py:274
 msgid "Are you sure you want to give up the current session?"
 msgstr "Voulez-vous vraiment arrêter la session en cours ?"
+
+#: schedulerlib/widgets/timer_widget.py:42
+msgid "Interval"
+msgstr "Intervalle"
+
+#: schedulerlib/widgets/timer_widget.py:53
+msgid "Intervals:"
+msgstr "Intervalles :"
+
+#: schedulerlib/widgets/task_widget.py:42
+#: schedulerlib/settings/pomodoro_params.py:196
+#: schedulerlib/settings/settings.py:61 schedulerlib/settings/settings.py:310
+#: schedulerlib/settings/settings.py:313 schedulerlib/settings/settings.py:334
+#: schedulerlib/settings/settings.py:337 schedulerlib/settings/settings.py:352
+#: schedulerlib/settings/settings.py:354 schedulerlib/settings/settings.py:356
+#: schedulerlib/settings/settings.py:357
+msgid "Tasks"
+msgstr "Tâches"
 
 #: schedulerlib/eyes.py:39
 msgid "Status"
@@ -182,6 +325,10 @@ msgstr "Le script de repos des yeux a été lancé !"
 msgid "Stop"
 msgstr "Stop"
 
+#: schedulerlib/eyes.py:68 schedulerlib/scheduler.py:71
+msgid "Eyes' rest"
+msgstr "Repos des yeux"
+
 #: schedulerlib/eyes.py:69
 msgid "Look away from your screen for 20 s"
 msgstr "Regarder au loin pendant 20 s"
@@ -194,6 +341,50 @@ msgstr "Temps depuis le dernier repos des yeux"
 #: schedulerlib/eyes.py:80
 msgid "The eyes' rest script is not active."
 msgstr "Le script de repos des yeux n'est pas actif."
+
+#: schedulerlib/messagebox.py:183
+msgid "Please report this bug on "
+msgstr "Merci de signaler ce bug sur "
+
+#: schedulerlib/messagebox.py:270 schedulerlib/messagebox.py:412
+#: schedulerlib/messagebox.py:414
+msgid "Yes"
+msgstr "Oui"
+
+#: schedulerlib/messagebox.py:270 schedulerlib/messagebox.py:412
+msgid "No"
+msgstr "Non"
+
+#: schedulerlib/messagebox.py:270 schedulerlib/messagebox.py:393
+#: schedulerlib/constants.py:268 schedulerlib/settings/pomodoro_params.py:338
+#: schedulerlib/settings/settings.py:85
+msgid "Cancel"
+msgstr "Annuler"
+
+#: schedulerlib/constants.py:256
+msgid "Sound configuration"
+msgstr "Configuration du son"
+
+#: schedulerlib/constants.py:257
+msgid ""
+"The automatic detection of command line soundplayer has failed. If you want "
+"to hear the beep between work sessions and breaks, please give the name of a "
+"command line soundplayer installed on your system. If you do not know, you "
+"can install mpg123."
+msgstr ""
+"La détection automatique du lecteur audio en ligne de commande a échoué. Si "
+"vous voulez entendre les bips entre les sessions de travail et les pauses, "
+"merci de renseignez un lecteur audio en ligne de commande installé sur votre "
+"système. Si vous ne savez pas quoi mettre, vous pouvez installer mpg123 "
+"(linux)."
+
+#: schedulerlib/constants.py:579
+msgid "Open"
+msgstr "Ouvrir"
+
+#: schedulerlib/settings/color.py:45 schedulerlib/settings/color.py:47
+msgid "Color"
+msgstr "Couleur"
 
 #: schedulerlib/settings/opacity.py:38
 msgid "Opacity"
@@ -277,20 +468,6 @@ msgstr "La tâche {task} existe déjà."
 msgid "New task"
 msgstr "Nouvelle tâche"
 
-#: schedulerlib/settings/pomodoro_params.py:338
-#: schedulerlib/settings/settings.py:85 schedulerlib/messagebox.py:270
-#: schedulerlib/messagebox.py:393 schedulerlib/constants.py:267
-msgid "Cancel"
-msgstr "Annuler"
-
-#: schedulerlib/settings/pomodoro_params.py:339
-#: schedulerlib/settings/settings.py:84 schedulerlib/messagebox.py:32
-#: schedulerlib/messagebox.py:95 schedulerlib/messagebox.py:327
-#: schedulerlib/messagebox.py:393 schedulerlib/messagebox.py:395
-#: schedulerlib/constants.py:268
-msgid "Ok"
-msgstr "Ok"
-
 #: schedulerlib/settings/pomodoro_params.py:343
 msgid "sound file"
 msgstr "fichier son"
@@ -310,6 +487,10 @@ msgstr "Italique"
 #: schedulerlib/settings/font.py:99
 msgid "Underline"
 msgstr "Souligné"
+
+#: schedulerlib/settings/settings.py:41 schedulerlib/scheduler.py:72
+msgid "Settings"
+msgstr "Paramètres"
 
 #: schedulerlib/settings/settings.py:62 schedulerlib/settings/settings.py:361
 #: schedulerlib/settings/settings.py:363 schedulerlib/settings/settings.py:384
@@ -437,124 +618,65 @@ msgstr "La catégorie {category} existe déjà."
 msgid "New category"
 msgstr "Nouvelle catégorie"
 
-#: schedulerlib/settings/color.py:45 schedulerlib/settings/color.py:47
-msgid "Color"
-msgstr "Couleur"
+#: schedulerlib/event_calendar.py:523 schedulerlib/scheduler.py:82
+msgid "Delete"
+msgstr "Supprimer"
 
-#: schedulerlib/about.py:42
-msgid "About Scheduler"
-msgstr "À propos de Scheduler"
+#: schedulerlib/event_calendar.py:528
+msgid "Remove Holiday"
+msgstr "Pas férié"
 
-#: schedulerlib/about.py:49
-msgid "Task scheduling and calendar"
-msgstr "Gestion de tâches et calendrier"
+#: schedulerlib/event_calendar.py:531
+msgid "Set Holiday"
+msgstr "Férié"
 
-#: schedulerlib/about.py:52 schedulerlib/about.py:76
-msgid "License"
-msgstr "Licence"
+#: schedulerlib/scheduler.py:69 schedulerlib/scheduler.py:467
+#: schedulerlib/scheduler.py:470 schedulerlib/scheduler.py:473
+msgid "Manager"
+msgstr "Gestionnaire"
 
-#: schedulerlib/about.py:53 schedulerlib/about.py:102
-msgid "Close"
-msgstr "Fermer"
+#: schedulerlib/scheduler.py:70
+msgid "Widgets"
+msgstr "Widgets"
 
-#: schedulerlib/about.py:85
-msgid ""
-"Scheduler is free software: you can redistribute it and/or modify it under "
-"the terms of the GNU General Public License as published by the Free "
-"Software Foundation, either version 3 of the License, or (at your option) "
-"any later version.\n"
-"\n"
-msgstr ""
-"Scheduler est un logiciel libre ; vous pouvez le diffuser et/ou le modifier "
-"suivant les termes de la Licence Publique Générale GNU telle que publiée par "
-"la Free Software Foundation ; soit la version 3 de cette licence, soit (à "
-"votre convenance) une version ultérieure.\n"
-"\n"
+#: schedulerlib/scheduler.py:74
+msgid "About"
+msgstr "À propos"
 
-#: schedulerlib/about.py:87
-msgid ""
-"Scheduler is distributed in the hope that it will be useful, but WITHOUT ANY "
-"WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS "
-"FOR A PARTICULAR PURPOSE. See the GNU General Public License for more "
-"details.\n"
-"\n"
-msgstr ""
-"Scheduler est diffusé dans l'espoir qu'il sera utile, mais SANS AUCUNE "
-"GARANTIE ; sans même une garantie implicite de COMMERCIALISATION ou "
-"d'ADÉQUATION À UN USAGE PARTICULIER. Voyez la Licence Publique Générale GNU "
-"pour plus de détails.\n"
-"\n"
+#: schedulerlib/scheduler.py:75
+msgid "Quit"
+msgstr "Quitter"
 
-#: schedulerlib/about.py:89
-msgid ""
-"You should have received a copy of the GNU General Public License along with "
-"this program. If not, see http://www.gnu.org/licenses/."
-msgstr ""
-"Vous devriez avoir reçu une copie de la Licence Publique Générale GNU avec "
-"ce programme. Sinon, consultez http://www.gnu.org/licenses/."
+#: schedulerlib/scheduler.py:81
+msgid "Edit"
+msgstr "Éditer"
 
-#: schedulerlib/messagebox.py:183
-msgid "Please report this bug on "
-msgstr "Merci de signaler ce bug sur "
+#: schedulerlib/scheduler.py:276
+msgid "Filter by"
+msgstr "Filtrer par"
 
-#: schedulerlib/messagebox.py:270 schedulerlib/messagebox.py:412
-#: schedulerlib/messagebox.py:414
-msgid "Yes"
-msgstr "Oui"
+#: schedulerlib/pomodoro_stats.py:38
+msgid "Pomodoro - statistics"
+msgstr "Pomodoro - statistiques"
 
-#: schedulerlib/messagebox.py:270 schedulerlib/messagebox.py:412
-msgid "No"
-msgstr "Non"
+#: schedulerlib/pomodoro_stats.py:106
+msgid "time (h)"
+msgstr "temps (h)"
 
-#: schedulerlib/navtoolbar.py:42
-msgid "Reset original view"
-msgstr "Réinitialiser la vue"
+#: schedulerlib/pomodoro_stats.py:107
+msgid "date"
+msgstr "date"
 
-#: schedulerlib/navtoolbar.py:43
-msgid "Back to previous view"
-msgstr "Retour à la vue précédente"
+#: scheduler.py:26
+#, python-brace-format
+msgid "Scheduler is already running. If not deletes {pidfile}"
+msgstr "Scheduler est déjà lancé, si ce n'est pas le cas, supprimez {pidfile}"
 
-#: schedulerlib/navtoolbar.py:44
-msgid "Forward to next view"
-msgstr "Aller à la vue suivante"
+msgid "Year"
+msgstr "Année"
 
-#: schedulerlib/navtoolbar.py:46
-msgid "Pan axes with left mouse, zoom with right"
-msgstr "Faire défiler des axes avec le clic gauche, zoomer avec le droit"
+msgid "Month"
+msgstr "Mois"
 
-#: schedulerlib/navtoolbar.py:47
-msgid "Zoom to rectangle"
-msgstr "Zoomer"
-
-#: schedulerlib/navtoolbar.py:48
-msgid "Configure subplots"
-msgstr "Configurer les subplots"
-
-#: schedulerlib/navtoolbar.py:49
-msgid "Tight layout"
-msgstr "Ajuster la mise en page"
-
-#: schedulerlib/navtoolbar.py:51
-msgid "Save the figure"
-msgstr "Enregistrer la figure"
-
-#: schedulerlib/constants.py:255
-msgid "Sound configuration"
-msgstr "Configuration du son"
-
-#: schedulerlib/constants.py:256
-msgid ""
-"The automatic detection of command line soundplayer has failed. If you want "
-"to hear the beep between work sessions and breaks, please give the name of a "
-"command line soundplayer installed on your system. If you do not know, you "
-"can install mpg123."
-msgstr ""
-"La détection automatique du lecteur audio en ligne de commande a échoué. Si "
-"vous voulez entendre les bips entre les sessions de travail et les pauses, "
-"merci de renseignez un lecteur audio en ligne de commande installé sur votre "
-"système. Si vous ne savez pas quoi mettre, vous pouvez installer mpg123 "
-"(linux)."
-
-#: schedulerlib/constants.py:575
-msgid "Open"
-msgstr "Ouvrir"
+msgid "Week"
+msgstr "Semaine"
