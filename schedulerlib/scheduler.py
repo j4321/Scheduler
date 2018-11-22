@@ -115,8 +115,6 @@ class EventScheduler(Tk):
         self.style.configure('white.TLabel', background='white')
         self.style.configure('border.TFrame', background='white', border=1, relief='sunken')
         self.style.configure("Treeview.Heading", font="TkDefaultFont")
-        # self.style.map("TCombobox", fieldbackground=[("readonly", "white")],
-                       # foreground=[("readonly", "black")])
         bgc = self.style.lookup("TButton", "background")
         bga = self.style.lookup("TButton", "background", ("active",))
         self.style.map('TCombobox',
@@ -283,9 +281,11 @@ class EventScheduler(Tk):
         self.filter_val = Combobox(toolbar, state="readonly",
                                    exportselection=False)
         self.filter_val.pack(side="left", padx=4)
+        Button(toolbar, text=_('Delete All Outdated'), padding=1,
+               command=self.delete_outdated_events).pack(side="right", padx=4)
 
         # --- grid
-        toolbar.grid(row=0, columnspan=2, sticky='w', pady=4)
+        toolbar.grid(row=0, columnspan=2, sticky='we', pady=4)
         self.tree.grid(row=1, column=0, sticky='eswn')
         scroll.grid(row=1, column=1, sticky='ns')
 
@@ -298,7 +298,7 @@ class EventScheduler(Tk):
                 dp = Unpickler(file)
                 data = dp.load()
         except Exception:
-            l = os.listdir(os.path.dirname(BACKUP_PATH))
+            l = [f for f in os.listdir(os.path.dirname(BACKUP_PATH)) if f.startswith('data.backup')]
             if l:
                 l.sort(key=lambda x: int(x[11:]))
                 shutil.copy(os.path.join(os.path.dirname(BACKUP_PATH), l[-1]),
@@ -309,14 +309,11 @@ class EventScheduler(Tk):
         self.nb = len(data)
         backup()
 
-        now = datetime.now()
         for i, prop in enumerate(data):
             iid = str(i)
             self.events[iid] = Event(self.scheduler, iid=iid, **prop)
             self.tree.insert('', 'end', iid, values=self.events[str(i)].values())
             tags = [str(self.tree.index(iid) % 2)]
-            if not prop['Repeat'] and prop['Start'] < now:
-                tags.append('outdated')
             self.tree.item(iid, tags=tags)
 
         self.after_id = self.after(15 * 60 * 1000, self.check_outdated)
@@ -356,6 +353,27 @@ class EventScheduler(Tk):
                       lambda *args, i=item: self._menu_widgets_trace(i))
 
         self.icon.loop(self)
+        self.tk.eval("""
+apply {name {
+    set newmap {}
+    foreach {opt lst} [ttk::style map $name] {
+        if {($opt eq "-foreground") || ($opt eq "-background")} {
+            set newlst {}
+            foreach {st val} $lst {
+                if {($st eq "disabled") || ($st eq "selected")} {
+                    lappend newlst $st $val
+                }
+            }
+            if {$newlst ne {}} {
+                lappend newmap $opt $newlst
+            }
+        } else {
+            lappend newmap $opt $lst
+        }
+    }
+    ttk::style map $name {*}$newmap
+}} Treeview
+        """)
         self.scheduler.start()
 
     def _setup_style(self):
@@ -542,6 +560,22 @@ class EventScheduler(Tk):
             else:
                 self._img_dot = PhotoImage(master=self)
             self.menu_task.entryconfigure(1, image=self._img_dot)
+
+    def delete_outdated_events(self):
+        now = datetime.now()
+        outdated = []
+        for iid, prop in self.events.items():
+            if prop['End'] < now:
+                if not prop['Repeat']:
+                    outdated.append(iid)
+                else:
+                    end = prop['End']
+                    enddate = datetime.fromordinal(prop['Repeat']['EndDate'].toordinal())
+                    enddate.replace(hour=end.hour, minute=end.minute)
+                    if enddate < now:
+                        outdated.append(iid)
+        for item in outdated:
+            self.delete(item)
 
     def delete(self, iid):
         index = self.tree.index(iid)

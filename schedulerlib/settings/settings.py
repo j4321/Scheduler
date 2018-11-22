@@ -135,6 +135,9 @@ class Settings(tk.Toplevel):
         self.eyes_interval.insert(0, CONFIG.get("General", "eyes_interval", fallback='20'))
         self.eyes_interval.pack(side="left", padx=4)
 
+        # --- reminders
+        # ...
+
         # --- placement
         lang_frame.grid(pady=4, sticky="ew")
         frame_gui.grid(pady=4, sticky="ew")

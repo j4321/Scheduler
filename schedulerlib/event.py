@@ -29,13 +29,14 @@ from subprocess import run
 from datetime import timedelta, datetime, time
 from schedulerlib.constants import NOTIF_PATH, TASK_STATE, CONFIG
 
+
 class Event:
     def __init__(self, scheduler, iid=None, **kw):
         d = datetime.now() + timedelta(minutes=5)
-        d = d.replace(minute=(d.minute//5)*5)
+        d = d.replace(minute=(d.minute // 5) * 5)
         d = kw.pop('Start', d)
         self.scheduler = scheduler
-        defaults = {'Summary': '', 'Place':'', 'Description': '',
+        defaults = {'Summary': '', 'Place': '', 'Description': '',
                     'Start': d, 'End': d + timedelta(hours=1), 'Task': False,
                     'Repeat': {}, 'WholeDay': False, 'Reminders': {},
                     'Category': CONFIG.options('Categories')[0]}
@@ -68,7 +69,7 @@ class Event:
             vals = [False]
             vals.extend(TASK_STATE.keys())
             vals.extend(['{}%'.format(i) for i in range(0, 110, 10)])
-            if value in  vals:
+            if value in vals:
                 self._properties['Task'] = value
             else:
                 raise ValueError("Unrecognized Task option %s." % value)
@@ -76,7 +77,6 @@ class Event:
             raise AttributeError("This attribute cannot be set, use 'reminder_add'/'reminder_remove' instead.")
         else:
             raise AttributeError("Event object has no attribute %s." % item)
-
 
     def reminder_add(self, date):
         repeat = self._properties['Repeat']
@@ -100,16 +100,16 @@ class Event:
                 elif repeat['Frequency'] == 'month':
                     m = date.month + nb
                     month = m % 12
-                    year = date.year + m//12
+                    year = date.year + m // 12
                     cron_prop['end_date'] = date.replace(year=year, month=month) + timedelta(hours=1)
                 else:
                     start_day = date.isocalendar()[2] - 1
                     week_days = [(x - start_day) % 7 for x in repeat['WeekDays']]
 
                     nb_per_week = len(repeat['WeekDays'])
-                    nb_week = nb//nb_per_week
+                    nb_week = nb // nb_per_week
                     rem = nb % nb_per_week
-                    cron_prop['end_date'] = date + timedelta(days=(7*nb_week + week_days[rem] + 1))
+                    cron_prop['end_date'] = date + timedelta(days=(7 * nb_week + week_days[rem] + 1))
             else:
                 cron_prop['end_date'] = None
 
@@ -177,16 +177,16 @@ class Event:
                 elif freq == 'month':
                     m = date.month + nb
                     month = m % 12
-                    year = date.year + m//12
+                    year = date.year + m // 12
                     end = date.replace(year=year, month=month)
                 else:
                     start_day = date.isocalendar()[2] - 1
                     week_days = [(x - start_day) % 7 for x in repeat['WeekDays']]
 
                     nb_per_week = len(repeat['WeekDays'])
-                    nb_week = nb//nb_per_week
+                    nb_week = nb // nb_per_week
                     rem = nb % nb_per_week
-                    end = date + self.timedelta(days=(7*nb_week + week_days[rem] + 1))
+                    end = date + self.timedelta(days=(7 * nb_week + week_days[rem] + 1))
                 return end
             else:
                 return None

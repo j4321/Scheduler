@@ -113,6 +113,12 @@ if not CONFIG.read(CONFIG_PATH):
     CONFIG.set("General", "language", "")
     CONFIG.set("General", "eyes_interval", "20")
 
+    CONFIG.add_section('Reminder')
+    CONFIG.set('Reminder', 'window', 'True')
+    CONFIG.set('Reminder', 'notification', 'True')
+    CONFIG.set('Reminder', 'sound', 'False')
+    CONFIG.set('Reminder', 'blink', '500')
+
     CONFIG.add_section('Events')
     CONFIG.set('Events', 'geometry', '')
     CONFIG.set('Events', 'visible', 'True')
@@ -196,6 +202,13 @@ if not CONFIG.has_section('Pomodoro'):
     CONFIG.set("Pomodoro", "mute", "False")
 
     CONFIG.add_section("PomodoroTasks")
+
+if not CONFIG.has_section('Reminder'):
+    CONFIG.add_section('Reminder')
+    CONFIG.set('Reminder', 'window', 'True')
+    CONFIG.set('Reminder', 'notification', 'True')
+    CONFIG.set('Reminder', 'sound', 'False')
+    CONFIG.set('Reminder', 'blink', '500')
 
 
 def save_config():
