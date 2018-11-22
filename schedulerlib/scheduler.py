@@ -316,7 +316,7 @@ class EventScheduler(Tk):
             tags = [str(self.tree.index(iid) % 2)]
             self.tree.item(iid, tags=tags)
             if not prop['Repeat']:
-                for rid, d in prop['Reminders'].items():
+                for rid, d in list(prop['Reminders'].items()):
                     if d < now:
                         del self.events[iid]['Reminders'][rid]
         self.after_id = self.after(15 * 60 * 1000, self.check_outdated)
