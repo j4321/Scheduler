@@ -571,7 +571,7 @@ apply {name {
             if prop['End'] < now:
                 if not prop['Repeat']:
                     outdated.append(iid)
-                else:
+                elif prop['Repeat']['Limit'] != 'always':
                     end = prop['End']
                     enddate = datetime.fromordinal(prop['Repeat']['EndDate'].toordinal())
                     enddate.replace(hour=end.hour, minute=end.minute)
