@@ -324,6 +324,10 @@ class EventScheduler(Tk):
         # --- bindings
         self.bind_class("TCombobox", "<<ComboboxSelected>>",
                         self.clear_selection, add=True)
+        self.bind_class("TCombobox", "<Control-a>",
+                        self.select_all)
+        self.bind_class("TEntry", "<Control-a>",
+                        self.select_all)
         self.tree.bind('<3>', self._post_menu)
         self.tree.bind('<1>', self._select)
         self.tree.bind('<Double-1>', self._edit_on_click)
@@ -387,9 +391,15 @@ class EventScheduler(Tk):
         showerror('Exception', str(args[1]), err, parent=self)
 
     # --- class bindings
-    def clear_selection(self, event):
+    @staticmethod
+    def clear_selection(event):
         combo = event.widget
         combo.selection_clear()
+
+    @staticmethod
+    def select_all(event):
+        event.widget.selection_range(0, "end")
+        return "break"
 
     # --- filter
     def update_filter_val(self, event):

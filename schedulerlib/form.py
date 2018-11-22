@@ -25,7 +25,8 @@ Task editor
 from tkinter import Toplevel, PhotoImage, Text, Spinbox, BooleanVar, StringVar
 from tkinter.ttk import Entry, Label, Button, Frame, Style, Combobox
 from tkinter.ttk import Radiobutton, Checkbutton, Notebook
-from schedulerlib.constants import IM_BELL, IM_MOINS, CONFIG, TASK_REV_TRANSLATION
+from schedulerlib.constants import IM_BELL, IM_MOINS, CONFIG, \
+    TASK_REV_TRANSLATION, FREQ_REV_TRANSLATION
 from schedulerlib.ttkcalendar import DateEntry, get_calendar
 from schedulerlib.ttkwidgets import LabelFrame
 from datetime import timedelta, time, datetime
@@ -414,7 +415,7 @@ class Form(Toplevel):
         when.pack()
         when.delete(0, 'end')
         what = Combobox(rem, width=8, state='readonly',
-                        values=('minutes', 'hours', 'days'))
+                        values=(_('minutes'), _('hours'), _('days')))
 
         if date:
             hour = int(self.start_hour.get())
@@ -422,22 +423,22 @@ class Form(Toplevel):
             dt = self.start_entry.get_date().replace(hour=hour, minute=minute) - date
             if dt.days > 0:
                 when.insert(0, str(dt.days))
-                what.set('days')
+                what.set(_('days'))
             else:
                 h, m, s = str(dt).split(':')
                 if h != "0":
                     when.insert(0, h)
-                    what.set('hours')
+                    what.set(_('hours'))
                 else:
                     while m[0] is '0':
                         m = m[1:]
                     if not m:
                         m = '0'
                     when.insert(0, m)
-                    what.set('minutes')
+                    what.set(_('minutes'))
         else:
             when.insert(0, '15')
-            what.set('minutes')
+            what.set(_('minutes'))
 
         self.alarms.append((when, what))
 
@@ -487,7 +488,7 @@ class Form(Toplevel):
         self.event.reminder_remove_all()
         for when, what in self.alarms:
             dt = int(when.get())
-            unit = what.get()
+            unit = FREQ_REV_TRANSLATION[what.get()]
             date = self.event['Start'] - timedelta(**{unit: dt})
             self.event.reminder_add(date)
 

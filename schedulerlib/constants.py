@@ -228,6 +228,7 @@ gettext.translation(APP_NAME, PATH_LOCALE,
                     languages=[LANGUAGE],
                     fallback=True).install()
 
+FREQ_REV_TRANSLATION = {_("hours"): "hours", _("minutes"): "minutes", _("days"): "days"}
 
 # --- retrieve holidays
 HOLIDAYS = set(CONFIG.get('Calendar', 'holidays').split(', '))
