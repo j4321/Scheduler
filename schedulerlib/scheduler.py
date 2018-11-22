@@ -308,14 +308,17 @@ class EventScheduler(Tk):
                     data = dp.load()
         self.nb = len(data)
         backup()
-
+        now = datetime.now()
         for i, prop in enumerate(data):
             iid = str(i)
             self.events[iid] = Event(self.scheduler, iid=iid, **prop)
             self.tree.insert('', 'end', iid, values=self.events[str(i)].values())
             tags = [str(self.tree.index(iid) % 2)]
             self.tree.item(iid, tags=tags)
-
+            if not prop['Repeat']:
+                for rid, d in prop['Reminders'].items():
+                    if d < now:
+                        del self.events[iid]['Reminders'][rid]
         self.after_id = self.after(15 * 60 * 1000, self.check_outdated)
 
         # --- bindings
