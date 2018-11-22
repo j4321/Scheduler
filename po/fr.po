@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-11-22 09:14+0100\n"
-"PO-Revision-Date: 2018-11-22 09:14+0100\n"
+"POT-Creation-Date: 2018-11-22 09:19+0100\n"
+"PO-Revision-Date: 2018-11-22 09:19+0100\n"
 "Last-Translator: Unknown <juliette@Juliette-MacBook>\n"
 "Language-Team: French\n"
 "Language: fr\n"
@@ -118,6 +118,10 @@ msgstr "Férié"
 #: schedulerlib/settings/settings.py:304 schedulerlib/settings/settings.py:306
 msgid "Events"
 msgstr "Événements"
+
+#: schedulerlib/widgets/event_widget.py:135
+msgid "Today"
+msgstr "Aujourd'hui"
 
 #: schedulerlib/widgets/timer_widget.py:42
 msgid "Interval"

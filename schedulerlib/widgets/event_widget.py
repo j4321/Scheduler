@@ -132,7 +132,7 @@ class EventWidget(BaseWidget):
 
         for day, evts in week.items():
             if day == today:
-                text = 'Today'
+                text = _('Today')
             else:
                 text = day.capitalize()
             Label(self.display, text=text,

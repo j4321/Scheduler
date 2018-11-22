@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-11-22 09:07+0100\n"
+"POT-Creation-Date: 2018-11-22 09:19+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,15 +17,15 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: scheduler.py:25 schedulerlib/settings/pomodoro_params.py:284
+#: scheduler.py:46 schedulerlib/settings/pomodoro_params.py:284
 #: schedulerlib/settings/pomodoro_params.py:314
 #: schedulerlib/settings/settings.py:441 schedulerlib/navtoolbar.py:96
 msgid "Error"
 msgstr ""
 
-#: scheduler.py:26
+#: scheduler.py:47
 #, python-brace-format
-msgid "Scheduler is already running. If not deletes {pidfile}"
+msgid "Scheduler is already running. If not deletes {pidfile}."
 msgstr ""
 
 #: schedulerlib/scheduler.py:69 schedulerlib/scheduler.py:467
@@ -117,6 +117,10 @@ msgstr ""
 #: schedulerlib/settings/settings.py:286 schedulerlib/settings/settings.py:289
 #: schedulerlib/settings/settings.py:304 schedulerlib/settings/settings.py:306
 msgid "Events"
+msgstr ""
+
+#: schedulerlib/widgets/event_widget.py:135
+msgid "Today"
 msgstr ""
 
 #: schedulerlib/widgets/timer_widget.py:42
