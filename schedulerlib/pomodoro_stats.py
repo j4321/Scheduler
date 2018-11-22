@@ -110,6 +110,7 @@ class Stats(tk.Toplevel):
             lgd.set_draggable(True)
             max_y = yy0.max()
             self.ax.set_ylim(0, max_y + 0.1 * max_y)
+            self.ax.tick_params('x', rotation=70)
             self.update_idletasks()
             self.fig.tight_layout()
         self.figAgg.draw()
