@@ -241,24 +241,15 @@ class EventScheduler(Tk):
                                                {'expand': '1'})],
                                  'sticky': 'ns'})])
         # --- tree
-        self.tree = Treeview(self, show="headings",
-                             columns=('Summary', 'Place', 'Start', 'End', 'Category'))
-        self.tree.column('Summary', stretch=True, width=300)
-        self.tree.column('Place', stretch=True, width=200)
-        self.tree.column('Start', width=150, stretch=False)
-        self.tree.column('End', width=150, stretch=False)
-        self.tree.column('Category', width=100)
-        self.tree.heading('Summary', text=_('Summary'), anchor="w",
-                          command=lambda: self._sort_by_desc('Summary', False))
-        self.tree.heading('Place', text=_('Place'), anchor="w",
-                          command=lambda: self._sort_by_desc('Place', False))
-        self.tree.heading('Start', text=_('Start'), anchor="w",
-                          command=lambda: self._sort_by_date('Start', False))
-        self.tree.heading('End', text=_('End'), anchor="w",
-                          command=lambda: self._sort_by_date('End', False))
-        self.tree.heading('Category', text=_('Category'), anchor="w",
-                          command=lambda: self._sort_by_desc('Category', False))
-
+        columns = {_('Summary'): ({'stretch': True, 'width': 300}, lambda: self._sort_by_desc(_('Summary'), False)),
+                   _('Place'): ({'stretch': True, 'width': 200}, lambda: self._sort_by_desc(_('Place'), False)),
+                   _('Start'): ({'stretch': False, 'width': 150}, lambda: self._sort_by_date(_('Start'), False)),
+                   _('End'): ({'stretch': False, 'width': 150}, lambda: self._sort_by_date(_("End"), False)),
+                   _('Category'): ({'stretch': False, 'width': 100}, lambda: self._sort_by_desc(_('Category'), False))}
+        self.tree = Treeview(self, show="headings", columns=list(columns))
+        for label, (col_prop, cmd) in columns.items():
+            self.tree.column(label, **col_prop)
+            self.tree.heading(label, text=label, anchor="w", command=cmd)
         self.tree.tag_configure('0', background='#ececec')
         self.tree.tag_configure('1', background='white')
         self.tree.tag_configure('outdated', foreground='red')
@@ -506,8 +497,15 @@ apply {name {
         tags.append(str(index % 2))
         self.tree.item(item, tags=tags)
 
+    @staticmethod
+    def to_datetime(date):
+        try:
+            return datetime.strptime(date, '%x')
+        except ValueError:
+            return datetime.strptime(date, '%x %H:%M')
+
     def _sort_by_date(self, col, reverse):
-        l = [(self.events[k][col], k) for k in self.tree.get_children('')]
+        l = [(self.to_datetime(self.tree.set(k, col)), k) for k in self.tree.get_children('')]
         l.sort(reverse=reverse)
 
         # rearrange items in sorted positions
