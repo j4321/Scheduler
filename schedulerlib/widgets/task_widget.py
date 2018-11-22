@@ -24,7 +24,7 @@ Task desktop widget
 
 from tkinter import Text
 from tkinter.ttk import Label, Separator, Sizegrip
-from schedulerlib.constants import CONFIG, TASK_STATE
+from schedulerlib.constants import CONFIG, TASK_STATE, active_color
 from schedulerlib.ttkwidgets import AutoScrollbar
 from .base_widget import BaseWidget
 
@@ -39,7 +39,7 @@ class TaskWidget(BaseWidget):
         self.hide_completed = CONFIG.getboolean('Tasks', 'hide_completed')
 
         # --- elements
-        label = Label(self, text='TASKS', style='title.Tasks.TLabel',
+        label = Label(self, text=_('Tasks').upper(), style='title.Tasks.TLabel',
                       anchor='center')
         label.grid(row=0, columnspan=2, pady=4, sticky='ew')
         Separator(self, style='Tasks.TSeparator').grid(row=1, columnspan=2, sticky='we')
@@ -69,6 +69,8 @@ class TaskWidget(BaseWidget):
         self.attributes('-alpha', CONFIG.get(self.name, 'alpha', fallback=0.85))
         bg = CONFIG.get('Tasks', 'background')
         fg = CONFIG.get('Tasks', 'foreground')
+        r, g, b = self.winfo_rgb(bg)
+        active_bg = active_color(r * 255 / 65535, g * 255 / 65535, b * 255 / 65535)
         self.style.configure('Tasks.TFrame', background=bg)
         self.style.configure('Tasks.TSizegrip', background=bg)
         self.style.configure('Tasks.TSeparator', background=bg)
@@ -77,6 +79,10 @@ class TaskWidget(BaseWidget):
         self.style.configure('title.Tasks.TLabel',
                              font=CONFIG.get('Tasks', 'font_title'))
         self.configure(bg=bg)
+        self.menu.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
+                            activebackground=active_bg)
+        self.menu_pos.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
+                                activebackground=active_bg)
         self.display.configure(selectbackground=bg,
                                inactiveselectbackground=bg,
                                selectforeground=fg,

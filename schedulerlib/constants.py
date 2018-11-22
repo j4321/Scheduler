@@ -293,7 +293,7 @@ IM_LAYOUT = os.path.join(PATH_IMAGES, 'layout.png')
 IM_SCROLL_ALPHA = os.path.join(PATH_IMAGES, "scroll.png")
 IM_EYE = os.path.join(PATH_IMAGES, "yeux.svg")
 IM_START = os.path.join(PATH_IMAGES, "start.png")
-IM_STOP= os.path.join(PATH_IMAGES, "stop_m.png")
+IM_STOP = os.path.join(PATH_IMAGES, "stop_m.png")
 
 IM_ERROR_DATA = """
 iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAABiRJREFU
@@ -438,8 +438,11 @@ mfwLcAuinuFNL7QAAAAASUVORK5CYII=
 ICONS = {"information": IM_INFO_DATA, "error": IM_ERROR_DATA,
          "question": IM_QUESTION_DATA, "warning": IM_WARNING_DATA}
 
-TASK_STATE = {'Pending': '⌛', 'In Progress': '✎', 'Completed': '✔', 'Cancelled': '✗'}
+# --- task state
+TASK_STATE = {'Pending': '⌛', 'In Progress': '✎', 'Completed': '✔',
+              'Cancelled': '✗'}
 
+TASK_REV_TRANSLATION = {_(task): task for task in TASK_STATE}
 
 # --- matplotlib config
 matplotlib.rc("axes.formatter", use_locale=True)

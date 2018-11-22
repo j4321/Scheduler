@@ -75,8 +75,9 @@ class Pomodoro(BaseWidget):
         tasks_frame = Frame(self, style='pomodoro.TFrame')
         tasks_frame.grid(row=3, column=0, columnspan=3, sticky="wnse")
         tasks = [t.capitalize() for t in CONFIG.options("PomodoroTasks")]
+        tasks.sort()
         self.task = StringVar(self, tasks[0])
-        self.menu_tasks = Menu(tasks_frame, tearoff=False)
+        self.menu_tasks = Menu(tasks_frame, relief='sunken', activeborderwidth=0)
         self.choose_task = Menubutton(tasks_frame, textvariable=self.task,
                                       menu=self.menu_tasks, style='pomodoro.TMenubutton')
         Label(tasks_frame,
@@ -137,6 +138,7 @@ class Pomodoro(BaseWidget):
     def update_style(self):
         self.menu_tasks.delete(0, 'end')
         tasks = [t.capitalize() for t in CONFIG.options('PomodoroTasks')]
+        tasks.sort()
         for task in tasks:
             self.menu_tasks.add_radiobutton(label=task, value=task,
                                             variable=self.task)
@@ -163,6 +165,12 @@ class Pomodoro(BaseWidget):
         self.style.map('pomodoro.TMenubutton', background=[('disabled', bg),
                                                            ('!disabled', 'active', active_bg)])
         self.configure(bg=bg)
+        self.menu.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
+                            activebackground=active_bg)
+        self.menu_pos.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
+                                activebackground=active_bg)
+        self.menu_tasks.configure(bg=bg, activebackground=active_bg, fg=fg,
+                                  selectcolor=fg, activeforeground=fg)
         self.background = {_("Work"): CONFIG.get("Pomodoro", "work_bg"),
                            _("Break"): CONFIG.get("Pomodoro", "break_bg"),
                            _("Rest"): CONFIG.get("Pomodoro", "rest_bg")}
@@ -246,12 +254,13 @@ class Pomodoro(BaseWidget):
     def go(self):
         if self.on:
             self.on = False
+            self.choose_task.state(["!disabled"])
             self.b_go.configure(image=self.im_go)
             if self.activite.get() == _("Work"):
                 self.stop()
         else:
             self.on = True
-            self.choose_task.config(state="disabled")
+            self.choose_task.state(["disabled"])
             self.b_go.configure(image=self.im_stop)
             self.after(1000, self.affiche)
 
@@ -277,7 +286,6 @@ class Pomodoro(BaseWidget):
             self.style.configure('timer.pomodoro.TLabel',
                                  background=self.background[act],
                                  foreground=self.foreground[act])
-            self.choose_task.config(state="normal")
         else:
             self.on = True
             self.affiche()

@@ -24,7 +24,7 @@ Event desktop widget
 
 from tkinter import Canvas
 from tkinter.ttk import Label, Separator, Sizegrip, Frame
-from schedulerlib.constants import CONFIG
+from schedulerlib.constants import CONFIG, active_color
 from schedulerlib.ttkwidgets import AutoScrollbar, ToggledFrame
 from .base_widget import BaseWidget
 from datetime import datetime, timedelta
@@ -38,7 +38,7 @@ class EventWidget(BaseWidget):
         self.columnconfigure(0, weight=1)
 
         # --- elements
-        label = Label(self, text='EVENTS', style='title.Events.TLabel',
+        label = Label(self, text=_('Events').upper(), style='title.Events.TLabel',
                       anchor='center')
         label.grid(row=0, columnspan=2, pady=4, sticky='ew')
         Separator(self, style='Events.TSeparator').grid(row=1, columnspan=2, sticky='we')
@@ -77,6 +77,8 @@ class EventWidget(BaseWidget):
     def update_style(self):
         bg = CONFIG.get('Events', 'background')
         fg = CONFIG.get('Events', 'foreground')
+        r, g, b = self.winfo_rgb(bg)
+        active_bg = active_color(r * 255 / 65535, g * 255 / 65535, b * 255 / 65535)
         self.attributes('-alpha', CONFIG.get(self.name, 'alpha', fallback=0.85))
         self.style.configure('Events.TFrame', background=bg)
         self.style.configure('Events.TSizegrip', background=bg)
@@ -89,6 +91,10 @@ class EventWidget(BaseWidget):
                              font=CONFIG.get('Events', 'font_day'))
         self.style.configure('Toggle', background=bg)
         self.configure(bg=bg)
+        self.menu_pos.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
+                                activebackground=active_bg)
+        self.menu.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
+                            activebackground=active_bg)
         self.canvas.configure(bg=bg)
 
     def _scroll(self, delta):

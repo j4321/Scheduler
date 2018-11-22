@@ -2,15 +2,15 @@
 # -*-coding:Utf-8 -*
 
 """
-WorkHourGlass - Enhance your efficiency by timing your work and breaks
+Scheduler - Task scheduling and calendar
 Copyright 2015-2017 Juliette Monsel <j_4321@protonmail.com>
 
-WorkHourGlass is free software: you can redistribute it and/or modify
+Scheduler is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-WorkHourGlass  is distributed in the hope that it will be useful,
+Scheduler is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
@@ -206,6 +206,7 @@ class PomodoroParams(Frame):
         can.create_window(0, 0, anchor='nw', window=self.task_frame)
 
         tasks = CONFIG.options("PomodoroTasks")
+        tasks.sort()
         cmap = [CONFIG.get("PomodoroTasks", task) for task in tasks]
         self.tasks = {}
         self._tasks_btns = {}

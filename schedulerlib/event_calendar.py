@@ -508,7 +508,7 @@ class EventCalendar(Calendar):
             if start <= date2 and (end is None or end >= date2):
                 evts.append((desc, iid))
 
-        self._menu.add_command(label='New Event',
+        self._menu.add_command(label=_('New Event'),
                                command=lambda: self.master.master.add(date))
         if evts:
             self._menu.add_separator()
@@ -520,15 +520,15 @@ class EventCalendar(Calendar):
                                           label="Edit %s" % desc,
                                           command=lambda i=iid: self.master.master.edit(i))
                 index_edit += 1
-                self._menu.add_command(label="Delete %s" % desc,
+                self._menu.add_command(label=_("Delete") + " %s" % desc,
                                        command=lambda i=iid: self.master.master.delete(i))
         else:
             self._menu.add_separator()
             if date.strftime('%Y/%m/%d') in HOLIDAYS:
-                self._menu.add_command(label='Remove Holiday',
+                self._menu.add_command(label=_('Remove Holiday'),
                                        command=lambda: self.remove_holiday(date.date()))
             else:
-                self._menu.add_command(label='Set Holiday',
+                self._menu.add_command(label=_('Set Holiday'),
                                        command=lambda: self.add_holiday(date.date()))
 
         self._menu.tk_popup(event.x_root, event.y_root)
