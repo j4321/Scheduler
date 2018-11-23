@@ -34,20 +34,15 @@ class CalendarWidget(BaseWidget):
         """
         Create a CalendarWidget that sticks on the desktop.
 
-        OPTIONS
-
-            the same as EventCalendar
-
+        kw: the same as EventCalendar
         """
-        BaseWidget.__init__(self, 'Calendar', master)
+        BaseWidget.__init__(self, 'Calendar', master, **kw)
 
+    def create_content(self, **kw):
         self._calendar = EventCalendar(self, **kw)
         self._calendar.pack(padx=1, pady=1)
-
-        # --- events
         for ev in self.master.events.values():
             self._calendar.add_event(ev)
-
         # --- bindings
         self._calendar.bind('<3>', lambda e: self.menu.tk_popup(e.x_root, e.y_root))
         self.bind('<ButtonPress-1>', self._start_move)

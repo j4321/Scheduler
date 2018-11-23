@@ -102,10 +102,10 @@ class Settings(tk.Toplevel):
                        menu=menu_lang).pack(side="left", padx=4)
         # --- gui toolkit
         frame_gui = ttk.Frame(self.frames[_('General')])
-        ttk.Label(frame_gui, wraplength=250,
+        ttk.Label(frame_gui,
                   text=_("GUI Toolkit for the system tray icon")).pack(side="left")
         menu_gui = tk.Menu(frame_gui)
-        ttk.Menubutton(frame_gui, menu=menu_gui, width=9, padding=1,
+        ttk.Menubutton(frame_gui, menu=menu_gui, width=4, padding=1,
                        textvariable=self.gui).pack(side="left", padx=4)
 
         for toolkit, b in TOOLKITS.items():

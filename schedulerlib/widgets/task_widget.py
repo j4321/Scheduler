@@ -33,6 +33,7 @@ class TaskWidget(BaseWidget):
     def __init__(self, master):
         BaseWidget.__init__(self, 'Tasks', master)
 
+    def create_content(self, **kw):
         self.rowconfigure(2, weight=1)
         self.columnconfigure(0, weight=1)
         self.minsize(50, 50)

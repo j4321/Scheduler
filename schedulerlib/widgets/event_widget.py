@@ -33,11 +33,12 @@ from datetime import datetime, timedelta
 class EventWidget(BaseWidget):
     def __init__(self, master):
         BaseWidget.__init__(self, 'Events', master)
+
+    def create_content(self, **kw):
         self.minsize(50, 50)
         self.rowconfigure(2, weight=1)
         self.columnconfigure(0, weight=1)
 
-        # --- elements
         label = Label(self, text=_('Events').upper(), style='title.Events.TLabel',
                       anchor='center')
         label.grid(row=0, columnspan=2, pady=4, sticky='ew')

@@ -37,6 +37,8 @@ class Pomodoro(BaseWidget):
     """ Chronometre de temps de travail pour plus d'efficacité """
     def __init__(self, master):
         BaseWidget.__init__(self, 'Pomodoro', master)
+
+    def create_content(self, **kw):
         self.minsize(190, 190)
 
         self.on = False  # is the timer on?

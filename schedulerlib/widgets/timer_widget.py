@@ -16,6 +16,7 @@ class Timer(BaseWidget):
     def __init__(self, master):
         BaseWidget.__init__(self, 'Timer', master)
 
+    def create_content(self, **kw):
         self.minsize(50, 120)
 
         self._time = [0, 0, 0]

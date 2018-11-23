@@ -46,6 +46,7 @@ class BaseWidget(Toplevel):
 
         self.ewmh = EWMH()
         self.title('scheduler.{}'.format(self.name.lower()))
+
         self.withdraw()
 
         # control main menu checkbutton
@@ -55,11 +56,7 @@ class BaseWidget(Toplevel):
         self.menu = Menu(self, relief='sunken', activeborderwidth=0)
         self._populate_menu()
 
-        # --- geometry
-        geometry = CONFIG.get(self.name, 'geometry')
-        self.update_idletasks()
-        if geometry:
-            self.geometry(geometry)
+        self.create_content(**kw)
 
         self.x = None
         self.y = None
@@ -69,6 +66,16 @@ class BaseWidget(Toplevel):
 
         if CONFIG.getboolean(self.name, 'visible', fallback=True):
             self.show()
+
+        # --- geometry
+        geometry = CONFIG.get(self.name, 'geometry')
+        self.update_idletasks()
+        if geometry:
+            self.geometry(geometry)
+
+    def create_content(self):
+        # to be overriden by subclass
+        pass
 
     def _populate_menu(self):
         self.menu_pos = Menu(self.menu, relief='sunken', activeborderwidth=0)
