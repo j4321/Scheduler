@@ -26,14 +26,10 @@ from tkinter import Toplevel, PhotoImage, Text, Spinbox, BooleanVar, StringVar
 from tkinter.ttk import Entry, Label, Button, Frame, Style, Combobox
 from tkinter.ttk import Radiobutton, Checkbutton, Notebook
 from schedulerlib.constants import IM_BELL, IM_MOINS, CONFIG, \
-    TASK_REV_TRANSLATION, FREQ_REV_TRANSLATION
+    TASK_REV_TRANSLATION, FREQ_REV_TRANSLATION, only_nb
 from schedulerlib.ttkcalendar import DateEntry, get_calendar
 from schedulerlib.ttkwidgets import LabelFrame
 from datetime import timedelta, time, datetime
-
-
-def only_nb(text):
-    return text == '' or text.isdigit()
 
 
 class Form(Toplevel):

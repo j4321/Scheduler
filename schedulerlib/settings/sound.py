@@ -29,16 +29,17 @@ import os
 
 
 class SoundFrame(ttk.Frame):
-    def __init__(self, master=None, soundfile='', mute=False, label=''):
+    def __init__(self, master=None, soundfile='', mute=False, label='', **kw):
         ttk.Frame.__init__(self, master)
         self.columnconfigure(0, weight=1)
 
         self.mute = tk.BooleanVar(self, mute)
         frame = ttk.Frame(self)
-        ttk.Label(frame, text=label,
-                  style='title.TLabel').pack(side='left', pady=4, padx=(0, 4))
-        ttk.Checkbutton(frame, variable=self.mute, command=self._toggle,
-                        style='Mute').pack(side='left', pady=4, padx=6)
+        self.label = ttk.Label(frame, text=label, **kw)
+        self.label.pack(side='left', pady=4, padx=(0, 4))
+        self.mute_btn = ttk.Checkbutton(frame, variable=self.mute,
+                                        command=self._toggle, style='Mute')
+        self.mute_btn.pack(side='left', pady=4, padx=6)
         self.path = ttk.Entry(self)
         self._soundfile = soundfile
         self.path.insert(0, soundfile)
@@ -49,6 +50,13 @@ class SoundFrame(ttk.Frame):
         self.path.grid(column=0, row=1, sticky='ew', padx=(4, 0))
         self.b_choose.grid(column=1, row=1, padx=(2, 4))
         self._toggle()
+
+    def state(self, statespec=None):
+        self.path.state(statespec)
+        self.b_choose.state(statespec)
+        self.mute_btn.state(statespec)
+        self.label.state(statespec)
+        return ttk.Frame.state(self, statespec)
 
     def _toggle(self):
         if self.mute.get():

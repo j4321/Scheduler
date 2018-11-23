@@ -25,7 +25,7 @@ from tkinter import Tk
 from tkinter.ttk import Label, Button, Style
 import sys
 from schedulerlib.constants import CONFIG, ICON_NAME
-from subprocess import Popen, call
+from subprocess import Popen
 
 
 class Notification(Tk):
@@ -54,10 +54,14 @@ class Notification(Tk):
         self.alarm_id = ''
         self.alarm_process = None
         self.blink_id = ''
+        self.timeout_id = ''
         if CONFIG.getboolean('Reminders', 'blink'):
             self.blink_id = self.after(500, self.blink)
         if not CONFIG.getboolean("Reminders", "mute", fallback=False):
             self.alarm()
+        timeout = CONFIG.getint('Reminders', 'timeout') * 60 * 1000
+        if timeout > 0:
+            self.timeout_id = self.after(timeout, self.quit)
 
     def alarm(self):
         self.alarm_process = Popen([CONFIG.get("General", "soundplayer"),
@@ -79,6 +83,10 @@ class Notification(Tk):
             self.after_cancel(self.blink_id)
         except ValueError:
             pass
+        try:
+            self.after_cancel(self.timeout_id)
+        except ValueError:
+            pass
         if self.alarm_process is not None:
             self.alarm_process.terminate()
         self.destroy()
@@ -97,6 +105,7 @@ class Notification(Tk):
 
 
 if __name__ == '__main__':
+    print(sys.argv)
     if len(sys.argv) > 1:
         text = sys.argv[1]
         if CONFIG.getboolean('Reminders', 'notification', fallback=True):

@@ -31,7 +31,8 @@ from apscheduler.schedulers import SchedulerNotRunningError
 from datetime import datetime, timedelta
 from schedulerlib.constants import ICON48, ICON, IM_PLUS, CONFIG, IM_DOT, JOBSTORE, \
     DATA_PATH, BACKUP_PATH, IM_SCROLL_ALPHA, active_color, backup, add_trace, \
-    IM_SOUND, IM_MUTE, IM_CLOSED, IM_OPENED, IM_CLOSED_SEL, IM_OPENED_SEL
+    IM_SOUND, IM_MUTE, IM_SOUND_DIS, IM_MUTE_DIS, IM_CLOSED, IM_OPENED, \
+    IM_CLOSED_SEL, IM_OPENED_SEL
 from schedulerlib.trayicon import TrayIcon, SubMenu
 from schedulerlib.form import Form
 from schedulerlib.event import Event
@@ -187,10 +188,15 @@ class EventScheduler(Tk):
                                             'sticky': 'nswe'})],
                              'sticky': 'nswe'})])
         # toggle sound
-        self._im_son = PhotoImage(master=self, file=IM_SOUND)
+        self._im_sound = PhotoImage(master=self, file=IM_SOUND)
         self._im_mute = PhotoImage(master=self, file=IM_MUTE)
-        self.style.element_create('mute', 'image', self._im_son,
-                                  ('selected', self._im_mute), border=2, sticky='')
+        self._im_sound_dis = PhotoImage(master=self, file=IM_SOUND_DIS)
+        self._im_mute_dis = PhotoImage(master=self, file=IM_MUTE_DIS)
+        self.style.element_create('mute', 'image', self._im_sound,
+                                  ('selected', '!disabled', self._im_mute),
+                                  ('selected', 'disabled', self._im_mute_dis),
+                                  ('!selected', 'disabled', self._im_sound_dis),
+                                  border=2, sticky='')
         self.style.layout('Mute',
                           [('Mute.border',
                             {'children': [('Mute.padding',

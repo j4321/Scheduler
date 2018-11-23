@@ -30,7 +30,7 @@ from .sound import SoundFrame
 from .opacity import OpacityFrame
 from .pomodoro_params import PomodoroParams
 from schedulerlib.constants import save_config, CONFIG, LANGUAGES, REV_LANGUAGES, \
-    TOOLKITS, IM_PLUS, IM_MOINS, valide_entree_nb
+    TOOLKITS, IM_PLUS, IM_MOINS, only_nb
 from schedulerlib.messagebox import showerror, showinfo, askyesno
 from schedulerlib.ttkwidgets import AutoScrollbar
 from PIL.ImageTk import PhotoImage
@@ -43,6 +43,8 @@ class Settings(tk.Toplevel):
         self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
         self.minsize(574, 565)
+
+        self._only_nb = self.register(only_nb)
 
         self._im_plus = PhotoImage(master=self, file=IM_PLUS)
         self._im_moins = PhotoImage(master=self, file=IM_MOINS)
@@ -124,14 +126,13 @@ class Settings(tk.Toplevel):
 
         # --- eyes
         frame_eyes = ttk.Frame(self.frames[_('General')])
-        valid_entry_nb = self.register(valide_entree_nb)
         ttk.Label(frame_eyes, text=_("Eyes' rest"),
                   style='title.TLabel').grid(sticky='w', padx=4, pady=4)
         ttk.Label(frame_eyes,
                   text=_("Interval between two eyes' rest (min)")).grid(row=1, column=0, sticky='w', padx=4, pady=4)
         self.eyes_interval = ttk.Entry(frame_eyes, width=4, justify='center',
                                        validate='key',
-                                       validatecommand=(valid_entry_nb, '%d', '%S'))
+                                       validatecommand=(self._only_nb, '%P'))
         self.eyes_interval.insert(0, CONFIG.get("General", "eyes_interval", fallback='20'))
         self.eyes_interval.grid(row=1, column=1, sticky='w', padx=4, pady=4)
 
@@ -158,21 +159,39 @@ class Settings(tk.Toplevel):
         pass  # already done in custom class
 
     def _init_reminders(self):
-        # --- reminders
+
+        def toggle_window():
+            b = 'selected' in self.reminders_window.state()
+            state = [b * '!' + 'disabled']
+            label.state(state)
+            self.reminders_timeout.state(state)
+            self.reminders_blink.state(state)
+            self.reminders_sound.state(state)
+
         frame_window = ttk.Frame(self.frames[_('Reminders')])
-        frame_window.columnconfigure(0, weight=1)
+        frame_window.columnconfigure(1, weight=1)
         self.reminders_window = ttk.Checkbutton(frame_window, text=_('Banner'),
-                                                style='title.TCheckbutton')
-        self.reminders_window.grid(sticky='w', pady=4)
+                                                style='title.TCheckbutton',
+                                                command=toggle_window)
+        self.reminders_window.grid(sticky='w', row=0, columnspan=2, column=0, pady=4)
         self.reminders_window.state(('!alternate',
                                      '!' * (not CONFIG.getboolean('Reminders', 'window')) + 'selected'))
+        label = ttk.Label(frame_window, text=_('Timeout (min)'))
+        label.grid(row=1, column=0, sticky='w', padx=(12, 2), pady=4)
+        self.reminders_timeout = ttk.Entry(frame_window, width=5, justify='center',
+                                           validate='key',
+                                           validatecommand=(self._only_nb, '%P'))
+        self.reminders_timeout.insert(0, CONFIG.get('Reminders', 'timeout'))
+        self.reminders_timeout.grid(row=1, column=1, sticky='w', padx=(2, 4), pady=4)
         self.reminders_blink = ttk.Checkbutton(frame_window, text=_('Blink'))
-        self.reminders_blink.grid(sticky='w', padx=(12, 4), pady=4)
+        self.reminders_blink.grid(sticky='w', row=2, columnspan=2, column=0,
+                                  padx=(12, 4), pady=4)
         self.reminders_blink.state(('!alternate',
                                     '!' * (not CONFIG.getboolean('Reminders', 'blink')) + 'selected'))
         self.reminders_sound = SoundFrame(frame_window, CONFIG.get('Reminders', 'alarm'),
                                           CONFIG.get('Reminders', 'mute'), _('Alarm'))
-        self.reminders_sound.grid(sticky='ew', padx=(12, 4), pady=4)
+        self.reminders_sound.grid(sticky='ew', columnspan=2, row=3, column=0,
+                                  padx=(12, 4), pady=4)
 
         frame_notif = ttk.Frame(self.frames[_('Reminders')])
         self.reminders_notif = ttk.Checkbutton(frame_notif, text=_('Notification'),
@@ -520,9 +539,9 @@ class Settings(tk.Toplevel):
         CONFIG.set("General", "trayicon", self.gui.get().lower())
         # CONFIG.set("General", "check_update", str('selected' in self.confirm_update.state()))
         eyes = self.eyes_interval.get()
-        if not eyes:
-            eyes = 20
-        CONFIG.set("General", "eyes_interval", str(eyes))
+        if eyes == '':
+            eyes = '20'
+        CONFIG.set("General", "eyes_interval", eyes)
         CONFIG.set("General", "soundplayer", self.player.get())
         # --- Reminders
         CONFIG.set("Reminders", 'window', str("selected" in self.reminders_window.state()))
@@ -530,6 +549,10 @@ class Settings(tk.Toplevel):
         CONFIG.set("Reminders", 'notification', str("selected" in self.reminders_notif.state()))
         alarm, mute = self.reminders_sound.get()
         CONFIG.set("Reminders", 'alarm', alarm)
+        timeout = self.reminders_timeout.get()
+        if timeout == '':
+            timeout = '5'
+        CONFIG.set("Reminders", 'timeout', timeout)
         CONFIG.set("Reminders", 'mute', str(mute))
         # --- Calendar
         CONFIG.set("Calendar", "alpha", "%.2f" % (self.cal_opacity.get_opacity()))

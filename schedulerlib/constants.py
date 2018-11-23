@@ -114,11 +114,13 @@ if not CONFIG.read(CONFIG_PATH):
     CONFIG.set("General", "eyes_interval", "20")
     CONFIG.set("General", "soundplayer", "")
 
-    CONFIG.add_section('Reminder')
-    CONFIG.set('Reminder', 'window', 'True')
-    CONFIG.set('Reminder', 'notification', 'True')
-    CONFIG.set('Reminder', 'sound', 'False')
-    CONFIG.set('Reminder', 'blink', '500')
+    CONFIG.add_section('Reminders')
+    CONFIG.set('Reminders', 'window', 'True')
+    CONFIG.set('Reminders', 'notification', 'True')
+    CONFIG.set('Reminders', 'mute', 'True')
+    CONFIG.set('Reminders', 'alarm', os.path.join(PATH_SOUNDS, 'alarm.wav'))
+    CONFIG.set('Reminders', 'blink', 'True')
+    CONFIG.set('Reminders', 'timeout', '5')
 
     CONFIG.add_section('Events')
     CONFIG.set('Events', 'geometry', '')
@@ -210,6 +212,7 @@ if not CONFIG.has_section('Reminders'):
     CONFIG.set('Reminders', 'mute', 'True')
     CONFIG.set('Reminders', 'alarm', os.path.join(PATH_SOUNDS, 'alarm.wav'))
     CONFIG.set('Reminders', 'blink', 'True')
+    CONFIG.set('Reminders', 'timeout', '5')
 
 
 def save_config():
@@ -299,6 +302,8 @@ IM_GRAPH = os.path.join(PATH_IMAGES, "graph.png")
 IM_COLOR = os.path.join(PATH_IMAGES, "color.png")
 IM_SOUND = os.path.join(PATH_IMAGES, "son.png")
 IM_MUTE = os.path.join(PATH_IMAGES, "mute.png")
+IM_SOUND_DIS = os.path.join(PATH_IMAGES, "son_dis.png")
+IM_MUTE_DIS = os.path.join(PATH_IMAGES, "mute_dis.png")
 IM_CLOSED = os.path.join(PATH_IMAGES, 'closed.png')
 IM_OPENED = os.path.join(PATH_IMAGES, 'open.png')
 IM_CLOSED_SEL = os.path.join(PATH_IMAGES, 'closed_sel.png')
@@ -718,10 +723,5 @@ def active_color(r, g, b, output='HTML'):
         return (round(r), round(g), round(b))
 
 
-def valide_entree_nb(d, S):
-    """ commande de validation des champs devant contenir
-        seulement des chiffres """
-    if d == '1':
-        return S.isdigit()
-    else:
-        return True
+def only_nb(text):
+    return text == '' or text.isdigit()

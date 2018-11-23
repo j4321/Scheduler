@@ -22,12 +22,11 @@ Settings GUI
 """
 
 import os
-from tkinter import BooleanVar, Canvas, Toplevel
-from tkinter.ttk import Notebook, Style, Label, Separator, Frame, Entry, \
-    Button, Checkbutton
+from tkinter import Canvas, Toplevel
+from tkinter.ttk import Notebook, Style, Label, Separator, Frame, Entry, Button
 from tkinter.messagebox import showerror, askyesno
-from schedulerlib.constants import IM_COLOR, valide_entree_nb, CONFIG, askcolor, \
-    askopenfilename, CMAP, IM_PLUS, IM_MOINS, PATH_STATS, save_config
+from schedulerlib.constants import IM_COLOR, only_nb, CONFIG, askcolor, \
+    CMAP, IM_PLUS, IM_MOINS, PATH_STATS, save_config
 from schedulerlib.ttkwidgets import AutoScrollbar
 from PIL.ImageTk import PhotoImage
 from .color import ColorFrame
@@ -48,7 +47,7 @@ class PomodoroParams(Frame):
         self.im_plus = PhotoImage(master=self, file=IM_PLUS)
         self.im_moins = PhotoImage(master=self, file=IM_MOINS)
 
-        self.okfct = self.register(valide_entree_nb)
+        self.okfct = self.register(only_nb)
 
         self.style = Style(self)
 
@@ -66,19 +65,19 @@ class PomodoroParams(Frame):
         self.time_frame.grid(row=0, column=1, sticky="w", padx=4)
         Label(self.time_frame, text=_("Work")).grid(row=0, padx=4, column=0)
         self.travail = Entry(self.time_frame, width=4, justify='center',
-                             validatecommand=(self.okfct, '%d', '%S'),
+                             validatecommand=(self.okfct, '%P'),
                              validate='key')
         self.travail.insert(0, CONFIG.get("Pomodoro", "work_time"))
         self.travail.grid(row=0, column=1, padx=(0, 10))
         Label(self.time_frame, text=_("Break")).grid(row=0, column=2, padx=4)
         self.pause = Entry(self.time_frame, width=4, justify='center',
-                           validatecommand=(self.okfct, '%d', '%S'),
+                           validatecommand=(self.okfct, '%P'),
                            validate='key')
         self.pause.insert(0, CONFIG.get("Pomodoro", "break_time"))
         self.pause.grid(row=0, column=3, padx=(0, 10))
         Label(self.time_frame, text=_("Rest")).grid(row=0, column=4, padx=4)
         self.rest = Entry(self.time_frame, width=4, justify='center',
-                          validatecommand=(self.okfct, '%d', '%S'),
+                          validatecommand=(self.okfct, '%P'),
                           validate='key')
         self.rest.insert(0, CONFIG.get("Pomodoro", "rest_time"))
         self.rest.grid(row=0, column=5)
@@ -109,7 +108,7 @@ class PomodoroParams(Frame):
         # --- --- Son
         self.sound = SoundFrame(self.general, CONFIG.get("Pomodoro", "beep"),
                                 mute=CONFIG.getboolean("Pomodoro", "mute"),
-                                label=_("Sound"))
+                                label=_("Sound"), style='title.TLabel')
         self.sound.grid(row=7, columnspan=2, sticky='ew', pady=4)
 
         # --- Couleurs
