@@ -403,6 +403,7 @@ class Form(Toplevel):
                 self.start_min.set(self.end_min.get())
 
     def add_reminder(self, date=None):
+
         def remove():
             self.alarms.remove((when, what))
             rem.destroy()
