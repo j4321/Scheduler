@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Pomodoro widget
 """
+
 from subprocess import Popen
 from tkinter import StringVar, Menu, IntVar, PhotoImage
 from tkinter.ttk import Button, Label, Frame, Menubutton, Sizegrip
@@ -27,11 +28,9 @@ from tkinter.messagebox import askyesno
 import os
 import datetime as dt
 from schedulerlib.constants import CONFIG, CMAP, PATH_STATS, IM_PLAY, \
-    STOP, IM_POMODORO, IM_PARAMS, IM_GRAPH, active_color
+    STOP, IM_POMODORO, IM_GRAPH, active_color
 from .base_widget import BaseWidget
 from schedulerlib.pomodoro_stats import Stats
-
-# TODO: fix task deletion
 
 
 class Pomodoro(BaseWidget):
@@ -67,7 +66,6 @@ class Pomodoro(BaseWidget):
         # --- images
         self.im_go = PhotoImage(master=self, file=IM_PLAY)
         self.im_stop = PhotoImage(master=self, file=STOP)
-        self.im_params = PhotoImage(master=self, file=IM_PARAMS)
         self.im_tomate = PhotoImage(master=self, file=IM_POMODORO)
         self.im_graph = PhotoImage(master=self, file=IM_GRAPH)
 
@@ -213,32 +211,30 @@ class Pomodoro(BaseWidget):
         BaseWidget.hide(self)
 
     def stats(self, time=None):
-        """ Enregistre la durée de travail (en min) effectuée ce jour pour la
-            tâche qui vient d'être interrompue.
-            Seul les pomodori complets sont pris en compte. """
+        """Save stats."""
         if time is None:
             time = CONFIG.getint("Pomodoro", "work_time")
         # TODO: translate, correct date/time format
         # la tâche en cours a été travaillée, il faut enregistrer les stats
         date = dt.date.today()
         task = self.task.get()
-        chemin = os.path.join(PATH_STATS, "_".join(task.split(" ")))
-        if not os.path.exists(chemin):
-            with open(chemin, 'w') as fich:
-                fich.write("# tâche : %s\n# jour\tmois\tannée\ttemps de travail (min)\n" % task)
-        with open(chemin, 'r') as fich:
+        path = os.path.join(PATH_STATS, "_".join(task.split(" ")))
+        if not os.path.exists(path):
+            with open(path, 'w') as fich:
+                fich.write(_("# task: {task_name}\n# day\tmonth\tyear\twork time (min)\n").format(task_name=task))
+        with open(path, 'r') as fich:
             stats = fich.readlines()
         if len(stats) > 2:
             last = stats[-1][:10], stats[-1][:-1].split("\t")[-1]
         else:
             last = "", 0
         if last[0] != date.strftime("%d\t%m\t%Y"):
-            with open(chemin, 'a') as fich:
+            with open(path, 'a') as fich:
                 fich.write("%s\t%i\n" % (date.strftime("%d\t%m\t%Y"), time))
         else:
             # un nombre a déjà été enregistré plus tôt dans la journée
             # il faut les additioner
-            with open(chemin, 'w') as fich:
+            with open(path, 'w') as fich:
                 fich.writelines(stats[:-1])
                 fich.write("%s\t%i\n" % (date.strftime("%d\t%m\t%Y"),
                            time + int(last[1])))
@@ -256,8 +252,7 @@ class Pomodoro(BaseWidget):
             self.on = False
             self.choose_task.state(["!disabled"])
             self.b_go.configure(image=self.im_go)
-            if self.activite.get() == _("Work"):
-                self.stop()
+            self.stop()
         else:
             self.on = True
             self.choose_task.state(["disabled"])
@@ -290,10 +285,11 @@ class Pomodoro(BaseWidget):
             self.on = True
             self.affiche()
 
-    def ting(self):
+    @staticmethod
+    def ting():
         """ joue le son marquant le changement de période """
         if not CONFIG.getboolean("Pomodoro", "mute", fallback=False):
-            Popen([CONFIG.get("Pomodoro", "player"),
+            Popen([CONFIG.get("General", "soundplayer"),
                    CONFIG.get("Pomodoro", "beep")])
 
     def affiche(self):
@@ -305,6 +301,7 @@ class Pomodoro(BaseWidget):
                     if self.activite.get() == _("Work"):
                         self.pomodori.set(self.pomodori.get() + 1)
                         self.nb_cycles += 1
+                        self.choose_task.state(["!disabled"])
                         if self.nb_cycles % 4 == 0:
                             # pause longue
                             self.stats()
@@ -316,6 +313,7 @@ class Pomodoro(BaseWidget):
                             self.activite.set(_("Break"))
                             self.tps = [CONFIG.getint("Pomodoro", "break_time"), 0]
                     else:
+                        self.choose_task.state(["disabled"])
                         self.activite.set(_("Work"))
                         self.tps = [CONFIG.getint("Pomodoro", "work_time"), 0]
                     act = self.activite.get()

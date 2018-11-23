@@ -112,6 +112,7 @@ if not CONFIG.read(CONFIG_PATH):
     CONFIG.set('General', 'trayicon', '')
     CONFIG.set("General", "language", "")
     CONFIG.set("General", "eyes_interval", "20")
+    CONFIG.set("General", "soundplayer", "")
 
     CONFIG.add_section('Reminder')
     CONFIG.set('Reminder', 'window', 'True')
@@ -198,17 +199,17 @@ if not CONFIG.has_section('Pomodoro'):
     CONFIG.set("Pomodoro", "rest_bg", "#FF7A40")
     CONFIG.set("Pomodoro", "rest_fg", "#000000")
     CONFIG.set("Pomodoro", "beep", os.path.join(PATH_SOUNDS, 'ting.wav'))
-    CONFIG.set("Pomodoro", "player", "")
     CONFIG.set("Pomodoro", "mute", "False")
 
     CONFIG.add_section("PomodoroTasks")
 
-if not CONFIG.has_section('Reminder'):
-    CONFIG.add_section('Reminder')
-    CONFIG.set('Reminder', 'window', 'True')
-    CONFIG.set('Reminder', 'notification', 'True')
-    CONFIG.set('Reminder', 'sound', 'False')
-    CONFIG.set('Reminder', 'blink', '500')
+if not CONFIG.has_section('Reminders'):
+    CONFIG.add_section('Reminders')
+    CONFIG.set('Reminders', 'window', 'True')
+    CONFIG.set('Reminders', 'notification', 'True')
+    CONFIG.set('Reminders', 'mute', 'True')
+    CONFIG.set('Reminders', 'alarm', os.path.join(PATH_SOUNDS, 'alarm.wav'))
+    CONFIG.set('Reminders', 'blink', 'True')
 
 
 def save_config():
@@ -254,15 +255,15 @@ if not CONFIG.options("PomodoroTasks"):
     CONFIG.set("PomodoroTasks", _("Work"), CMAP[0])
 
 # --- default sound player
-if not CONFIG.get("Pomodoro", "player"):
+if not CONFIG.get("General", "soundplayer", fallback=''):
     if os.path.exists("/usr/bin/aplay"):
-        CONFIG.set("Pomodoro", "player", "aplay")
+        CONFIG.set("General", "soundplayer", "aplay")
     elif os.path.exists("/usr/bin/paplay"):
-        CONFIG.set("Pomodoro", "player", "paplay")
+        CONFIG.set("General", "soundplayer", "paplay")
     elif os.path.exists("/usr/bin/mpg123"):
-        CONFIG.set("Pomodoro", "player", "mpg123")
+        CONFIG.set("General", "soundplayer", "mpg123")
     elif os.path.exists("/usr/bin/cvlc"):
-        CONFIG.set("Pomodoro", "player", "cvlc")
+        CONFIG.set("General", "soundplayer", "cvlc")
     else:
         top = Toplevel()
         top.resizable((0, 0))
@@ -275,7 +276,7 @@ you can install mpg123.")).grid(row=0, columnspan=2)
         player.grid(row=1, columnspan=2, sticky="ew")
 
         def valide():
-            CONFIG.set("Pomodoro", "player", player.get())
+            CONFIG.set("General", "soundplayer", player.get())
             top.destroy()
 
         Button(top, _("Cancel"), command=top.destroy).grid(row=2, column=0)
@@ -295,7 +296,6 @@ IM_PAUSE = os.path.join(PATH_IMAGES, 'pause.png')
 STOP = os.path.join(PATH_IMAGES, 'stop.png')
 IM_POMODORO = os.path.join(PATH_IMAGES, "tomate.png")
 IM_GRAPH = os.path.join(PATH_IMAGES, "graph.png")
-IM_PARAMS = os.path.join(PATH_IMAGES, "params.png")
 IM_COLOR = os.path.join(PATH_IMAGES, "color.png")
 IM_SOUND = os.path.join(PATH_IMAGES, "son.png")
 IM_MUTE = os.path.join(PATH_IMAGES, "mute.png")

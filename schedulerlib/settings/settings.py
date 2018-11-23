@@ -26,6 +26,7 @@ import tkinter as tk
 from tkinter import ttk
 from .font import FontFrame
 from .color import ColorFrame
+from .sound import SoundFrame
 from .opacity import OpacityFrame
 from .pomodoro_params import PomodoroParams
 from schedulerlib.constants import save_config, CONFIG, LANGUAGES, REV_LANGUAGES, \
@@ -54,9 +55,11 @@ class Settings(tk.Toplevel):
         self.listbox.pack(fill='both', expand=True)
         frame.grid(row=0, column=0, sticky='ns', padx=4, pady=4)
 
-        cats = ['General', 'Calendar', 'Events', 'Pomodoro', 'Tasks', 'Timer']
+        # --- tabs
+        cats = ['General', 'Reminders', 'Calendar', 'Events', 'Pomodoro', 'Tasks', 'Timer']
         self.frames = {}
         self.frames[_('General')] = ttk.Frame(self, relief='raised', border=1, padding=10)
+        self.frames[_('Reminders')] = ttk.Frame(self, relief='raised', border=1, padding=10)
         self.frames[_('Events')] = ttk.Frame(self, relief='raised', border=1, padding=10)
         self.frames[_('Tasks')] = ttk.Frame(self, relief='raised', border=1, padding=10)
         self.frames[_('Timer')] = ttk.Frame(self, relief='raised', border=1, padding=10)
@@ -67,12 +70,7 @@ class Settings(tk.Toplevel):
             self.listbox.insert('end', _(cat) + ' ')
             self.frames[_(cat)].grid(row=0, column=1, sticky='ewns', padx=4, pady=4)
             self.frames[_(cat)].grid_remove()
-
-        self._init_general()
-        self._init_calendar()
-        self._init_events()
-        self._init_tasks()
-        self._init_timer()
+            self.__getattribute__('_init_{}'.format(cat.lower()))()
 
         self._current_frame = self.frames[_('General')]
         self._current_frame.grid()
@@ -94,7 +92,7 @@ class Settings(tk.Toplevel):
         # --- Langue
         lang_frame = ttk.Frame(self.frames[_('General')])
 
-        ttk.Label(lang_frame, text=_("Language"), style='subtitle.TLabel').pack(side="left")
+        ttk.Label(lang_frame, text=_("Language")).pack(side="left")
 
         menu_lang = tk.Menu(lang_frame)
         for lang in REV_LANGUAGES:
@@ -104,7 +102,7 @@ class Settings(tk.Toplevel):
                        menu=menu_lang).pack(side="left", padx=4)
         # --- gui toolkit
         frame_gui = ttk.Frame(self.frames[_('General')])
-        ttk.Label(frame_gui, style='subtitle.TLabel',
+        ttk.Label(frame_gui, wraplength=250,
                   text=_("GUI Toolkit for the system tray icon")).pack(side="left")
         menu_gui = tk.Menu(frame_gui)
         ttk.Menubutton(frame_gui, menu=menu_gui, width=9, padding=1,
@@ -127,23 +125,66 @@ class Settings(tk.Toplevel):
         # --- eyes
         frame_eyes = ttk.Frame(self.frames[_('General')])
         valid_entry_nb = self.register(valide_entree_nb)
-        ttk.Label(frame_eyes, style='subtitle.TLabel',
-                  text=_("Interval between two eyes' rest (min)")).pack(side="left", padx=4)
+        ttk.Label(frame_eyes, text=_("Eyes' rest"),
+                  style='title.TLabel').grid(sticky='w', padx=4, pady=4)
+        ttk.Label(frame_eyes,
+                  text=_("Interval between two eyes' rest (min)")).grid(row=1, column=0, sticky='w', padx=4, pady=4)
         self.eyes_interval = ttk.Entry(frame_eyes, width=4, justify='center',
                                        validate='key',
                                        validatecommand=(valid_entry_nb, '%d', '%S'))
         self.eyes_interval.insert(0, CONFIG.get("General", "eyes_interval", fallback='20'))
-        self.eyes_interval.pack(side="left", padx=4)
+        self.eyes_interval.grid(row=1, column=1, sticky='w', padx=4, pady=4)
 
-        # --- reminders
-        # ...
+        # --- sound player
+        son_frame = ttk.Frame(self.frames[_('General')])
+        ttk.Label(son_frame, text=_("Audio player"),
+                  style='title.TLabel').pack(side="left", padx=(2, 10))
+        self.player = ttk.Entry(son_frame, justify='center')
+        self.player.insert(0, CONFIG.get("General", "soundplayer"))
+        self.player.pack(side="right", fill="both", expand=True, padx=4)
 
         # --- placement
+        ttk.Label(self.frames[_('General')], text=_("Interface"),
+                  style='title.TLabel').grid(sticky='w', pady=4)
         lang_frame.grid(pady=4, sticky="ew")
         frame_gui.grid(pady=4, sticky="ew")
         # self.confirm_update.grid(pady=4, sticky='w')
         ttk.Separator(self.frames[_('General')], orient='horizontal').grid(sticky='ew', pady=10)
         frame_eyes.grid(pady=4, sticky="ew")
+        ttk.Separator(self.frames[_('General')], orient='horizontal').grid(sticky='ew', pady=10)
+        son_frame.grid(pady=4, sticky="ew")
+
+    def _init_pomodoro(self):
+        pass  # already done in custom class
+
+    def _init_reminders(self):
+        # --- reminders
+        frame_window = ttk.Frame(self.frames[_('Reminders')])
+        frame_window.columnconfigure(0, weight=1)
+        self.reminders_window = ttk.Checkbutton(frame_window, text=_('Banner'),
+                                                style='title.TCheckbutton')
+        self.reminders_window.grid(sticky='w', pady=4)
+        self.reminders_window.state(('!alternate',
+                                     '!' * (not CONFIG.getboolean('Reminders', 'window')) + 'selected'))
+        self.reminders_blink = ttk.Checkbutton(frame_window, text=_('Blink'))
+        self.reminders_blink.grid(sticky='w', padx=(12, 4), pady=4)
+        self.reminders_blink.state(('!alternate',
+                                    '!' * (not CONFIG.getboolean('Reminders', 'blink')) + 'selected'))
+        self.reminders_sound = SoundFrame(frame_window, CONFIG.get('Reminders', 'alarm'),
+                                          CONFIG.get('Reminders', 'mute'), _('Alarm'))
+        self.reminders_sound.grid(sticky='ew', padx=(12, 4), pady=4)
+
+        frame_notif = ttk.Frame(self.frames[_('Reminders')])
+        self.reminders_notif = ttk.Checkbutton(frame_notif, text=_('Notification'),
+                                               style='title.TCheckbutton')
+        self.reminders_notif.grid(sticky='w', pady=4)
+        self.reminders_notif.state(('!alternate',
+                                    '!' * (not CONFIG.getboolean('Reminders', 'notification')) + 'selected'))
+
+        # --- placement
+        frame_window.pack(anchor='nw', fill='x')
+        ttk.Separator(self.frames[_('Reminders')], orient='horizontal').pack(fill='x', pady=10)
+        frame_notif.pack(anchor='nw')
 
     def _init_calendar(self):
         # --- general config
@@ -482,7 +523,14 @@ class Settings(tk.Toplevel):
         if not eyes:
             eyes = 20
         CONFIG.set("General", "eyes_interval", str(eyes))
-
+        CONFIG.set("General", "soundplayer", self.player.get())
+        # --- Reminders
+        CONFIG.set("Reminders", 'window', str("selected" in self.reminders_window.state()))
+        CONFIG.set("Reminders", 'blink', str("selected" in self.reminders_blink.state()))
+        CONFIG.set("Reminders", 'notification', str("selected" in self.reminders_notif.state()))
+        alarm, mute = self.reminders_sound.get()
+        CONFIG.set("Reminders", 'alarm', alarm)
+        CONFIG.set("Reminders", 'mute', str(mute))
         # --- Calendar
         CONFIG.set("Calendar", "alpha", "%.2f" % (self.cal_opacity.get_opacity()))
 

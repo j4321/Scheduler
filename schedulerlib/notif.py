@@ -25,7 +25,7 @@ from tkinter import Tk
 from tkinter.ttk import Label, Button, Style
 import sys
 from schedulerlib.constants import CONFIG, ICON_NAME
-from subprocess import Popen
+from subprocess import Popen, call
 
 
 class Notification(Tk):
@@ -51,11 +51,36 @@ class Notification(Tk):
         self.deiconify()
         self.update_idletasks()
         self.geometry('%ix%i+0+0' % (self.winfo_screenwidth(), self.winfo_height()))
-        self.delay = CONFIG.getint('Reminder', 'blink', fallback=500)
-        self.after_id = self.after(self.delay, self.blink)
+        self.alarm_id = ''
+        self.alarm_process = None
+        self.blink_id = ''
+        if CONFIG.getboolean('Reminders', 'blink'):
+            self.blink_id = self.after(500, self.blink)
+        if not CONFIG.getboolean("Reminders", "mute", fallback=False):
+            self.alarm()
+
+    def alarm(self):
+        self.alarm_process = Popen([CONFIG.get("General", "soundplayer"),
+                                    CONFIG.get("Reminders", "alarm")])
+        self.alarm_id = self.after(500, self.repeat_alarm)
+
+    def repeat_alarm(self):
+        if self.alarm_process.poll() is None:
+            self.alarm_id = self.after(500, self.repeat_alarm)
+        else:  # ringing is finished
+            self.alarm()
 
     def quit(self):
-        self.after_cancel(self.after_id)
+        try:
+            self.after_cancel(self.alarm_id)
+        except ValueError:
+            pass
+        try:
+            self.after_cancel(self.blink_id)
+        except ValueError:
+            pass
+        if self.alarm_process is not None:
+            self.alarm_process.terminate()
         self.destroy()
 
     def blink(self):
@@ -68,17 +93,15 @@ class Notification(Tk):
             self.style.configure('notif.TLabel', foreground='white', background='black')
             self.configure(bg='black')
         self.blink_alternate = not self.blink_alternate
-        self.after_id = self.after(self.delay, self.blink)
+        self.blink_id = self.after(500, self.blink)
 
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         text = sys.argv[1]
-        # if CONFIG.getboolean('Reminder', 'sound', fallback=False):
-            # Popen([...])
-        if CONFIG.getboolean('Reminder', 'notification', fallback=True):
+        if CONFIG.getboolean('Reminders', 'notification', fallback=True):
             Popen(["notify-send", "-i", ICON_NAME, "Scheduler", text])
-        if CONFIG.getboolean('Reminder', 'window', fallback=True):
+        if CONFIG.getboolean('Reminders', 'window', fallback=True):
             n = Notification(text)
             n.mainloop()
     else:

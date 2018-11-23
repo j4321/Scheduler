@@ -23,6 +23,7 @@ Files:
     params.png
     play.png
     pause.png
+    son.png
     stop.png
     scheduler.png
 Copyright:
@@ -64,7 +65,6 @@ License: GPL-3+
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
     
-
 Files:
     tomate.png
 License: Public domain

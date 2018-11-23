@@ -16,8 +16,8 @@
    version="1.1"
    inkscape:version="0.92.2 2405546, 2018-03-11"
    inkscape:export-filename="/media/DATA/Divers/scheduler/schedulerlib/images/graph.png"
-   inkscape:export-xdpi="144"
-   inkscape:export-ydpi="144"
+   inkscape:export-xdpi="84"
+   inkscape:export-ydpi="84"
    sodipodi:docname="stats.svg">
   <defs
      id="defs4" />
@@ -28,16 +28,16 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="15.839192"
-     inkscape:cx="22.531165"
-     inkscape:cy="18.012245"
+     inkscape:zoom="22.4"
+     inkscape:cx="12.981129"
+     inkscape:cy="9.2519611"
      inkscape:document-units="px"
      inkscape:current-layer="g5159"
      showgrid="false"
-     inkscape:window-width="1920"
-     inkscape:window-height="1031"
-     inkscape:window-x="0"
-     inkscape:window-y="23"
+     inkscape:window-width="1440"
+     inkscape:window-height="874"
+     inkscape:window-x="1680"
+     inkscape:window-y="694"
      inkscape:window-maximized="1"
      units="px"
      showguides="true"
@@ -56,7 +56,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>

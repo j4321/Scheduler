@@ -33,6 +33,7 @@ from PIL.ImageTk import PhotoImage
 from .color import ColorFrame
 from .opacity import OpacityFrame
 from .font import FontFrame
+from .sound import SoundFrame
 
 
 class PomodoroParams(Frame):
@@ -106,31 +107,10 @@ class PomodoroParams(Frame):
                                             sticky="ew", pady=10)
 
         # --- --- Son
-        self.son = Frame(self.general)
-        self.son.columnconfigure(1, weight=1)
-        self.son.grid(row=7, columnspan=2, sticky='ew', pady=4)
-
-        Label(self.son, text=_("Sound"),
-              style='title.TLabel').grid(row=0, pady=4, padx=(2, 10), sticky="w")
-        self.mute = BooleanVar(self, CONFIG.getboolean("Pomodoro", "mute"))
-
-        b_son = Checkbutton(self.son, variable=self.mute, style='Mute')
-        b_son.grid(row=0, column=1, sticky="w", pady=4, padx=10)
-        self.son_frame = Frame(self.son)
-        self.son_frame.grid(row=1, sticky="ew", columnspan=2, pady=4)
-        self.bip = Entry(self.son_frame)
-        self.bip.insert(0, CONFIG.get("Pomodoro", "beep"))
-        self.bip.pack(side="left", fill="both", expand=True)
-        Button(self.son_frame, text="...", width=2, padding=0,
-               command=self.choix_son).pack(side="right", padx=(2, 4))
-
-        son_frame2 = Frame(self.son)
-        son_frame2.grid(row=3, sticky="ew", columnspan=2, pady=4)
-        Label(son_frame2, text=_("Audio player"),
-              style='subtitle.TLabel').pack(side="left", padx=(2, 10))
-        self.player = Entry(son_frame2, justify='center')
-        self.player.insert(0, CONFIG.get("Pomodoro", "player"))
-        self.player.pack(side="right", fill="both", expand=True, padx=4)
+        self.sound = SoundFrame(self.general, CONFIG.get("Pomodoro", "beep"),
+                                mute=CONFIG.getboolean("Pomodoro", "mute"),
+                                label=_("Sound"))
+        self.sound.grid(row=7, columnspan=2, sticky='ew', pady=4)
 
         # --- Couleurs
         self.couleurs = Frame(self.onglets, padding=10)
@@ -250,16 +230,14 @@ class PomodoroParams(Frame):
         tpsw = int(self.travail.get())
         tpsp = int(self.pause.get())
         tpsr = int(self.rest.get())
-        son = self.bip.get()
-        player = CONFIG.get("Pomodoro", "player")
-        mute = self.mute.get()
+        sound, mute = self.sound.get()
         font_prop = self.font.get_font()
         font = "{} {}".format(font_prop['family'].replace(' ', '\ '),
                               font_prop['size'])
         filetypes = ["ogg", "wav", "mp3"]
 
         if (tpsw > 0 and tpsp > 0 and tpsr > 0 and
-           os.path.exists(son) and (son.split('.')[-1] in filetypes)):
+           os.path.exists(sound) and (sound.split('.')[-1] in filetypes)):
             CONFIG.set("Pomodoro", "alpha", str(self.opacity.get_opacity()))
             CONFIG.set("Pomodoro", "font", font)
             CONFIG.set("Pomodoro", "background", self.bg.get_color())
@@ -273,8 +251,7 @@ class PomodoroParams(Frame):
             CONFIG.set("Pomodoro", "rest_time", str(tpsr))
             CONFIG.set("Pomodoro", "rest_bg", self.rest_bg.get_color())
             CONFIG.set("Pomodoro", "rest_fg", self.rest_fg.get_color())
-            CONFIG.set("Pomodoro", "beep", son)
-            CONFIG.set("Pomodoro", "player", player)
+            CONFIG.set("Pomodoro", "beep", sound)
             CONFIG.set("Pomodoro", "mute", str(mute))
             for task, widget in self.tasks.items():
                 CONFIG.set("PomodoroTasks", task, widget.get_color())
@@ -339,16 +316,16 @@ class PomodoroParams(Frame):
         Button(top, text=_("Ok"), command=ajoute).grid(row=1, column=1)
         top.wait_window(top)
 
-    def choix_son(self):
-        filetypes = [(_("sound file"), '*.mp3|*.ogg|*.wav'),
-                     ('OGG', '*.ogg'),
-                     ('MP3', '*.mp3'),
-                     ('WAV', '*.wav')]
-        init = self.bip.get()
-        if not os.path.exists(init):
-            init = CONFIG.get("Pomodoro", "beep")
-        fich = askopenfilename(filetypes=filetypes, initialfile=os.path.split(init)[1],
-                               initialdir=os.path.dirname(init), parent=self)
-        if fich:
-            self.bip.delete(0, "end")
-            self.bip.insert(0, fich)
+    # def choix_son(self):
+        # filetypes = [(_("sound file"), '*.mp3|*.ogg|*.wav'),
+                     # ('OGG', '*.ogg'),
+                     # ('MP3', '*.mp3'),
+                     # ('WAV', '*.wav')]
+        # init = self.bip.get()
+        # if not os.path.exists(init):
+            # init = CONFIG.get("Pomodoro", "beep")
+        # fich = askopenfilename(filetypes=filetypes, initialfile=os.path.split(init)[1],
+                               # initialdir=os.path.dirname(init), parent=self)
+        # if fich:
+            # self.bip.delete(0, "end")
+            # self.bip.insert(0, fich)

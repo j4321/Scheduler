@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-11-22 09:19+0100\n"
+"POT-Creation-Date: 2018-11-22 13:23+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,7 +19,7 @@ msgstr ""
 
 #: scheduler.py:46 schedulerlib/settings/pomodoro_params.py:284
 #: schedulerlib/settings/pomodoro_params.py:314
-#: schedulerlib/settings/settings.py:441 schedulerlib/navtoolbar.py:96
+#: schedulerlib/settings/settings.py:444 schedulerlib/navtoolbar.py:96
 msgid "Error"
 msgstr ""
 
@@ -28,8 +28,8 @@ msgstr ""
 msgid "Scheduler is already running. If not deletes {pidfile}."
 msgstr ""
 
-#: schedulerlib/scheduler.py:69 schedulerlib/scheduler.py:467
-#: schedulerlib/scheduler.py:470 schedulerlib/scheduler.py:473
+#: schedulerlib/scheduler.py:69 schedulerlib/scheduler.py:479
+#: schedulerlib/scheduler.py:482 schedulerlib/scheduler.py:485
 msgid "Manager"
 msgstr ""
 
@@ -61,31 +61,35 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#: schedulerlib/scheduler.py:253 schedulerlib/form.py:76
+#: schedulerlib/scheduler.py:244 schedulerlib/form.py:76
 msgid "Summary"
 msgstr ""
 
-#: schedulerlib/scheduler.py:255 schedulerlib/form.py:77
+#: schedulerlib/scheduler.py:245 schedulerlib/form.py:77
 msgid "Place"
 msgstr ""
 
-#: schedulerlib/scheduler.py:257 schedulerlib/eyes.py:38
+#: schedulerlib/scheduler.py:246 schedulerlib/eyes.py:38
 #: schedulerlib/eyes.py:51 schedulerlib/form.py:78
 msgid "Start"
 msgstr ""
 
-#: schedulerlib/scheduler.py:259 schedulerlib/form.py:79
+#: schedulerlib/scheduler.py:247 schedulerlib/form.py:79
 #: schedulerlib/form.py:359
 msgid "End"
 msgstr ""
 
-#: schedulerlib/scheduler.py:261 schedulerlib/scheduler.py:280
-#: schedulerlib/settings/settings.py:466 schedulerlib/form.py:84
+#: schedulerlib/scheduler.py:248 schedulerlib/scheduler.py:269
+#: schedulerlib/settings/settings.py:469 schedulerlib/form.py:84
 msgid "Category"
 msgstr ""
 
-#: schedulerlib/scheduler.py:276
+#: schedulerlib/scheduler.py:265
 msgid "Filter by"
+msgstr ""
+
+#: schedulerlib/scheduler.py:275
+msgid "Delete All Outdated"
 msgstr ""
 
 #: schedulerlib/pomodoro_stats.py:38
@@ -113,9 +117,9 @@ msgid "Set Holiday"
 msgstr ""
 
 #: schedulerlib/widgets/event_widget.py:41 schedulerlib/settings/settings.py:60
-#: schedulerlib/settings/settings.py:255 schedulerlib/settings/settings.py:257
-#: schedulerlib/settings/settings.py:286 schedulerlib/settings/settings.py:289
-#: schedulerlib/settings/settings.py:304 schedulerlib/settings/settings.py:306
+#: schedulerlib/settings/settings.py:258 schedulerlib/settings/settings.py:260
+#: schedulerlib/settings/settings.py:289 schedulerlib/settings/settings.py:292
+#: schedulerlib/settings/settings.py:307 schedulerlib/settings/settings.py:309
 msgid "Events"
 msgstr ""
 
@@ -133,11 +137,11 @@ msgstr ""
 
 #: schedulerlib/widgets/task_widget.py:42
 #: schedulerlib/settings/pomodoro_params.py:196
-#: schedulerlib/settings/settings.py:61 schedulerlib/settings/settings.py:310
-#: schedulerlib/settings/settings.py:313 schedulerlib/settings/settings.py:334
-#: schedulerlib/settings/settings.py:337 schedulerlib/settings/settings.py:352
-#: schedulerlib/settings/settings.py:354 schedulerlib/settings/settings.py:356
-#: schedulerlib/settings/settings.py:357
+#: schedulerlib/settings/settings.py:61 schedulerlib/settings/settings.py:313
+#: schedulerlib/settings/settings.py:316 schedulerlib/settings/settings.py:337
+#: schedulerlib/settings/settings.py:340 schedulerlib/settings/settings.py:355
+#: schedulerlib/settings/settings.py:357 schedulerlib/settings/settings.py:359
+#: schedulerlib/settings/settings.py:360
 msgid "Tasks"
 msgstr ""
 
@@ -154,7 +158,7 @@ msgstr ""
 #: schedulerlib/widgets/pomodoro_widget.py:319
 #: schedulerlib/settings/pomodoro_params.py:66
 #: schedulerlib/settings/pomodoro_params.py:172
-#: schedulerlib/settings/pomodoro_params.py:304 schedulerlib/constants.py:241
+#: schedulerlib/settings/pomodoro_params.py:304 schedulerlib/constants.py:254
 msgid "Work"
 msgstr ""
 
@@ -184,7 +188,7 @@ msgstr ""
 
 #: schedulerlib/widgets/pomodoro_widget.py:273
 #: schedulerlib/settings/pomodoro_params.py:289
-#: schedulerlib/settings/settings.py:427
+#: schedulerlib/settings/settings.py:430
 msgid "Confirmation"
 msgstr ""
 
@@ -226,8 +230,8 @@ msgstr ""
 #: schedulerlib/settings/settings.py:59 schedulerlib/settings/settings.py:77
 #: schedulerlib/settings/settings.py:89 schedulerlib/settings/settings.py:95
 #: schedulerlib/settings/settings.py:106 schedulerlib/settings/settings.py:128
-#: schedulerlib/settings/settings.py:142 schedulerlib/settings/settings.py:149
-#: schedulerlib/settings/settings.py:169
+#: schedulerlib/settings/settings.py:145 schedulerlib/settings/settings.py:152
+#: schedulerlib/settings/settings.py:172
 msgid "General"
 msgstr ""
 
@@ -236,8 +240,8 @@ msgid "Times (min)"
 msgstr ""
 
 #: schedulerlib/settings/pomodoro_params.py:90
-#: schedulerlib/settings/settings.py:157 schedulerlib/settings/settings.py:259
-#: schedulerlib/settings/settings.py:315 schedulerlib/settings/settings.py:365
+#: schedulerlib/settings/settings.py:160 schedulerlib/settings/settings.py:262
+#: schedulerlib/settings/settings.py:318 schedulerlib/settings/settings.py:368
 msgid "Font"
 msgstr ""
 
@@ -250,8 +254,8 @@ msgid "Audio player"
 msgstr ""
 
 #: schedulerlib/settings/pomodoro_params.py:138
-#: schedulerlib/settings/settings.py:165 schedulerlib/settings/settings.py:290
-#: schedulerlib/settings/settings.py:338 schedulerlib/settings/settings.py:388
+#: schedulerlib/settings/settings.py:168 schedulerlib/settings/settings.py:293
+#: schedulerlib/settings/settings.py:341 schedulerlib/settings/settings.py:391
 msgid "Colors"
 msgstr ""
 
@@ -259,10 +263,10 @@ msgstr ""
 #: schedulerlib/settings/pomodoro_params.py:145
 #: schedulerlib/settings/pomodoro_params.py:148
 #: schedulerlib/settings/pomodoro_params.py:151
-#: schedulerlib/settings/settings.py:172 schedulerlib/settings/settings.py:194
-#: schedulerlib/settings/settings.py:234 schedulerlib/settings/settings.py:295
-#: schedulerlib/settings/settings.py:343 schedulerlib/settings/settings.py:393
-#: schedulerlib/settings/settings.py:448
+#: schedulerlib/settings/settings.py:175 schedulerlib/settings/settings.py:197
+#: schedulerlib/settings/settings.py:237 schedulerlib/settings/settings.py:298
+#: schedulerlib/settings/settings.py:346 schedulerlib/settings/settings.py:396
+#: schedulerlib/settings/settings.py:451
 msgid "Background"
 msgstr ""
 
@@ -270,10 +274,10 @@ msgstr ""
 #: schedulerlib/settings/pomodoro_params.py:157
 #: schedulerlib/settings/pomodoro_params.py:160
 #: schedulerlib/settings/pomodoro_params.py:163
-#: schedulerlib/settings/settings.py:175 schedulerlib/settings/settings.py:197
-#: schedulerlib/settings/settings.py:235 schedulerlib/settings/settings.py:299
-#: schedulerlib/settings/settings.py:347 schedulerlib/settings/settings.py:397
-#: schedulerlib/settings/settings.py:449
+#: schedulerlib/settings/settings.py:178 schedulerlib/settings/settings.py:200
+#: schedulerlib/settings/settings.py:238 schedulerlib/settings/settings.py:302
+#: schedulerlib/settings/settings.py:350 schedulerlib/settings/settings.py:400
+#: schedulerlib/settings/settings.py:452
 msgid "Foreground"
 msgstr ""
 
@@ -299,7 +303,7 @@ msgstr ""
 
 #: schedulerlib/settings/pomodoro_params.py:338
 #: schedulerlib/settings/settings.py:85 schedulerlib/messagebox.py:270
-#: schedulerlib/messagebox.py:393 schedulerlib/constants.py:268
+#: schedulerlib/messagebox.py:393 schedulerlib/constants.py:281
 msgid "Cancel"
 msgstr ""
 
@@ -307,7 +311,7 @@ msgstr ""
 #: schedulerlib/settings/settings.py:84 schedulerlib/form.py:66
 #: schedulerlib/messagebox.py:32 schedulerlib/messagebox.py:95
 #: schedulerlib/messagebox.py:327 schedulerlib/messagebox.py:393
-#: schedulerlib/messagebox.py:395 schedulerlib/constants.py:269
+#: schedulerlib/messagebox.py:395 schedulerlib/constants.py:282
 msgid "Ok"
 msgstr ""
 
@@ -331,21 +335,21 @@ msgstr ""
 msgid "Underline"
 msgstr ""
 
-#: schedulerlib/settings/settings.py:62 schedulerlib/settings/settings.py:361
-#: schedulerlib/settings/settings.py:363 schedulerlib/settings/settings.py:384
-#: schedulerlib/settings/settings.py:387 schedulerlib/settings/settings.py:402
-#: schedulerlib/settings/settings.py:404
+#: schedulerlib/settings/settings.py:62 schedulerlib/settings/settings.py:364
+#: schedulerlib/settings/settings.py:366 schedulerlib/settings/settings.py:387
+#: schedulerlib/settings/settings.py:390 schedulerlib/settings/settings.py:405
+#: schedulerlib/settings/settings.py:407
 msgid "Timer"
 msgstr ""
 
-#: schedulerlib/settings/settings.py:63 schedulerlib/settings/settings.py:147
-#: schedulerlib/settings/settings.py:149 schedulerlib/settings/settings.py:163
-#: schedulerlib/settings/settings.py:165 schedulerlib/settings/settings.py:211
-#: schedulerlib/settings/settings.py:214
+#: schedulerlib/settings/settings.py:63 schedulerlib/settings/settings.py:150
+#: schedulerlib/settings/settings.py:152 schedulerlib/settings/settings.py:166
+#: schedulerlib/settings/settings.py:168 schedulerlib/settings/settings.py:214
+#: schedulerlib/settings/settings.py:217
 msgid "Calendar"
 msgstr ""
 
-#: schedulerlib/settings/settings.py:64 schedulerlib/settings/settings.py:552
+#: schedulerlib/settings/settings.py:64 schedulerlib/settings/settings.py:555
 msgid "Pomodoro"
 msgstr ""
 
@@ -361,92 +365,92 @@ msgstr ""
 msgid "Interval between two eyes' rest (min)"
 msgstr ""
 
-#: schedulerlib/settings/settings.py:178
+#: schedulerlib/settings/settings.py:181
 msgid "Border"
 msgstr ""
 
-#: schedulerlib/settings/settings.py:183
+#: schedulerlib/settings/settings.py:186
 msgid "Normal day"
 msgstr ""
 
-#: schedulerlib/settings/settings.py:184
+#: schedulerlib/settings/settings.py:187
 msgid "Weekend"
 msgstr ""
 
-#: schedulerlib/settings/settings.py:185
+#: schedulerlib/settings/settings.py:188
 msgid "Other month day"
 msgstr ""
 
-#: schedulerlib/settings/settings.py:186
+#: schedulerlib/settings/settings.py:189
 msgid "Other month weekend"
 msgstr ""
 
-#: schedulerlib/settings/settings.py:187
+#: schedulerlib/settings/settings.py:190
 msgid "Selected day"
 msgstr ""
 
-#: schedulerlib/settings/settings.py:188
+#: schedulerlib/settings/settings.py:191
 msgid "Headers"
 msgstr ""
 
-#: schedulerlib/settings/settings.py:189
+#: schedulerlib/settings/settings.py:192
 msgid "Tooltip"
 msgstr ""
 
-#: schedulerlib/settings/settings.py:214
+#: schedulerlib/settings/settings.py:217
 msgid "Event categories"
 msgstr ""
 
-#: schedulerlib/settings/settings.py:263 schedulerlib/settings/settings.py:319
+#: schedulerlib/settings/settings.py:266 schedulerlib/settings/settings.py:322
 msgid "Title"
 msgstr ""
 
-#: schedulerlib/settings/settings.py:272
+#: schedulerlib/settings/settings.py:275
 msgid "Day"
 msgstr ""
 
-#: schedulerlib/settings/settings.py:280 schedulerlib/settings/settings.py:328
+#: schedulerlib/settings/settings.py:283 schedulerlib/settings/settings.py:331
 msgid "Text"
 msgstr ""
 
-#: schedulerlib/settings/settings.py:357
+#: schedulerlib/settings/settings.py:360
 msgid "Hide completed tasks"
 msgstr ""
 
-#: schedulerlib/settings/settings.py:369
+#: schedulerlib/settings/settings.py:372
 msgid "Time"
 msgstr ""
 
-#: schedulerlib/settings/settings.py:378
+#: schedulerlib/settings/settings.py:381
 msgid "Intervals"
 msgstr ""
 
-#: schedulerlib/settings/settings.py:417 schedulerlib/settings/settings.py:422
+#: schedulerlib/settings/settings.py:420 schedulerlib/settings/settings.py:425
 msgid "Information"
 msgstr ""
 
-#: schedulerlib/settings/settings.py:418
+#: schedulerlib/settings/settings.py:421
 msgid "The language setting will take effect after restarting the application."
 msgstr ""
 
-#: schedulerlib/settings/settings.py:423
+#: schedulerlib/settings/settings.py:426
 msgid ""
 "The GUI Toolkit setting will take effect after restarting the application"
 msgstr ""
 
-#: schedulerlib/settings/settings.py:428
+#: schedulerlib/settings/settings.py:431
 #, python-brace-format
 msgid ""
 "Are you sure you want to delete the category {category}? This action cannot "
 "be undone."
 msgstr ""
 
-#: schedulerlib/settings/settings.py:442
+#: schedulerlib/settings/settings.py:445
 #, python-brace-format
 msgid "The category {category} already exists."
 msgstr ""
 
-#: schedulerlib/settings/settings.py:462
+#: schedulerlib/settings/settings.py:465
 msgid "New category"
 msgstr ""
 
@@ -571,17 +575,17 @@ msgid "Deadline"
 msgstr ""
 
 #: schedulerlib/form.py:418 schedulerlib/form.py:438 schedulerlib/form.py:441
-#: schedulerlib/constants.py:231
+#: schedulerlib/constants.py:244
 msgid "minutes"
 msgstr ""
 
 #: schedulerlib/form.py:418 schedulerlib/form.py:431
-#: schedulerlib/constants.py:231
+#: schedulerlib/constants.py:244
 msgid "hours"
 msgstr ""
 
 #: schedulerlib/form.py:418 schedulerlib/form.py:426
-#: schedulerlib/constants.py:231
+#: schedulerlib/constants.py:244
 msgid "days"
 msgstr ""
 
@@ -634,11 +638,11 @@ msgstr ""
 msgid "Save the figure"
 msgstr ""
 
-#: schedulerlib/constants.py:256
+#: schedulerlib/constants.py:269
 msgid "Sound configuration"
 msgstr ""
 
-#: schedulerlib/constants.py:257
+#: schedulerlib/constants.py:270
 msgid ""
 "The automatic detection of command line soundplayer has failed. If you want "
 "to hear the beep between work sessions and breaks, please give the name of a "
@@ -646,6 +650,6 @@ msgid ""
 "can install mpg123."
 msgstr ""
 
-#: schedulerlib/constants.py:579
+#: schedulerlib/constants.py:592
 msgid "Open"
 msgstr ""
