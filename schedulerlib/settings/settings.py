@@ -95,27 +95,34 @@ class Settings(tk.Toplevel):
         lang_frame = ttk.Frame(self.frames[_('General')])
 
         ttk.Label(lang_frame, text=_("Language")).pack(side="left")
-
-        menu_lang = tk.Menu(lang_frame)
-        for lang in REV_LANGUAGES:
-            menu_lang.add_radiobutton(label=lang, variable=self.lang,
-                                      value=lang, command=self.change_langue)
-        ttk.Menubutton(lang_frame, textvariable=self.lang, padding=1,
-                       menu=menu_lang).pack(side="left", padx=4)
+        languages = list(REV_LANGUAGES)
+        self.cb_lang = ttk.Combobox(lang_frame, textvariable=self.lang,
+                                    state='readonly', style='menu.TCombobox',
+                                    exportselection=False,
+                                    width=len(max(languages, key=len)) + 1,
+                                    values=languages)
+        self.cb_lang.pack(side="left", padx=4)
+        self.cb_lang.bind('<<ComboboxSelected>>', self.change_langue)
         # --- gui toolkit
         frame_gui = ttk.Frame(self.frames[_('General')])
         ttk.Label(frame_gui,
                   text=_("GUI Toolkit for the system tray icon")).pack(side="left")
-        menu_gui = tk.Menu(frame_gui)
-        ttk.Menubutton(frame_gui, menu=menu_gui, width=4, padding=1,
-                       textvariable=self.gui).pack(side="left", padx=4)
+        self.cb_gui = ttk.Combobox(frame_gui, textvariable=self.gui,
+                                   state='readonly', style='menu.TCombobox',
+                                   exportselection=False, width=4,
+                                   values=[t.capitalize() for (t, b) in TOOLKITS.items() if b])
+        self.cb_gui.pack(side="left", padx=4)
+        self.cb_gui.bind('<<ComboboxSelected>>', self.change_gui)
+        # menu_gui = tk.Menu(frame_gui)
+        # ttk.Menubutton(frame_gui, menu=menu_gui, width=4, padding=1,
+                       # textvariable=self.gui).pack(side="left", padx=4)
 
-        for toolkit, b in TOOLKITS.items():
-            if b:
-                menu_gui.add_radiobutton(label=toolkit.capitalize(),
-                                         value=toolkit.capitalize(),
-                                         variable=self.gui,
-                                         command=self.change_gui)
+        # for toolkit, b in TOOLKITS.items():
+            # if b:
+                # menu_gui.add_radiobutton(label=toolkit.capitalize(),
+                                         # value=toolkit.capitalize(),
+                                         # variable=self.gui,
+                                         # command=self.change_gui)
         # --- Update checks
         # self.confirm_update = ttk.Checkbutton(self.frames[_('General')],
                                               # text=_("Check for updates on start-up"))
@@ -528,12 +535,14 @@ class Settings(tk.Toplevel):
         self._current_frame = self.frames[self.listbox.get(index).strip()]
         self._current_frame.grid()
 
-    def change_langue(self):
+    def change_langue(self, event=None):
+        self.cb_lang.selection_clear()
         showinfo(_("Information"),
                  _("The language setting will take effect after restarting the application."),
                  parent=self)
 
-    def change_gui(self):
+    def change_gui(self, event=None):
+        self.cb_gui.selection_clear()
         showinfo(_("Information"),
                  _("The GUI Toolkit setting will take effect after restarting the application"),
                  parent=self)

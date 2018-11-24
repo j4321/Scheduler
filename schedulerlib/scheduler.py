@@ -118,14 +118,27 @@ class EventScheduler(Tk):
         self.style.configure('border.TFrame', background='white', border=1, relief='sunken')
         self.style.configure("Treeview.Heading", font="TkDefaultFont")
         bgc = self.style.lookup("TButton", "background")
+        fgc = self.style.lookup("TButton", "foreground")
         bga = self.style.lookup("TButton", "background", ("active",))
         self.style.map('TCombobox',
                        fieldbackground=[('readonly', 'white'),
                                         ('readonly', 'focus', 'white')],
                        background=[("disabled", "active", "readonly", bgc),
                                    ("!disabled", "active", "readonly", bga)],
-                       foreground=[('readonly', '!disabled', 'black'),
-                                   ('readonly', '!disabled', 'focus', 'black'),
+                       foreground=[('readonly', '!disabled', fgc),
+                                   ('readonly', '!disabled', 'focus', fgc),
+                                   ('readonly', 'disabled', 'gray40'),
+                                   ('readonly', 'disabled', 'focus', 'gray40')],
+                       arrowcolor=[("disabled", "gray40")])
+        self.style.configure('menu.TCombobox', foreground=fgc, background=bgc,
+                             fieldbackground=bgc)
+        self.style.map('menu.TCombobox',
+                       fieldbackground=[('readonly', bgc),
+                                        ('readonly', 'focus', bgc)],
+                       background=[("disabled", "active", "readonly", bgc),
+                                   ("!disabled", "active", "readonly", bga)],
+                       foreground=[('readonly', '!disabled', fgc),
+                                   ('readonly', '!disabled', 'focus', fgc),
                                    ('readonly', 'disabled', 'gray40'),
                                    ('readonly', 'disabled', 'focus', 'gray40')],
                        arrowcolor=[("disabled", "gray40")])
