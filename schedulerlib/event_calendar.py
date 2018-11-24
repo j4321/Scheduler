@@ -66,7 +66,7 @@ class EventCalendar(Calendar):
         self._properties['tooltipforeground'] = tp_fg
         self._properties['tooltipalpha'] = tp_alpha
 
-        self._menu = Menu(self)
+        self.menu = Menu(self)
 
         for i, week in enumerate(self._calendar):
             for j, day in enumerate(week):
@@ -479,7 +479,7 @@ class EventCalendar(Calendar):
         self.master.master.add(date)
 
     def _post_menu(self, event, w):
-        self._menu.delete(0, 'end')
+        self.menu.delete(0, 'end')
         day = int(event.widget.cget('text'))
         date = self._get_date(w, day)
         date2 = date.date()
@@ -508,30 +508,30 @@ class EventCalendar(Calendar):
             if start <= date2 and (end is None or end >= date2):
                 evts.append((desc, iid))
 
-        self._menu.add_command(label=_('New Event'),
+        self.menu.add_command(label=_('New Event'),
                                command=lambda: self.master.master.add(date))
         if evts:
-            self._menu.add_separator()
-            self._menu.add_separator()
+            self.menu.add_separator()
+            self.menu.add_separator()
             index_edit = 2
             for vals in evts:
                 desc, iid = vals[0], vals[1]
-                self._menu.insert_command(index_edit,
+                self.menu.insert_command(index_edit,
                                           label="Edit %s" % desc,
                                           command=lambda i=iid: self.master.master.edit(i))
                 index_edit += 1
-                self._menu.add_command(label=_("Delete") + " %s" % desc,
+                self.menu.add_command(label=_("Delete") + " %s" % desc,
                                        command=lambda i=iid: self.master.master.delete(i))
         else:
-            self._menu.add_separator()
+            self.menu.add_separator()
             if date.strftime('%Y/%m/%d') in HOLIDAYS:
-                self._menu.add_command(label=_('Remove Holiday'),
+                self.menu.add_command(label=_('Remove Holiday'),
                                        command=lambda: self.remove_holiday(date.date()))
             else:
-                self._menu.add_command(label=_('Set Holiday'),
+                self.menu.add_command(label=_('Set Holiday'),
                                        command=lambda: self.add_holiday(date.date()))
 
-        self._menu.tk_popup(event.x_root, event.y_root)
+        self.menu.tk_popup(event.x_root, event.y_root)
 
     # --- public methods
     def get_events(self, date):

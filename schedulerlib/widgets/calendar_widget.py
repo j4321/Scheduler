@@ -25,7 +25,7 @@ Calendar desktop widget
 
 from .base_widget import BaseWidget
 from schedulerlib.event_calendar import EventCalendar
-from schedulerlib.constants import CONFIG, save_config
+from schedulerlib.constants import CONFIG, save_config, active_color
 
 
 class CalendarWidget(BaseWidget):
@@ -50,7 +50,19 @@ class CalendarWidget(BaseWidget):
         self.bind('<B1-Motion>', self._move)
 
     def update_style(self):
-        BaseWidget.update_style(self)
+        bg = CONFIG.get(self.name, 'background', fallback='grey10')
+        fg = CONFIG.get(self.name, 'foreground', fallback='white')
+        r, g, b = self.winfo_rgb(bg)
+        active_bg = active_color(r * 255 / 65535, g * 255 / 65535, b * 255 / 65535)
+        self.attributes('-alpha', CONFIG.get(self.name, 'alpha', fallback=0.85))
+        self.configure(bg=bg)
+        self._calendar.menu.configure(bg=bg, fg=fg, selectcolor=fg,
+                                      activeforeground=fg,
+                                      activebackground=active_bg)
+        self.menu.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
+                            activebackground=active_bg)
+        self.menu_pos.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
+                                activebackground=active_bg)
         keys = self._calendar.keys()
         opts = {opt: CONFIG.get('Calendar', opt) for opt in CONFIG.options('Calendar') if opt in keys}
         self._calendar.configure(**opts)
