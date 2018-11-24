@@ -663,6 +663,9 @@ apply {name {
 
     def exit(self):
         self.save()
+        rep = self.widgets['Pomodoro'].stop(self.widgets['Pomodoro'].on)
+        if not rep:
+            return
         self.menu_eyes.quit()
         self.after_cancel(self.after_id)
         try:

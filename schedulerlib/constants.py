@@ -100,7 +100,7 @@ logging.basicConfig(level=logging.DEBUG,
                     datefmt='%Y-%m-%d %H:%M:%S',
                     format='%(asctime)s %(levelname)s: %(message)s',
                     handlers=[handler])
-# logging.getLogger().addHandler(logging.StreamHandler())
+logging.getLogger().addHandler(logging.StreamHandler())
 
 # --- config
 CONFIG = ConfigParser()

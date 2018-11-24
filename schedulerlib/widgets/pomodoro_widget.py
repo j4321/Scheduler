@@ -31,6 +31,7 @@ from schedulerlib.constants import CONFIG, CMAP, PATH_STATS, IM_PLAY, \
     STOP, IM_POMODORO, IM_GRAPH, active_color
 from .base_widget import BaseWidget
 from schedulerlib.pomodoro_stats import Stats
+import logging
 
 
 class Pomodoro(BaseWidget):
@@ -260,17 +261,17 @@ class Pomodoro(BaseWidget):
             self.choose_task.state(["disabled"])
             self.b_go.configure(image=self.im_stop)
             self.after(1000, self.affiche)
+            logging.info('Start work cycle for task ' + self.task.get())
 
     def stop(self, confirmation=True):
         """ Arrête le décompte du temps et le réinitialise,
             demande une confirmation avant de le faire si confirmation=True """
         tps = int(CONFIG.getint("Pomodoro", "work_time") - self.tps[0] - self.tps[1] / 60)
         self.on = False
+        rep = True
         if confirmation:
             rep = askyesno(title=_("Confirmation"),
                            message=_("Are you sure you want to give up the current session?"))
-        else:
-            rep = True
         if rep:
             if self.activite.get() == _("Work"):
                 self.stats(tps)
@@ -283,9 +284,11 @@ class Pomodoro(BaseWidget):
             self.style.configure('timer.pomodoro.TLabel',
                                  background=self.background[act],
                                  foreground=self.foreground[act])
+            logging.info('Pomodoro session interrupted.')
         else:
             self.on = True
             self.affiche()
+        return rep
 
     @staticmethod
     def ting():
@@ -304,6 +307,7 @@ class Pomodoro(BaseWidget):
                         self.pomodori.set(self.pomodori.get() + 1)
                         self.nb_cycles += 1
                         self.choose_task.state(["!disabled"])
+                        logging.info('Pomodoro: completed work session for task ' + self.task.get())
                         if self.nb_cycles % 4 == 0:
                             # pause longue
                             self.stats()
