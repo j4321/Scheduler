@@ -144,43 +144,40 @@ class PomodoroParams(Frame):
         Label(self.couleurs, text=_("General"),
               style='title.TLabel').grid(row=0, column=0, pady=4,
                                          padx=(2, 10), sticky="w")
-        self.bg.grid(row=0, column=1, sticky='e', padx=4, pady=4)
-        self.fg.grid(row=0, column=2, sticky='e', padx=4, pady=4)
+        self.bg.grid(row=0, column=1, sticky='e', padx=8, pady=4)
+        self.fg.grid(row=0, column=2, sticky='e', padx=8, pady=4)
         Separator(self.couleurs, orient='horizontal').grid(row=1, sticky="ew",
                                                            pady=10, columnspan=4)
         Label(self.couleurs, text=_("Work"),
               style='title.TLabel').grid(row=2, column=0, pady=4,
                                          padx=(2, 10), sticky="w")
-        self.work_bg.grid(row=2, column=1, sticky='e', padx=4, pady=4)
-        self.work_fg.grid(row=2, column=2, sticky='e', padx=4, pady=4)
+        self.work_bg.grid(row=2, column=1, sticky='e', padx=8, pady=4)
+        self.work_fg.grid(row=2, column=2, sticky='e', padx=8, pady=4)
         Separator(self.couleurs, orient='horizontal').grid(row=3, sticky="ew",
                                                            pady=10, columnspan=4)
         Label(self.couleurs, text=_("Break"),
               style='title.TLabel').grid(row=4, column=0, pady=4,
                                          padx=(2, 10), sticky="w")
-        self.break_bg.grid(row=4, column=1, sticky='e', padx=4, pady=4)
-        self.break_fg.grid(row=4, column=2, sticky='e', padx=4, pady=4)
+        self.break_bg.grid(row=4, column=1, sticky='e', padx=8, pady=4)
+        self.break_fg.grid(row=4, column=2, sticky='e', padx=8, pady=4)
         Separator(self.couleurs, orient='horizontal').grid(row=5, sticky="ew",
                                                            pady=10, columnspan=4)
         Label(self.couleurs, text=_("Rest"),
               style='title.TLabel').grid(row=6, column=0, pady=4,
                                          padx=(2, 10), sticky="w")
-        self.rest_bg.grid(row=6, column=1, sticky='e', padx=4, pady=4)
-        self.rest_fg.grid(row=6, column=2, sticky='e', padx=4, pady=4)
+        self.rest_bg.grid(row=6, column=1, sticky='e', padx=8, pady=4)
+        self.rest_fg.grid(row=6, column=2, sticky='e', padx=8, pady=4)
 
         # --- Tasks
         self.stats = Frame(self.onglets, padding=10)
         self.stats.columnconfigure(0, weight=1)
-        self.stats.rowconfigure(0, weight=1)
+        self.stats.rowconfigure(1, weight=1)
         self.onglets.add(self.stats, text=_("Tasks"))
         can = Canvas(self.stats, bg=self.style.lookup('TFrame', 'background'),
                      highlightthickness=0, width=1,
                      relief='flat')
         scroll = AutoScrollbar(self.stats, orient='vertical', command=can.yview)
         can.configure(yscrollcommand=scroll.set)
-        can.grid(row=0, column=0, sticky='ewns')
-        scroll.grid(row=0, column=1, sticky='ns')
-        Button(self.stats, image=self.im_plus, command=self.add_task).grid(row=1, column=0, sticky='w')
         self.task_frame = Frame(can)
         can.create_window(0, 0, anchor='nw', window=self.task_frame)
 
@@ -198,6 +195,13 @@ class PomodoroParams(Frame):
             self._tasks_btns[task] = b
         if len(tasks) == 1:
             self._tasks_btns[tasks[0]].state(['disabled'])
+
+        Label(self.stats, text=_('Colors in the statistic graph'),
+              style='title.TLabel').grid(row=0, column=0, sticky='w', pady=4)
+        can.grid(row=1, column=0, sticky='ewns')
+        scroll.grid(row=1, column=1, sticky='ns')
+        Button(self.stats, image=self.im_plus, command=self.add_task).grid(row=2, column=0, sticky='w')
+
         self.update_idletasks()
         can.configure(width=self.task_frame.winfo_reqwidth())
         can.configure(scrollregion=can.bbox('all'))

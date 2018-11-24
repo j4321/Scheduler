@@ -159,6 +159,7 @@ class Settings(tk.Toplevel):
         pass  # already done in custom class
 
     def _init_reminders(self):
+        # --- window
 
         def toggle_window():
             b = 'selected' in self.reminders_window.state()
@@ -169,30 +170,81 @@ class Settings(tk.Toplevel):
             self.reminders_sound.state(state)
 
         frame_window = ttk.Frame(self.frames[_('Reminders')])
-        frame_window.columnconfigure(1, weight=1)
+        frame_window.columnconfigure(0, weight=1)
         self.reminders_window = ttk.Checkbutton(frame_window, text=_('Banner'),
                                                 style='title.TCheckbutton',
                                                 command=toggle_window)
         self.reminders_window.grid(sticky='w', row=0, columnspan=2, column=0, pady=4)
         self.reminders_window.state(('!alternate',
                                      '!' * (not CONFIG.getboolean('Reminders', 'window')) + 'selected'))
-        label = ttk.Label(frame_window, text=_('Timeout (min)'))
-        label.grid(row=1, column=0, sticky='w', padx=(12, 2), pady=4)
-        self.reminders_timeout = ttk.Entry(frame_window, width=5, justify='center',
-                                           validate='key',
+        # --- --- timeout
+        frame_timeout = ttk.Frame(frame_window)
+        frame_timeout.grid(sticky='w', padx=(16, 4), pady=4)
+        label = ttk.Label(frame_timeout, text=_('Timeout (min)'))
+        label.pack(side='left')
+        self.reminders_timeout = ttk.Entry(frame_timeout, width=5,
+                                           justify='center', validate='key',
                                            validatecommand=(self._only_nb, '%P'))
         self.reminders_timeout.insert(0, CONFIG.get('Reminders', 'timeout'))
-        self.reminders_timeout.grid(row=1, column=1, sticky='w', padx=(2, 4), pady=4)
-        self.reminders_blink = ttk.Checkbutton(frame_window, text=_('Blink'))
-        self.reminders_blink.grid(sticky='w', row=2, columnspan=2, column=0,
-                                  padx=(12, 4), pady=4)
+        self.reminders_timeout.pack(side='left', padx=4)
+        # --- --- colors
+        frame_color = ttk.Frame(frame_window)
+        frame_color.grid(sticky='w', padx=(16, 4), pady=4)
+        self.reminders_window_bg = ColorFrame(frame_color,
+                                              CONFIG.get('Reminders', 'window_bg'),
+                                              _('Background'))
+        self.reminders_window_bg.pack(side='left', padx=(0, 4))
+        self.reminders_window_fg = ColorFrame(frame_color,
+                                              CONFIG.get('Reminders', 'window_fg'),
+                                              _('Foreground'))
+        self.reminders_window_fg.pack(side='left', padx=(4, 0))
+        # --- --- opacity
+        self.reminders_opacity = OpacityFrame(frame_window,
+                                              CONFIG.getfloat('Reminders',
+                                                              'window_alpha',
+                                                              fallback=0.75),
+                                              style='TLabel')
+        self.reminders_opacity.grid(sticky='w', padx=(16, 4), pady=4)
+
+        ttk.Separator(frame_window, orient='horizontal').grid(sticky='ew',
+                                                              padx=(16, 10),
+                                                              pady=10)
+
+        # --- --- blink
+        frame_blink = ttk.Frame(frame_window)
+        frame_blink.grid(sticky='w', padx=(16, 4), pady=4)
+
+        def toggle_blink():
+            b = 'selected' in self.reminders_blink.state()
+            state = [b * '!' + 'disabled']
+            self.reminders_window_bg_alt.state(state)
+            self.reminders_window_fg_alt.state(state)
+
+        self.reminders_blink = ttk.Checkbutton(frame_blink, text=_('Blink'),
+                                               command=toggle_blink)
+        self.reminders_blink.pack(anchor='nw')
         self.reminders_blink.state(('!alternate',
                                     '!' * (not CONFIG.getboolean('Reminders', 'blink')) + 'selected'))
+        self.reminders_window_bg_alt = ColorFrame(frame_blink,
+                                                  CONFIG.get('Reminders', 'window_bg_alternate'),
+                                                  _('Alternate Background'))
+        self.reminders_window_bg_alt.pack(side='left', padx=(16, 4))
+        self.reminders_window_fg_alt = ColorFrame(frame_blink,
+                                                  CONFIG.get('Reminders', 'window_fg_alternate'),
+                                                  _('Alternate Foreground'))
+        self.reminders_window_fg_alt.pack(side='left', padx=10)
+        toggle_blink()
+
+        ttk.Separator(frame_window, orient='horizontal').grid(sticky='ew',
+                                                              padx=(16, 10),
+                                                              pady=10)
+        # --- --- alarm
+
         self.reminders_sound = SoundFrame(frame_window, CONFIG.get('Reminders', 'alarm'),
                                           CONFIG.get('Reminders', 'mute'), _('Alarm'))
-        self.reminders_sound.grid(sticky='ew', columnspan=2, row=3, column=0,
-                                  padx=(12, 4), pady=4)
+        self.reminders_sound.grid(sticky='ew', padx=(16, 10), pady=4)
 
+        # --- notif
         frame_notif = ttk.Frame(self.frames[_('Reminders')])
         self.reminders_notif = ttk.Checkbutton(frame_notif, text=_('Notification'),
                                                style='title.TCheckbutton')
@@ -239,9 +291,9 @@ class Settings(tk.Toplevel):
         self.cal_bd = ColorFrame(frame_color,
                                  CONFIG.get('Calendar', 'bordercolor'),
                                  _('Border'))
-        self.cal_bg.grid(row=0, column=1, sticky='e', padx=4, pady=4)
-        self.cal_fg.grid(row=0, column=2, sticky='e', padx=4, pady=4)
-        self.cal_bd.grid(row=1, column=1, sticky='e', padx=4, pady=4)
+        self.cal_bg.grid(row=0, column=1, sticky='e', padx=8, pady=4)
+        self.cal_fg.grid(row=0, column=2, sticky='e', padx=8, pady=4)
+        self.cal_bd.grid(row=1, column=1, sticky='e', padx=8, pady=4)
 
         cal_colors = {'normal': _('Normal day'),
                       'weekend': _('Weekend'),
@@ -266,9 +318,9 @@ class Settings(tk.Toplevel):
                                                                  pady=10,
                                                                  sticky='ew')
             ttk.Label(frame_color, style='subtitle.TLabel', wraplength=110,
-                      text=label).grid(row=3 + 2 * i, column=0, sticky='w', padx=(0, 4))
-            bg.grid(row=3 + 2 * i, column=1, sticky='e', padx=4, pady=4)
-            fg.grid(row=3 + 2 * i, column=2, sticky='e', padx=4, pady=4)
+                      text=label).grid(row=3 + 2 * i, column=0, sticky='w')
+            bg.grid(row=3 + 2 * i, column=1, sticky='e', padx=8, pady=4)
+            fg.grid(row=3 + 2 * i, column=2, sticky='e', padx=8, pady=4)
 
         # --- Categories
         categories = ttk.Frame(self.frames[_('Calendar')], padding=4)
@@ -352,15 +404,15 @@ class Settings(tk.Toplevel):
         frame_color = ttk.Frame(self.frames[_('Events')])
         ttk.Label(frame_color, text=_('Colors'),
                   style='title.TLabel').grid(row=0, column=0, sticky='w',
-                                             padx=4, pady=4)
+                                             padx=8, pady=4)
         self.events_bg = ColorFrame(frame_color,
                                     CONFIG.get('Events', 'background'),
                                     _('Background'))
-        self.events_bg.grid(row=0, column=1, sticky='e', padx=4, pady=4)
+        self.events_bg.grid(row=0, column=1, sticky='e', padx=8, pady=4)
         self.events_fg = ColorFrame(frame_color,
                                     CONFIG.get('Events', 'foreground'),
                                     _('Foreground'))
-        self.events_fg.grid(row=0, column=2, sticky='e', padx=4, pady=4)
+        self.events_fg.grid(row=0, column=2, sticky='e', padx=8, pady=4)
 
         # --- placement
         frame_font.grid(sticky='ew')
@@ -400,15 +452,15 @@ class Settings(tk.Toplevel):
         frame_color = ttk.Frame(self.frames[_('Tasks')])
         ttk.Label(frame_color, text=_('Colors'),
                   style='title.TLabel').grid(row=0, column=0, sticky='w',
-                                             padx=4, pady=4)
+                                             padx=8, pady=4)
         self.tasks_bg = ColorFrame(frame_color,
                                    CONFIG.get('Tasks', 'background'),
                                    _('Background'))
-        self.tasks_bg.grid(row=0, column=1, sticky='e', padx=4, pady=4)
+        self.tasks_bg.grid(row=0, column=1, sticky='e', padx=8, pady=4)
         self.tasks_fg = ColorFrame(frame_color,
                                    CONFIG.get('Tasks', 'foreground'),
                                    _('Foreground'))
-        self.tasks_fg.grid(row=0, column=2, sticky='e', padx=4, pady=4)
+        self.tasks_fg.grid(row=0, column=2, sticky='e', padx=8, pady=4)
 
         # --- placement
         frame_font.grid(sticky='ew')
@@ -450,15 +502,15 @@ class Settings(tk.Toplevel):
         frame_color = ttk.Frame(self.frames[_('Timer')])
         ttk.Label(frame_color, text=_('Colors'),
                   style='title.TLabel').grid(row=0, column=0, sticky='w',
-                                             padx=4, pady=4)
+                                             padx=8, pady=4)
         self.timer_bg = ColorFrame(frame_color,
                                    CONFIG.get('Timer', 'background'),
                                    _('Background'))
-        self.timer_bg.grid(row=0, column=1, sticky='e')
+        self.timer_bg.grid(row=0, column=1, sticky='e', padx=8, pady=4)
         self.timer_fg = ColorFrame(frame_color,
                                    CONFIG.get('Timer', 'foreground'),
                                    _('Foreground'))
-        self.timer_fg.grid(row=0, column=2, sticky='e')
+        self.timer_fg.grid(row=0, column=2, sticky='e', padx=8, pady=4)
 
         # --- placement
         frame_font.grid(sticky='ew')
@@ -545,6 +597,11 @@ class Settings(tk.Toplevel):
         CONFIG.set("General", "soundplayer", self.player.get())
         # --- Reminders
         CONFIG.set("Reminders", 'window', str("selected" in self.reminders_window.state()))
+        CONFIG.set("Reminders", 'window_bg', self.reminders_window_bg.get_color())
+        CONFIG.set("Reminders", 'window_fg', self.reminders_window_fg.get_color())
+        CONFIG.set("Reminders", "window_alpha", "%.2f" % (self.reminders_opacity.get_opacity()))
+        CONFIG.set("Reminders", 'window_bg_alternate', self.reminders_window_bg_alt.get_color())
+        CONFIG.set("Reminders", 'window_fg_alternate', self.reminders_window_fg_alt.get_color())
         CONFIG.set("Reminders", 'blink', str("selected" in self.reminders_blink.state()))
         CONFIG.set("Reminders", 'notification', str("selected" in self.reminders_notif.state()))
         alarm, mute = self.reminders_sound.get()

@@ -113,6 +113,7 @@ class BaseWidget(Toplevel):
     def show(self):
         ''' make widget sticky '''
         self.deiconify()
+        self.update_idletasks()
         try:
             pos = self._position.get()
             for w in self.ewmh.getClientList():

@@ -24,7 +24,7 @@ Notification class and script
 from tkinter import Tk
 from tkinter.ttk import Label, Button, Style
 import sys
-from schedulerlib.constants import CONFIG, ICON_NAME
+from schedulerlib.constants import CONFIG, ICON_NAME, active_color
 from subprocess import Popen
 
 
@@ -36,18 +36,25 @@ class Notification(Tk):
         self.columnconfigure(0, weight=1)
         self.attributes('-type', 'notification')
         self.attributes('-alpha', 0.75)
-        self.configure(bg='black')
+
         self.style = Style(self)
         self.style.theme_use('clam')
-        self.style.configure('notif.TLabel', background='black', foreground='white')
-        self.style.configure('notif.TButton', background='#252525',
-                             darkcolor='black', lightcolor='#4C4C4C',
-                             bordercolor='#737373', foreground='white')
-        self.style.map('notif.TButton', background=[('active', '#4C4C4C')])
+        self.bg = [CONFIG.get('Reminders', 'window_bg'),
+                   CONFIG.get('Reminders', 'window_bg_alternate')]
+        self.fg = [CONFIG.get('Reminders', 'window_fg'),
+                   CONFIG.get('Reminders', 'window_fg_alternate')]
+        self.active_bg = [active_color(bg) for bg in self.bg]
+        self.active_bg2 = [active_color(bg) for bg in self.active_bg]
+        self.style.configure('notif.TLabel', background=self.bg[0],
+                             foreground=self.fg[0])
+        self.style.configure('notif.TButton', background=self.active_bg[0],
+                             relief='flat', foreground=self.fg[0])
+        self.configure(bg=self.bg[0])
+        self.style.map('notif.TButton', background=[('active', self.active_bg2[0])])
         Label(self, text=text, style='notif.TLabel').grid(row=0, column=0, padx=10, pady=10)
         Button(self, text='Ok', command=self.quit,
                style='notif.TButton').grid(row=1, column=0, padx=10, pady=(0, 10))
-        self.blink_alternate = True
+        self.blink_alternate = False
         self.deiconify()
         self.update_idletasks()
         self.geometry('%ix%i+0+0' % (self.winfo_screenwidth(), self.winfo_height()))
@@ -92,15 +99,12 @@ class Notification(Tk):
         self.destroy()
 
     def blink(self):
-        if self.blink_alternate:
-            self.style.configure('notif.TButton', foreground='red', background='gray')
-            self.style.configure('notif.TLabel', foreground='red', background='gray')
-            self.configure(bg='gray')
-        else:
-            self.style.configure('notif.TButton', foreground='white', background='#252525')
-            self.style.configure('notif.TLabel', foreground='white', background='black')
-            self.configure(bg='black')
         self.blink_alternate = not self.blink_alternate
+        self.configure(bg=self.bg[self.blink_alternate])
+        self.style.configure('notif.TLabel', background=self.bg[self.blink_alternate],
+                             foreground=self.fg[self.blink_alternate])
+        self.style.configure('notif.TButton', background=self.active_bg[self.blink_alternate],
+                             relief='flat', foreground=self.fg[self.blink_alternate])
         self.blink_id = self.after(500, self.blink)
 
 

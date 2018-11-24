@@ -35,10 +35,17 @@ class ColorFrame(ttk.Frame):
         frame = ttk.Frame(self, border=1, relief='groove')
         self.preview = tk.Frame(frame, width=23, height=23, bg=color)
         self.preview.pack()
-        ttk.Label(self, text=label).pack(side='left', padx=4, pady=4)
-        frame.pack(side='left', padx=4, pady=4)
-        ttk.Button(self, image=self._im_color, padding=2,
-                   command=self.askcolor).pack(side='left', padx=4, pady=4)
+        self.label = ttk.Label(self, text=label)
+        self.label.pack(side='left', pady=4)
+        frame.pack(side='left', padx=8, pady=4)
+        self.button = ttk.Button(self, image=self._im_color, padding=2,
+                                 command=self.askcolor)
+        self.button.pack(side='left', pady=4)
+
+    def state(self, statespec=None):
+        self.button.state(statespec)
+        self.label.state(statespec)
+        return ttk.Frame.state(self, statespec)
 
     def askcolor(self):
         try:

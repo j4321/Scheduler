@@ -48,7 +48,7 @@ class SoundFrame(ttk.Frame):
         # --- placement
         frame.grid(row=0, columnspan=2, sticky='w')
         self.path.grid(column=0, row=1, sticky='ew', padx=(4, 0))
-        self.b_choose.grid(column=1, row=1, padx=(2, 4))
+        self.b_choose.grid(column=1, row=1, padx=(2, 0))
         self._toggle()
 
     def state(self, statespec=None):

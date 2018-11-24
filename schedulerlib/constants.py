@@ -116,6 +116,11 @@ if not CONFIG.read(CONFIG_PATH):
 
     CONFIG.add_section('Reminders')
     CONFIG.set('Reminders', 'window', 'True')
+    CONFIG.set('Reminders', 'window_alpha', '0.75')
+    CONFIG.set('Reminders', 'window_bg', 'gray10')
+    CONFIG.set('Reminders', 'window_fg', 'white')
+    CONFIG.set('Reminders', 'window_bg_alternate', 'gray30')
+    CONFIG.set('Reminders', 'window_fg_alternate', 'red')
     CONFIG.set('Reminders', 'notification', 'True')
     CONFIG.set('Reminders', 'mute', 'True')
     CONFIG.set('Reminders', 'alarm', os.path.join(PATH_SOUNDS, 'alarm.wav'))
@@ -208,6 +213,11 @@ if not CONFIG.has_section('Pomodoro'):
 if not CONFIG.has_section('Reminders'):
     CONFIG.add_section('Reminders')
     CONFIG.set('Reminders', 'window', 'True')
+    CONFIG.set('Reminders', 'window_alpha', '0.75')
+    CONFIG.set('Reminders', 'window_bg', 'gray10')
+    CONFIG.set('Reminders', 'window_fg', 'white')
+    CONFIG.set('Reminders', 'window_bg_alternate', 'gray30')
+    CONFIG.set('Reminders', 'window_fg_alternate', 'red')
     CONFIG.set('Reminders', 'notification', 'True')
     CONFIG.set('Reminders', 'mute', 'True')
     CONFIG.set('Reminders', 'alarm', os.path.join(PATH_SOUNDS, 'alarm.wav'))
