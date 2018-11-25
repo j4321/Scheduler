@@ -58,6 +58,7 @@ class Stats(tk.Toplevel):
 
     def plot_stats(self):
         tasks = [t.capitalize() for t in CONFIG.options("PomodoroTasks")]
+        tasks.sort()
         coul = [CONFIG.get("PomodoroTasks", task) for task in tasks]
         stats_x = []
         stats_y = []
