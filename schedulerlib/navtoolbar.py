@@ -27,7 +27,7 @@ ttk.Button, translatable tooltips and tkfilebrowser.saveasfilename dialog.
 import tkinter as tk
 from tkinter import ttk
 from .messagebox import showerror
-from .constants import IM_LAYOUT
+from .constants import IM_LAYOUT, IM_GRID
 from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 import os.path
 from matplotlib import rcParams
@@ -47,12 +47,14 @@ class NavigationToolbar(NavigationToolbar2Tk):
         ('Zoom', _('Zoom to rectangle'), os.path.join(rcParams['datapath'], 'images', 'zoom_to_rect.gif'), 'zoom'),
         ('Subplots', _('Configure subplots'), os.path.join(rcParams['datapath'], 'images', 'subplots.gif'), 'configure_subplots'),
         ('Layout', _('Tight layout'), IM_LAYOUT, 'tight_layout'),
+        ('Grid', _('Toggle grid'), IM_GRID, 'toggle_grid'),
         (None, None, None, None),
         ('Save', _('Save the figure'), os.path.join(rcParams['datapath'], 'images', 'filesave.gif'), 'save_figure'),
     )
 
-    def __init__(self, canvas, window, tight_layout_cmd):
+    def __init__(self, canvas, window, tight_layout_cmd, toggle_grid_cmd):
         self.tight_layout = tight_layout_cmd
+        self.toggle_grid = toggle_grid_cmd
         NavigationToolbar2Tk.__init__(self, canvas, window)
 
     def save_figure(self, *args):

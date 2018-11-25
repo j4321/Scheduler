@@ -44,9 +44,13 @@ class Stats(tk.Toplevel):
         self.figAgg.draw()
         self.figAgg.get_tk_widget().pack(fill='both', expand=True)
         self.figAgg.get_tk_widget().configure(bg=bg)
-        self.toolbar = NavigationToolbar(self.figAgg, self, self.tight_layout)
+        self.toolbar = NavigationToolbar(self.figAgg, self, self.tight_layout, self.toggle_grid)
 
         self.plot_stats()
+
+    def toggle_grid(self):
+        self.ax.grid()
+        self.figAgg.draw()
 
     def tight_layout(self):
         self.fig.tight_layout()
