@@ -61,9 +61,6 @@ class BaseWidget(Toplevel):
         self.x = None
         self.y = None
 
-        # --- bindings
-        self.bind('<Configure>', self._on_configure)
-
         if CONFIG.getboolean(self.name, 'visible', fallback=True):
             self.show()
 
@@ -72,6 +69,9 @@ class BaseWidget(Toplevel):
         self.update_idletasks()
         if geometry:
             self.geometry(geometry)
+
+        # --- bindings
+        self.bind('<Configure>', self._on_configure)
 
     def create_content(self):
         # to be overriden by subclass
