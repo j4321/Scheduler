@@ -25,11 +25,11 @@ Pomodoro stats viewer
 import tkinter as tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
-from schedulerlib.constants import CONFIG, PATH_STATS
+from schedulerlib.constants import CONFIG, PATH_STATS, scrub
 from schedulerlib.navtoolbar import NavigationToolbar
 import datetime as dt
-import os
 import numpy as np
+import sqlite3
 
 
 class Stats(tk.Toplevel):
@@ -62,28 +62,34 @@ class Stats(tk.Toplevel):
         coul = [CONFIG.get("PomodoroTasks", task) for task in tasks]
         stats_x = []
         stats_y = []
-
+        print(PATH_STATS)
         demain = dt.date.today().toordinal() + 1
         min_x = demain
 
         # récupération des données
         no_data = True
+        db = sqlite3.connect(PATH_STATS)
+        cursor = db.cursor()
         for i, task in enumerate(tasks):
-            chemin = os.path.join(PATH_STATS, "_".join(task.split(" ")))
-            if os.path.exists(chemin):
+            name = task.lower().replace(' ', '_')
+            try:
+                cursor.execute('SELECT date, work FROM {}'.format(scrub(name)))
+                data = cursor.fetchall()
+            except sqlite3.OperationalError:
+                # task was never worked
+                stats_x.append([demain - 1])
+                stats_y.append(np.array([0]))
+            else:
                 no_data = False
-                stat = np.loadtxt(chemin, dtype=int)
-                if len(stat.shape) == 1:
-                    stat = stat.reshape(1, 4)
-                x = [dt.date(an, mois, jour).toordinal() for jour, mois, an in stat[:, :3]]
-                y = stat[:, -1] / 60  # temps de travail
+                x = []
+                y = []
+                for date, work in data:
+                    x.append(date)
+                    y.append(work / 60)
                 min_x = min(x[0], min_x)
                 stats_x.append(x)
                 stats_y.append(y)
-            else:
-                # la taĉhe n'a jamais été travaillée
-                stats_x.append([demain - 1])
-                stats_y.append(np.array([0]))
+        db.close()
 
         # plots
         xx = np.arange(min_x, demain, dtype=float)

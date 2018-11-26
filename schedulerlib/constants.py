@@ -71,7 +71,7 @@ if not os.path.isdir(LOCAL_PATH):
         os.mkdir(LOCAL_PATH)
 
 PATH_CONFIG = os.path.join(LOCAL_PATH, "scheduler.ini")
-PATH_STATS = os.path.join(LOCAL_PATH, "pomodoro_stats")
+PATH_STATS = os.path.join(LOCAL_PATH, "pomodoro_stats.sqlite")
 PATH = os.path.dirname(__file__)
 PIDFILE = os.path.join(LOCAL_PATH, 'scheduler.pid')
 
@@ -88,9 +88,6 @@ if not os.path.exists(LOCAL_PATH):
 if not os.path.exists(os.path.dirname(BACKUP_PATH)):
     os.mkdir(os.path.dirname(BACKUP_PATH))
 
-if not os.path.exists(PATH_STATS):
-    os.mkdir(PATH_STATS)
-
 # --- stat colors
 CMAP = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#17becf', '#ff00ff', '#7f7f7f', '#bcbd22', '#9467bd']
 
@@ -100,7 +97,7 @@ logging.basicConfig(level=logging.DEBUG,
                     datefmt='%Y-%m-%d %H:%M:%S',
                     format='%(asctime)s %(levelname)s: %(message)s',
                     handlers=[handler])
-logging.getLogger().addHandler(logging.StreamHandler())
+# logging.getLogger().addHandler(logging.StreamHandler())
 
 # --- config
 CONFIG = ConfigParser()
@@ -736,3 +733,7 @@ def active_color(r, g, b, output='HTML'):
 
 def only_nb(text):
     return text == '' or text.isdigit()
+
+
+def scrub(table_name):
+    return ''.join(ch for ch in table_name if ch.isalnum() or ch == '_')

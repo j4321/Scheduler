@@ -7,3 +7,5 @@ build/
 *.tar.gz
 backup/
 dist/
+*.db
+stats_to_db.py

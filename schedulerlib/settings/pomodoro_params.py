@@ -26,13 +26,14 @@ from tkinter import Canvas, Toplevel
 from tkinter.ttk import Notebook, Style, Label, Separator, Frame, Entry, Button
 from tkinter.messagebox import showerror, askyesno
 from schedulerlib.constants import IM_COLOR, only_nb, CONFIG, askcolor, \
-    CMAP, IM_PLUS, IM_MOINS, PATH_STATS, save_config
+    CMAP, IM_PLUS, IM_MOINS, PATH_STATS, save_config, scrub
 from schedulerlib.ttkwidgets import AutoScrollbar
 from PIL.ImageTk import PhotoImage
 from .color import ColorFrame
 from .opacity import OpacityFrame
 from .font import FontFrame
 from .sound import SoundFrame
+import sqlite3
 
 
 class PomodoroParams(Frame):
@@ -272,9 +273,11 @@ class PomodoroParams(Frame):
             print(CONFIG.options("PomodoroTasks"))
             CONFIG.remove_option("PomodoroTasks", task)
             # remove stats
-            chemin = os.path.join(PATH_STATS, "_".join(task.split(" ")))
-            if os.path.exists(chemin):
-                os.remove(chemin)
+            db = sqlite3.connect(PATH_STATS)
+            cursor = db.cursor()
+            cursor.execute('DROP TABLE {}'.format(scrub(task.lower().replace(' ', '_'))))
+            db.commit()
+            db.close()
             self.tasks[task].destroy()
             self._tasks_btns[task].destroy()
             del self.tasks[task]
@@ -318,17 +321,3 @@ class PomodoroParams(Frame):
         Button(top, text=_("Cancel"), command=top.destroy).grid(row=1, column=0)
         Button(top, text=_("Ok"), command=ajoute).grid(row=1, column=1)
         top.wait_window(top)
-
-    # def choix_son(self):
-        # filetypes = [(_("sound file"), '*.mp3|*.ogg|*.wav'),
-                     # ('OGG', '*.ogg'),
-                     # ('MP3', '*.mp3'),
-                     # ('WAV', '*.wav')]
-        # init = self.bip.get()
-        # if not os.path.exists(init):
-            # init = CONFIG.get("Pomodoro", "beep")
-        # fich = askopenfilename(filetypes=filetypes, initialfile=os.path.split(init)[1],
-                               # initialdir=os.path.dirname(init), parent=self)
-        # if fich:
-            # self.bip.delete(0, "end")
-            # self.bip.insert(0, fich)

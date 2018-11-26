@@ -28,10 +28,11 @@ from tkinter.messagebox import askyesno
 import os
 import datetime as dt
 from schedulerlib.constants import CONFIG, CMAP, PATH_STATS, IM_PLAY, \
-    STOP, IM_POMODORO, IM_GRAPH, active_color
+    STOP, IM_POMODORO, IM_GRAPH, active_color, scrub
 from .base_widget import BaseWidget
 from schedulerlib.pomodoro_stats import Stats
 import logging
+import sqlite3
 
 
 class Pomodoro(BaseWidget):
@@ -217,30 +218,28 @@ class Pomodoro(BaseWidget):
         """Save stats."""
         if time is None:
             time = CONFIG.getint("Pomodoro", "work_time")
-        # TODO: translate, correct date/time format
-        # la tâche en cours a été travaillée, il faut enregistrer les stats
-        date = dt.date.today()
-        task = self.task.get()
-        path = os.path.join(PATH_STATS, "_".join(task.split(" ")))
-        if not os.path.exists(path):
-            with open(path, 'w') as fich:
-                fich.write(_("# task: {task_name}\n# day\tmonth\tyear\twork time (min)\n").format(task_name=task))
-        with open(path, 'r') as fich:
-            stats = fich.readlines()
-        if len(stats) > 2:
-            last = stats[-1][:10], stats[-1][:-1].split("\t")[-1]
+        today = dt.date.today().toordinal()
+        task = self.task.get().lower().replace(' ', '_')
+        db = sqlite3.connect(PATH_STATS)
+        cursor = db.cursor()
+        try:
+            cursor.execute('SELECT * FROM {} ORDER BY id DESC LIMIT 1'.format(scrub(task)))
+            key, date, work = cursor.fetchone()
+        except sqlite3.OperationalError:
+            cursor.execute('''CREATE TABLE {} (id INTEGER PRIMARY KEY
+                                               date INTEGER,
+                                               work INTEGER)'''.format(scrub(task)))
+            cursor.execute('INSERT INTO {}(date, work) VALUES (?, ?)'.format(scrub(task)),
+                           (today, time))
         else:
-            last = "", 0
-        if last[0] != date.strftime("%d\t%m\t%Y"):
-            with open(path, 'a') as fich:
-                fich.write("%s\t%i\n" % (date.strftime("%d\t%m\t%Y"), time))
-        else:
-            # un nombre a déjà été enregistré plus tôt dans la journée
-            # il faut les additioner
-            with open(path, 'w') as fich:
-                fich.writelines(stats[:-1])
-                fich.write("%s\t%i\n" % (date.strftime("%d\t%m\t%Y"),
-                           time + int(last[1])))
+            if today != date:
+                cursor.execute('INSERT INTO {}(date, work) VALUES (?, ?)'.format(scrub(task)),
+                               (today, time))
+            else:  # update day's value
+                cursor.execute('UPDATE {} SET work=? WHERE id=?'.format(scrub(task)), (work + time, key))
+        finally:
+            db.commit()
+            db.close()
 
     def display_stats(self):
         """ affiche les statistiques """
