@@ -25,7 +25,6 @@ from subprocess import Popen
 from tkinter import StringVar, Menu, IntVar, PhotoImage
 from tkinter.ttk import Button, Label, Frame, Menubutton, Sizegrip
 from tkinter.messagebox import askyesno
-import os
 import datetime as dt
 from schedulerlib.constants import CONFIG, CMAP, PATH_STATS, IM_PLAY, \
     STOP, IM_POMODORO, IM_GRAPH, active_color, scrub
@@ -226,7 +225,7 @@ class Pomodoro(BaseWidget):
             cursor.execute('SELECT * FROM {} ORDER BY id DESC LIMIT 1'.format(scrub(task)))
             key, date, work = cursor.fetchone()
         except sqlite3.OperationalError:
-            cursor.execute('''CREATE TABLE {} (id INTEGER PRIMARY KEY
+            cursor.execute('''CREATE TABLE {} (id INTEGER PRIMARY KEY,
                                                date INTEGER,
                                                work INTEGER)'''.format(scrub(task)))
             cursor.execute('INSERT INTO {}(date, work) VALUES (?, ?)'.format(scrub(task)),
