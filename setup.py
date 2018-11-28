@@ -21,11 +21,14 @@ for loc in os.listdir('schedulerlib/locale'):
 with open("schedulerlib/version.py") as f:
     exec(f.read())
 
+with open('README.rst', encoding='utf-8') as f:
+    long_description = f.read()
+
 
 setup(name='scheduler',
       version=__version__,
       description='Alarms and reminders',
-      long_description=""" Alarms and reminders """,
+      long_description=long_description,
       url='https://github.com/j4321/Scheduler',
       author='Juliette Monsel',
       author_email='j_4321@protonmail.com',
