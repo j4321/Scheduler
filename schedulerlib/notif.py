@@ -113,7 +113,10 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         text = sys.argv[1]
         if CONFIG.getboolean('Reminders', 'notification', fallback=True):
-            Popen(["notify-send", "-i", ICON_NAME, "Scheduler", text])
+            try:
+                Popen(["notify-send", "-i", ICON_NAME, "Scheduler", text])
+            except Exception:
+                pass  # notifications not supported
         if CONFIG.getboolean('Reminders', 'window', fallback=True):
             n = Notification(text)
             n.mainloop()
