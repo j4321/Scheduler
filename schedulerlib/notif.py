@@ -43,8 +43,8 @@ class Notification(Tk):
                    CONFIG.get('Reminders', 'window_bg_alternate')]
         self.fg = [CONFIG.get('Reminders', 'window_fg'),
                    CONFIG.get('Reminders', 'window_fg_alternate')]
-        self.active_bg = [active_color(bg) for bg in self.bg]
-        self.active_bg2 = [active_color(bg) for bg in self.active_bg]
+        self.active_bg = [active_color(*self.winfo_rgb(bg)) for bg in self.bg]
+        self.active_bg2 = [active_color(*self.winfo_rgb(bg)) for bg in self.active_bg]
         self.style.configure('notif.TLabel', background=self.bg[0],
                              foreground=self.fg[0])
         self.style.configure('notif.TButton', background=self.active_bg[0],

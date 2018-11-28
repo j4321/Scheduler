@@ -78,8 +78,7 @@ class EventWidget(BaseWidget):
     def update_style(self):
         bg = CONFIG.get('Events', 'background')
         fg = CONFIG.get('Events', 'foreground')
-        r, g, b = self.winfo_rgb(bg)
-        active_bg = active_color(r * 255 / 65535, g * 255 / 65535, b * 255 / 65535)
+        active_bg = active_color(*self.winfo_rgb(bg))
         self.attributes('-alpha', CONFIG.get(self.name, 'alpha', fallback=0.85))
         self.style.configure('Events.TFrame', background=bg)
         self.style.configure('Events.TSizegrip', background=bg)

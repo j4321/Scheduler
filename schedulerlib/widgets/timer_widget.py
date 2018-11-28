@@ -75,8 +75,7 @@ class Timer(BaseWidget):
         self.attributes('-alpha', CONFIG.get(self.name, 'alpha', fallback=0.85))
         bg = CONFIG.get('Timer', 'background')
         fg = CONFIG.get('Timer', 'foreground')
-        r, g, b = self.winfo_rgb(bg)
-        active_bg = active_color(r * 255 / 65535, g * 255 / 65535, b * 255 / 65535)
+        active_bg = active_color(*self.winfo_rgb(bg))
         self.configure(bg=bg)
         self.menu.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
                             activebackground=active_bg)

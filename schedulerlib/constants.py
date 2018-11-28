@@ -715,8 +715,10 @@ def is_color_light(r, g, b):
     return p > 0.5
 
 
-def active_color(r, g, b, output='HTML'):
+def active_color(R, G, B, output='HTML'):
     """Return a lighter shade of color (RGB triplet with value max 255) in HTML format."""
+    coef = 255 / 65535
+    r, g, b = R * coef, G * coef, B * coef
     if is_color_light(r, g, b):
         r *= 3 / 4
         g *= 3 / 4
@@ -728,7 +730,7 @@ def active_color(r, g, b, output='HTML'):
     if output == 'HTML':
         return ("#%2.2x%2.2x%2.2x" % (round(r), round(g), round(b))).upper()
     else:
-        return (round(r), round(g), round(b))
+        return (round(r) / coef, round(g) / coef, round(b) / coef)
 
 
 def only_nb(text):

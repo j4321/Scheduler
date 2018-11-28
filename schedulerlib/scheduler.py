@@ -224,13 +224,12 @@ class EventScheduler(Tk):
         self._im_slider_vert_prelight = {}
         self._im_slider_vert_active = {}
         self._slider_alpha = Image.open(IM_SCROLL_ALPHA)
-        vmax = self.winfo_rgb('white')[0]
         for widget in ['Events', 'Tasks']:
             bg = CONFIG.get(widget, 'background', fallback='gray10')
             fg = CONFIG.get(widget, 'foreground')
 
-            widget_bg = tuple(int(val / vmax * 255) for val in self.winfo_rgb(bg))
-            widget_fg = tuple(int(val / vmax * 255) for val in self.winfo_rgb(fg))
+            widget_bg = self.winfo_rgb(bg)
+            widget_fg = tuple(round(c * 255 / 65535) for c in self.winfo_rgb(fg))
             active_bg = active_color(*widget_bg)
             active_bg2 = active_color(*active_color(*widget_bg, 'RGB'))
 
@@ -392,13 +391,12 @@ apply {name {
 
     def _setup_style(self):
         # --- scrollbars
-        vmax = self.winfo_rgb('white')[0]
         for widget in ['Events', 'Tasks']:
             bg = CONFIG.get(widget, 'background', fallback='gray10')
             fg = CONFIG.get(widget, 'foreground', fallback='white')
 
-            widget_bg = tuple(int(val / vmax * 255) for val in self.winfo_rgb(bg))
-            widget_fg = tuple(int(val / vmax * 255) for val in self.winfo_rgb(fg))
+            widget_bg = self.winfo_rgb(bg)
+            widget_fg = tuple(round(c * 255 / 65535) for c in self.winfo_rgb(fg))
             active_bg = active_color(*widget_bg)
             active_bg2 = active_color(*active_color(*widget_bg, 'RGB'))
 
