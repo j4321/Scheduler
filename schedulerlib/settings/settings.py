@@ -113,16 +113,6 @@ class Settings(tk.Toplevel):
                                    values=[t.capitalize() for (t, b) in TOOLKITS.items() if b])
         self.cb_gui.pack(side="left", padx=4)
         self.cb_gui.bind('<<ComboboxSelected>>', self.change_gui)
-        # menu_gui = tk.Menu(frame_gui)
-        # ttk.Menubutton(frame_gui, menu=menu_gui, width=4, padding=1,
-                       # textvariable=self.gui).pack(side="left", padx=4)
-
-        # for toolkit, b in TOOLKITS.items():
-            # if b:
-                # menu_gui.add_radiobutton(label=toolkit.capitalize(),
-                                         # value=toolkit.capitalize(),
-                                         # variable=self.gui,
-                                         # command=self.change_gui)
         # --- Update checks
         # self.confirm_update = ttk.Checkbutton(self.frames[_('General')],
                                               # text=_("Check for updates on start-up"))
