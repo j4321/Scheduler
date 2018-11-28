@@ -337,10 +337,10 @@ class Form(Toplevel):
             self.end_hour.state(("!disabled",))
 
     def _toggle_in_progress(self, event=None):
-        if self.task_progress.get() == 'In Progress':
+        if self.task_progress.get() == _('In Progress'):
             self.in_progress.state(('!disabled',))
         else:
-            if self.task_progress.get() == 'Completed':
+            if self.task_progress.get() == _('Completed'):
                 self.in_progress.set('100%')
             self.in_progress.state(('disabled',))
 

@@ -92,13 +92,13 @@ class EventScheduler(Tk):
                                              variable=self._task_var,
                                              command=self._set_progress)
         for state in ['Pending', 'Completed', 'Cancelled']:
-            self.menu_task.add_radiobutton(label=state, value=state,
+            self.menu_task.add_radiobutton(label=_(state), value=state,
                                            variable=self._task_var,
                                            command=self._set_progress)
         self._img_dot = tkPhotoImage(master=self)
         self.menu_task.insert_cascade(1, menu=menu_in_progress,
                                       compound='left',
-                                      label='In Progress',
+                                      label=_('In Progress'),
                                       image=self._img_dot)
         self.title('Scheduler')
         self.rowconfigure(1, weight=1)
@@ -554,7 +554,7 @@ apply {name {
         self.tree.selection_add(self.right_click_iid)
         if self.right_click_iid:
             try:
-                self.menu.delete('Progress')
+                self.menu.delete(_('Progress'))
             except TclError:
                 pass
             state = self.events[self.right_click_iid]['Task']
@@ -565,7 +565,7 @@ apply {name {
                 else:
                     self._img_dot = tkPhotoImage(master=self)
                 self.menu_task.entryconfigure(1, image=self._img_dot)
-                self.menu.insert_cascade(0, menu=self.menu_task, label='Progress')
+                self.menu.insert_cascade(0, menu=self.menu_task, label=_('Progress'))
             self.menu.tk_popup(event.x_root, event.y_root)
 
     def _delete_menu(self):
@@ -579,7 +579,7 @@ apply {name {
             if '%' in self._task_var.get():
                 self._img_dot = PhotoImage(master=self, file=IM_DOT)
             else:
-                self._img_dot = PhotoImage(master=self)
+                self._img_dot = tkPhotoImage(master=self)
             self.menu_task.entryconfigure(1, image=self._img_dot)
 
     def delete_outdated_events(self):
@@ -683,10 +683,6 @@ apply {name {
         """return events scheduled for the next 7 days """
         next_ev = {}
         today = datetime.now().date()
-#        for event in self.events.values():
-#            dt = event['Start'].date() - today
-#            if dt.days >= 0 and dt.days < 7:
-#                next_ev.append(event)
         for d in range(7):
             day = today + timedelta(days=d)
             evts = self.widgets['Calendar'].get_events(day)
