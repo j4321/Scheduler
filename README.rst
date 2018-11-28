@@ -44,6 +44,19 @@ Install
 
 Scheduler can then be launched from *Menu > Utility > Scheduler* or directly from the command line with `scheduler`.
 
+
+Troubleshooting
+---------------
+
+Several gui toolkits are available to display the system tray icon, so if the
+icon does not behave properly, try to change toolkit, they are not all fully
+compatible with every desktop environment.
+
+If you encounter bugs or if you have suggestions, please open an issue
+on `GitHub <https://github.com/j4321/Scheduler/issues>`_.
+
+
+
 .. |Linux| image:: https://img.shields.io/badge/platform-Linux-blue.svg
     :alt: Linux
 .. |License| image:: https://img.shields.io/github/license/j4321/Scheduler.svg
