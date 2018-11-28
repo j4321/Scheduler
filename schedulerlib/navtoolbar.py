@@ -35,6 +35,7 @@ try:
     from tkfilebrowser import asksaveasfilename
 except ImportError:
     from tkinter.filedialog import asksaveasfilename
+from PIL.ImageTk import PhotoImage
 
 
 class NavigationToolbar(NavigationToolbar2Tk):
@@ -98,7 +99,7 @@ class NavigationToolbar(NavigationToolbar2Tk):
             showerror(_("Error"), str(e))
 
     def _Button(self, text, file, command, **kwargs):
-        im = tk.PhotoImage(master=self, file=file)
+        im = PhotoImage(master=self, file=file)
         b = ttk.Button(master=self, text=text, padding=1, image=im, command=command)
         b._ntimage = im
         b.pack(side=tk.LEFT)

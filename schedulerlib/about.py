@@ -24,10 +24,11 @@ About dialog
 
 
 from webbrowser import open as webOpen
-from tkinter import Text, Toplevel, PhotoImage
+from tkinter import Text, Toplevel
 from tkinter.ttk import Button, Label
 from schedulerlib.constants import ICON48
 from schedulerlib.version import __version__
+from PIL.ImageTk import PhotoImage
 
 
 class About(Toplevel):

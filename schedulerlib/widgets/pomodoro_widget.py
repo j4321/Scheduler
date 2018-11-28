@@ -22,7 +22,7 @@ Pomodoro widget
 """
 
 from subprocess import Popen
-from tkinter import StringVar, Menu, IntVar, PhotoImage
+from tkinter import StringVar, Menu, IntVar
 from tkinter.ttk import Button, Label, Frame, Menubutton, Sizegrip
 from tkinter.messagebox import askyesno
 import datetime as dt
@@ -32,6 +32,7 @@ from .base_widget import BaseWidget
 from schedulerlib.pomodoro_stats import Stats
 import logging
 import sqlite3
+from PIL.ImageTk import PhotoImage
 
 
 class Pomodoro(BaseWidget):

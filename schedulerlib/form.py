@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Task editor
 """
 
-from tkinter import Toplevel, PhotoImage, Text, Spinbox, BooleanVar, StringVar
+from tkinter import Toplevel, Text, Spinbox, BooleanVar, StringVar
 from tkinter.ttk import Entry, Label, Button, Frame, Style, Combobox
 from tkinter.ttk import Radiobutton, Checkbutton, Notebook
 from schedulerlib.constants import IM_BELL, IM_MOINS, CONFIG, \
@@ -30,6 +30,7 @@ from schedulerlib.constants import IM_BELL, IM_MOINS, CONFIG, \
 from schedulerlib.ttkcalendar import DateEntry, get_calendar
 from schedulerlib.ttkwidgets import LabelFrame
 from datetime import timedelta, time, datetime
+from PIL.ImageTk import PhotoImage
 
 
 class Form(Toplevel):

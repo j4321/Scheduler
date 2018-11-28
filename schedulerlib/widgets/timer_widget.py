@@ -6,10 +6,11 @@ Created on Thu Jun 15 13:02:41 2017
 @author: juliette
 """
 
-from tkinter import PhotoImage, Text
+from tkinter import Text
 from tkinter.ttk import Button, Label, Sizegrip
 from schedulerlib.constants import IM_PLAY, IM_PAUSE, STOP, CONFIG, active_color
 from .base_widget import BaseWidget
+from PIL.ImageTk import PhotoImage
 
 
 class Timer(BaseWidget):
