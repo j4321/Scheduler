@@ -9,7 +9,8 @@ images = [os.path.join("schedulerlib/images/", img) for img in os.listdir("sched
 sounds = [os.path.join("schedulerlib/sounds/", s) for s in os.listdir("schedulerlib/sounds/")]
 
 data_files = [("/usr/share/pixmaps", ["scheduler.svg", "scheduler-tray.svg"]),
-              ("/usr/share/doc/scheduler", ["README.rst"]),
+              ("/usr/share/doc/scheduler", ["README.rst", "changelog"]),
+              ("/usr/share/man/man1", ["scheduler.1.gz"]),
               ("/usr/share/scheduler/images/", images),
               ("/usr/share/scheduler/sounds/", sounds),
               ("/usr/share/applications", ["scheduler.desktop"])]
