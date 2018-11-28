@@ -600,16 +600,7 @@ class Calendar(ttk.Frame):
         for item, value in kw.items():
             self[item] = value
 
-    def config(self, **kw):
-        """
-        Configure resources of a widget.
-
-        The values for resources are specified as keyword
-        arguments. To get an overview about
-        the allowed keyword arguments call the method keys.
-        """
-        for item, value in kw.items():
-            self[item] = value
+    config = configure
 
 
 class DateEntry(ttk.Entry):

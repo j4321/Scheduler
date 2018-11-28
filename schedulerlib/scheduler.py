@@ -22,24 +22,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Task manager (main app)
 """
 
-from tkinter import Tk, Menu, StringVar, TclError
+from tkinter import Tk, Menu, StringVar, TclError, BooleanVar
 from tkinter import PhotoImage as tkPhotoImage
 from tkinter.ttk import Button, Treeview, Style, Label, Combobox, Frame
 from schedulerlib.messagebox import showerror
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers import SchedulerNotRunningError
 from datetime import datetime, timedelta
-from schedulerlib.constants import ICON48, ICON, PLUS, CONFIG, DOT, JOBSTORE, \
-    DATA_PATH, BACKUP_PATH, SCROLL_ALPHA, active_color, backup, add_trace
+from schedulerlib.constants import ICON48, ICON, IM_PLUS, CONFIG, IM_DOT, JOBSTORE, \
+    DATA_PATH, BACKUP_PATH, IM_SCROLL_ALPHA, active_color, backup, add_trace, \
+    IM_SOUND, IM_MUTE, IM_SOUND_DIS, IM_MUTE_DIS, IM_CLOSED, IM_OPENED, \
+    IM_CLOSED_SEL, IM_OPENED_SEL
 from schedulerlib.trayicon import TrayIcon, SubMenu
 from schedulerlib.form import Form
 from schedulerlib.event import Event
-from schedulerlib.event_widget import EventWidget
-from schedulerlib.timer_widget import Timer
-from schedulerlib.task_widget import TaskWidget
-from schedulerlib.calendar_widget import CalendarWidget
+from schedulerlib.widgets import EventWidget, Timer, TaskWidget, Pomodoro, CalendarWidget
+from schedulerlib.settings import Settings
 from schedulerlib.ttkwidgets import AutoScrollbar
 from schedulerlib.about import About
+from schedulerlib.eyes import Eyes
 import os
 import shutil
 from pickle import Pickler, Unpickler
@@ -53,22 +54,33 @@ class EventScheduler(Tk):
     def __init__(self):
         Tk.__init__(self, className='Scheduler')
         logging.info('Start')
-        self.protocol("WM_DELETE_WINDOW", self.display_hide)
+        self.protocol("WM_DELETE_WINDOW", self.hide)
+        self._visible = BooleanVar(self, False)
+        self.withdraw()
 
         self.icon_img = PhotoImage(master=self, file=ICON48)
         self.iconphoto(True, self.icon_img)
+
+        # --- systray icon
         self.icon = TrayIcon(ICON, fallback_icon_path=ICON48)
+
+        # --- menu
         self.menu_widgets = SubMenu(parent=self.icon.menu)
-        self.icon.menu.add_checkbutton(label='Manager', command=self.display_hide)
-        self.withdraw()
-        self.icon.menu.add_cascade(label='Widgets', menu=self.menu_widgets)
-        self.icon.menu.add_command(label='About', command=lambda: About(self))
-        self.icon.menu.add_command(label='Quit', command=self.exit)
-        self.icon.bind_left_click(self.display_hide)
+        self.menu_eyes = Eyes(self.icon.menu, self)
+        self.icon.menu.add_checkbutton(label=_('Manager'), command=self.display_hide)
+        self.icon.menu.add_cascade(label=_('Widgets'), menu=self.menu_widgets)
+        self.icon.menu.add_cascade(label=_("Eyes' rest"), menu=self.menu_eyes)
+        self.icon.menu.add_command(label=_('Settings'), command=self.settings)
+        self.icon.menu.add_separator()
+        self.icon.menu.add_command(label=_('About'), command=lambda: About(self))
+        self.icon.menu.add_command(label=_('Quit'), command=self.exit)
+        self.icon.bind_left_click(lambda: self.display_hide(toggle=True))
+
+        add_trace(self._visible, 'write', self._visibility_trace)
 
         self.menu = Menu(self, tearoff=False)
-        self.menu.add_command(label='Edit', command=self._edit_menu)
-        self.menu.add_command(label='Delete', command=self._delete_menu)
+        self.menu.add_command(label=_('Edit'), command=self._edit_menu)
+        self.menu.add_command(label=_('Delete'), command=self._delete_menu)
         self.right_click_iid = None
 
         self.menu_task = Menu(self.menu, tearoff=False)
@@ -99,30 +111,132 @@ class EventScheduler(Tk):
         # --- style
         self.style = Style(self)
         self.style.theme_use("clam")
+        self.style.configure('title.TLabel', font='TkdefaultFont 10 bold')
+        self.style.configure('title.TCheckbutton', font='TkdefaultFont 10 bold')
+        self.style.configure('subtitle.TLabel', font='TkdefaultFont 9 bold')
+        self.style.configure('white.TLabel', background='white')
+        self.style.configure('border.TFrame', background='white', border=1, relief='sunken')
         self.style.configure("Treeview.Heading", font="TkDefaultFont")
-        self.configure(bg=self.style.lookup('TFrame', 'background'))
-        self.style.map("TCombobox", fieldbackground=[("readonly", "white")],
-                       foreground=[("readonly", "black")])
+        bgc = self.style.lookup("TButton", "background")
+        fgc = self.style.lookup("TButton", "foreground")
+        bga = self.style.lookup("TButton", "background", ("active",))
+        self.style.map('TCombobox',
+                       fieldbackground=[('readonly', 'white'),
+                                        ('readonly', 'focus', 'white')],
+                       background=[("disabled", "active", "readonly", bgc),
+                                   ("!disabled", "active", "readonly", bga)],
+                       foreground=[('readonly', '!disabled', fgc),
+                                   ('readonly', '!disabled', 'focus', fgc),
+                                   ('readonly', 'disabled', 'gray40'),
+                                   ('readonly', 'disabled', 'focus', 'gray40')],
+                       arrowcolor=[("disabled", "gray40")])
+        self.style.configure('menu.TCombobox', foreground=fgc, background=bgc,
+                             fieldbackground=bgc)
+        self.style.map('menu.TCombobox',
+                       fieldbackground=[('readonly', bgc),
+                                        ('readonly', 'focus', bgc)],
+                       background=[("disabled", "active", "readonly", bgc),
+                                   ("!disabled", "active", "readonly", bga)],
+                       foreground=[('readonly', '!disabled', fgc),
+                                   ('readonly', '!disabled', 'focus', fgc),
+                                   ('readonly', 'disabled', 'gray40'),
+                                   ('readonly', 'disabled', 'focus', 'gray40')],
+                       arrowcolor=[("disabled", "gray40")])
+        self.style.map('DateEntry', arrowcolor=[("disabled", "gray40")])
+        self.style.configure('cal.TFrame', background='#424242')
+        self.style.configure('month.TLabel', background='#424242', foreground='white')
+        self.style.configure('R.TButton', background='#424242',
+                             arrowcolor='white', bordercolor='#424242',
+                             lightcolor='#424242', darkcolor='#424242')
+        self.style.configure('L.TButton', background='#424242',
+                             arrowcolor='white', bordercolor='#424242',
+                             lightcolor='#424242', darkcolor='#424242')
+        active_bg = self.style.lookup('TEntry', 'selectbackground', ('focus',))
+        self.style.map('R.TButton', background=[('active', active_bg)],
+                       bordercolor=[('active', active_bg)],
+                       darkcolor=[('active', active_bg)],
+                       lightcolor=[('active', active_bg)])
+        self.style.map('L.TButton', background=[('active', active_bg)],
+                       bordercolor=[('active', active_bg)],
+                       darkcolor=[('active', active_bg)],
+                       lightcolor=[('active', active_bg)])
+        self.style.configure('txt.TFrame', background='white')
+        self.style.layout('down.TButton',
+                          [('down.TButton.downarrow',
+                            {'side': 'right', 'sticky': 'ns'})])
+        self.style.map('TRadiobutton',
+                       indicatorforeground=[('disabled', 'gray40')])
+        self.style.map('TCheckbutton',
+                       indicatorforeground=[('disabled', 'gray40')],
+                       indicatorbackground=[('pressed', '#dcdad5'),
+                                            ('!disabled', 'alternate', 'white'),
+                                            ('disabled', 'alternate', '#a0a0a0'),
+                                            ('disabled', '#dcdad5')])
+        self.style.map('down.TButton',
+                       arrowcolor=[("disabled", "gray40")])
 
+        self.style.map('TMenubutton',
+                       arrowcolor=[('disabled', self.style.lookup('TMenubutton', 'foreground', ['disabled']))])
+        bg = self.style.lookup('TFrame', 'background', default='#ececec')
+        self.configure(bg=bg)
+        self.option_add('*Toplevel.background', bg)
+        self.option_add('*Menu.background', bg)
+        self.option_add('*Menu.tearOff', False)
+        # toggle text
+        self._open_image = PhotoImage(name='img_opened', file=IM_OPENED, master=self)
+        self._closed_image = PhotoImage(name='img_closed', file=IM_CLOSED, master=self)
+        self._open_image_sel = PhotoImage(name='img_opened_sel', file=IM_OPENED_SEL, master=self)
+        self._closed_image_sel = PhotoImage(name='img_closed_sel', file=IM_CLOSED_SEL, master=self)
+        self.style.element_create("toggle", "image", "img_closed",
+                                  ("selected", "!disabled", "img_opened"),
+                                  ("active", "!selected", "!disabled", "img_closed_sel"),
+                                  ("active", "selected", "!disabled", "img_opened_sel"),
+                                  border=2, sticky='')
+        self.style.map('Toggle', background=[])
+        self.style.layout('Toggle',
+                          [('Toggle.border',
+                            {'children': [('Toggle.padding',
+                                           {'children': [('Toggle.toggle',
+                                                          {'sticky': 'nswe'})],
+                                            'sticky': 'nswe'})],
+                             'sticky': 'nswe'})])
+        # toggle sound
+        self._im_sound = PhotoImage(master=self, file=IM_SOUND)
+        self._im_mute = PhotoImage(master=self, file=IM_MUTE)
+        self._im_sound_dis = PhotoImage(master=self, file=IM_SOUND_DIS)
+        self._im_mute_dis = PhotoImage(master=self, file=IM_MUTE_DIS)
+        self.style.element_create('mute', 'image', self._im_sound,
+                                  ('selected', '!disabled', self._im_mute),
+                                  ('selected', 'disabled', self._im_mute_dis),
+                                  ('!selected', 'disabled', self._im_sound_dis),
+                                  border=2, sticky='')
+        self.style.layout('Mute',
+                          [('Mute.border',
+                            {'children': [('Mute.padding',
+                                           {'children': [('Mute.mute',
+                                                          {'sticky': 'nswe'})],
+                                            'sticky': 'nswe'})],
+                             'sticky': 'nswe'})])
+        self.style.configure('Mute', relief='raised')
+        # widget scrollbar
         self._im_trough = {}
         self._im_slider_vert = {}
         self._im_slider_vert_prelight = {}
         self._im_slider_vert_active = {}
+        self._slider_alpha = Image.open(IM_SCROLL_ALPHA)
+        vmax = self.winfo_rgb('white')[0]
         for widget in ['Events', 'Tasks']:
             bg = CONFIG.get(widget, 'background', fallback='gray10')
             fg = CONFIG.get(widget, 'foreground')
-            vmax = self.winfo_rgb('white')[0]
+
             widget_bg = tuple(int(val / vmax * 255) for val in self.winfo_rgb(bg))
             widget_fg = tuple(int(val / vmax * 255) for val in self.winfo_rgb(fg))
             active_bg = active_color(*widget_bg)
             active_bg2 = active_color(*active_color(*widget_bg, 'RGB'))
-            slider_alpha = Image.open(SCROLL_ALPHA)
+
             slider_vert = Image.new('RGBA', (13, 28), active_bg)
-            slider_vert.putalpha(slider_alpha)
             slider_vert_active = Image.new('RGBA', (13, 28), widget_fg)
-            slider_vert_active.putalpha(slider_alpha)
             slider_vert_prelight = Image.new('RGBA', (13, 28), active_bg2)
-            slider_vert_prelight.putalpha(slider_alpha)
 
             self._im_trough[widget] = tkPhotoImage(width=15, height=15, master=self)
             self._im_trough[widget].put(" ".join(["{" + " ".join([bg] * 15) + "}"] * 15))
@@ -147,24 +261,15 @@ class EventScheduler(Tk):
                                                {'expand': '1'})],
                                  'sticky': 'ns'})])
         # --- tree
-        self.tree = Treeview(self, show="headings",
-                             columns=('Summary', 'Place', 'Start', 'End', 'Category'))
-        self.tree.column('Summary', stretch=True, width=300)
-        self.tree.column('Place', stretch=True, width=200)
-        self.tree.column('Start', width=150, stretch=False)
-        self.tree.column('End', width=150, stretch=False)
-        self.tree.column('Category', width=100)
-        self.tree.heading('Summary', text='Summary', anchor="w",
-                          command=lambda: self._sort_by_desc('Summary', False))
-        self.tree.heading('Place', text='Place', anchor="w",
-                          command=lambda: self._sort_by_desc('Place', False))
-        self.tree.heading('Start', text='Start', anchor="w",
-                          command=lambda: self._sort_by_date('Start', False))
-        self.tree.heading('End', text='End', anchor="w",
-                          command=lambda: self._sort_by_date('End', False))
-        self.tree.heading('Category', text='Category', anchor="w",
-                          command=lambda: self._sort_by_desc('Category', False))
-
+        columns = {_('Summary'): ({'stretch': True, 'width': 300}, lambda: self._sort_by_desc(_('Summary'), False)),
+                   _('Place'): ({'stretch': True, 'width': 200}, lambda: self._sort_by_desc(_('Place'), False)),
+                   _('Start'): ({'stretch': False, 'width': 150}, lambda: self._sort_by_date(_('Start'), False)),
+                   _('End'): ({'stretch': False, 'width': 150}, lambda: self._sort_by_date(_("End"), False)),
+                   _('Category'): ({'stretch': False, 'width': 100}, lambda: self._sort_by_desc(_('Category'), False))}
+        self.tree = Treeview(self, show="headings", columns=list(columns))
+        for label, (col_prop, cmd) in columns.items():
+            self.tree.column(label, **col_prop)
+            self.tree.heading(label, text=label, anchor="w", command=cmd)
         self.tree.tag_configure('0', background='#ececec')
         self.tree.tag_configure('1', background='white')
         self.tree.tag_configure('outdated', foreground='red')
@@ -174,22 +279,24 @@ class EventScheduler(Tk):
 
         # --- toolbar
         toolbar = Frame(self)
-        self.img_plus = PhotoImage(master=self, file=PLUS)
+        self.img_plus = PhotoImage(master=self, file=IM_PLUS)
         Button(toolbar, image=self.img_plus, padding=1,
                command=self.add).pack(side="left", padx=4)
-        Label(toolbar, text="Filter by").pack(side="left", padx=4)
+        Label(toolbar, text=_("Filter by")).pack(side="left", padx=4)
         # --- TODO: add filter by start date (after date)
         self.filter_col = Combobox(toolbar, state="readonly",
                                    # values=("",) + self.tree.cget('columns')[1:],
-                                   values=("", "Category"),
+                                   values=("", _("Category")),
                                    exportselection=False)
         self.filter_col.pack(side="left", padx=4)
         self.filter_val = Combobox(toolbar, state="readonly",
                                    exportselection=False)
         self.filter_val.pack(side="left", padx=4)
+        Button(toolbar, text=_('Delete All Outdated'), padding=1,
+               command=self.delete_outdated_events).pack(side="right", padx=4)
 
         # --- grid
-        toolbar.grid(row=0, columnspan=2, sticky='w', pady=4)
+        toolbar.grid(row=0, columnspan=2, sticky='we', pady=4)
         self.tree.grid(row=1, column=0, sticky='eswn')
         scroll.grid(row=1, column=1, sticky='ns')
 
@@ -202,7 +309,7 @@ class EventScheduler(Tk):
                 dp = Unpickler(file)
                 data = dp.load()
         except Exception:
-            l = os.listdir(os.path.dirname(BACKUP_PATH))
+            l = [f for f in os.listdir(os.path.dirname(BACKUP_PATH)) if f.startswith('data.backup')]
             if l:
                 l.sort(key=lambda x: int(x[11:]))
                 shutil.copy(os.path.join(os.path.dirname(BACKUP_PATH), l[-1]),
@@ -212,22 +319,26 @@ class EventScheduler(Tk):
                     data = dp.load()
         self.nb = len(data)
         backup()
-
         now = datetime.now()
         for i, prop in enumerate(data):
             iid = str(i)
             self.events[iid] = Event(self.scheduler, iid=iid, **prop)
             self.tree.insert('', 'end', iid, values=self.events[str(i)].values())
             tags = [str(self.tree.index(iid) % 2)]
-            if not prop['Repeat'] and prop['Start'] < now:
-                tags.append('outdated')
             self.tree.item(iid, tags=tags)
-
+            if not prop['Repeat']:
+                for rid, d in list(prop['Reminders'].items()):
+                    if d < now:
+                        del self.events[iid]['Reminders'][rid]
         self.after_id = self.after(15 * 60 * 1000, self.check_outdated)
 
         # --- bindings
         self.bind_class("TCombobox", "<<ComboboxSelected>>",
                         self.clear_selection, add=True)
+        self.bind_class("TCombobox", "<Control-a>",
+                        self.select_all)
+        self.bind_class("TEntry", "<Control-a>",
+                        self.select_all)
         self.tree.bind('<3>', self._post_menu)
         self.tree.bind('<1>', self._select)
         self.tree.bind('<Double-1>', self._edit_on_click)
@@ -236,29 +347,75 @@ class EventScheduler(Tk):
         self.filter_val.bind("<<ComboboxSelected>>", self.apply_filter)
 
         # --- widgets
+        self.widgets = {}
         prop = {op: CONFIG.get('Calendar', op) for op in CONFIG.options('Calendar')}
-        self.cal_widget = CalendarWidget(self,
-                                         locale=CONFIG.get('General', 'locale'),
-                                         **prop)
-        self.events_widget = EventWidget(self)
-        self.tasks_widget = TaskWidget(self)
-        self.timer_widget = Timer(self)
+        self.widgets['Calendar'] = CalendarWidget(self,
+                                                  locale=CONFIG.get('General', 'locale'),
+                                                  **prop)
+        self.widgets['Events'] = EventWidget(self)
+        self.widgets['Tasks'] = TaskWidget(self)
+        self.widgets['Timer'] = Timer(self)
+        self.widgets['Pomodoro'] = Pomodoro(self)
 
-        for item, widget in zip(['Calendar', 'Events', 'Tasks', 'Timer'],
-                                [self.cal_widget, self.events_widget,
-                                 self.tasks_widget, self.timer_widget]):
-            self.menu_widgets.add_checkbutton(label=item,
-                                              command=lambda i=item, w=widget: self.display_hide_widget(i, w))
-            self.menu_widgets.set_item_value(item, widget.variable.get())
+        self._setup_style()
+
+        for item, widget in self.widgets.items():
+            self.menu_widgets.add_checkbutton(label=_(item),
+                                              command=lambda i=item: self.display_hide_widget(i))
+            self.menu_widgets.set_item_value(_(item), widget.variable.get())
             add_trace(widget.variable, 'write',
-                      lambda *args: self._menu_widgets_trace(item, widget))
+                      lambda *args, i=item: self._menu_widgets_trace(i))
 
-        # self.menu_widgets.add_checkbutton(label='Calendar', command=self.display_hide_cal)
-        # self.menu_widgets.add_checkbutton(label='Events', command=self.display_hide_events)
-        # self.menu_widgets.add_checkbutton(label='Tasks', command=self.display_hide_tasks)
-        # self.menu_widgets.add_checkbutton(label='Timer', command=self.display_hide_timer)
         self.icon.loop(self)
+        self.tk.eval("""
+apply {name {
+    set newmap {}
+    foreach {opt lst} [ttk::style map $name] {
+        if {($opt eq "-foreground") || ($opt eq "-background")} {
+            set newlst {}
+            foreach {st val} $lst {
+                if {($st eq "disabled") || ($st eq "selected")} {
+                    lappend newlst $st $val
+                }
+            }
+            if {$newlst ne {}} {
+                lappend newmap $opt $newlst
+            }
+        } else {
+            lappend newmap $opt $lst
+        }
+    }
+    ttk::style map $name {*}$newmap
+}} Treeview
+        """)
         self.scheduler.start()
+
+    def _setup_style(self):
+        # --- scrollbars
+        vmax = self.winfo_rgb('white')[0]
+        for widget in ['Events', 'Tasks']:
+            bg = CONFIG.get(widget, 'background', fallback='gray10')
+            fg = CONFIG.get(widget, 'foreground', fallback='white')
+
+            widget_bg = tuple(int(val / vmax * 255) for val in self.winfo_rgb(bg))
+            widget_fg = tuple(int(val / vmax * 255) for val in self.winfo_rgb(fg))
+            active_bg = active_color(*widget_bg)
+            active_bg2 = active_color(*active_color(*widget_bg, 'RGB'))
+
+            slider_vert = Image.new('RGBA', (13, 28), active_bg)
+            slider_vert.putalpha(self._slider_alpha)
+            slider_vert_active = Image.new('RGBA', (13, 28), widget_fg)
+            slider_vert_active.putalpha(self._slider_alpha)
+            slider_vert_prelight = Image.new('RGBA', (13, 28), active_bg2)
+            slider_vert_prelight.putalpha(self._slider_alpha)
+
+            self._im_trough[widget].put(" ".join(["{" + " ".join([bg] * 15) + "}"] * 15))
+            self._im_slider_vert_active[widget].paste(slider_vert_active)
+            self._im_slider_vert[widget].paste(slider_vert)
+            self._im_slider_vert_prelight[widget].paste(slider_vert_prelight)
+
+        for widget in self.widgets.values():
+            widget.update_style()
 
     def report_callback_exception(self, *args):
         err = ''.join(traceback.format_exception(*args))
@@ -266,9 +423,15 @@ class EventScheduler(Tk):
         showerror('Exception', str(args[1]), err, parent=self)
 
     # --- class bindings
-    def clear_selection(self, event):
+    @staticmethod
+    def clear_selection(event):
         combo = event.widget
         combo.selection_clear()
+
+    @staticmethod
+    def select_all(event):
+        event.widget.selection_range(0, "end")
+        return "break"
 
     # --- filter
     def update_filter_val(self, event):
@@ -313,50 +476,35 @@ class EventScheduler(Tk):
         if not self.tree.identify_row(event.y):
             self.tree.selection_remove(*self.tree.selection())
 
-    def _menu_widgets_trace(self, item, widget):
-        self.menu_widgets.set_item_value(item, widget.variable.get())
+    def _menu_widgets_trace(self, item):
+        self.menu_widgets.set_item_value(_(item), self.widgets[item].variable.get())
 
-    def withdraw(self):
-        Tk.withdraw(self)
-        self.icon.menu.set_item_value('Manager', False)
-
-    def deiconify(self):
-        Tk.deiconify(self)
-        self.icon.menu.set_item_value('Manager', True)
-
-    def display_hide_widget(self, item, widget):
-        value = self.menu_widgets.get_item_value(item)
+    def display_hide_widget(self, item):
+        value = self.menu_widgets.get_item_value(_(item))
         if value:
-            widget.deiconify()
+            self.widgets[item].show()
         else:
-            widget.withdraw()
+            self.widgets[item].hide()
 
-    def display_hide_tasks(self):
-        if self.tasks_widget.winfo_ismapped():
-            self.tasks_widget.withdraw()
-        else:
-            self.tasks_widget.deiconify()
+    def hide(self):
+        self._visible.set(False)
+        self.withdraw()
+        self.save()
 
-    def display_hide_events(self):
-        if self.events_widget.winfo_ismapped():
-            self.events_widget.withdraw()
-        else:
-            self.events_widget.deiconify()
+    def show(self):
+        self._visible.set(True)
+        self.deiconify()
 
-    def display_hide_timer(self):
-        if self.timer_widget.winfo_ismapped():
-            self.timer_widget.withdraw()
-        else:
-            self.timer_widget.deiconify()
+    def _visibility_trace(self, *args):
+        self.icon.menu.set_item_value(_('Manager'), self._visible.get())
 
-    def display_hide_cal(self):
-        if self.cal_widget.winfo_ismapped():
-            self.cal_widget.withdraw()
-        else:
-            self.cal_widget.deiconify()
-
-    def display_hide(self, event=None):
-        if self.winfo_ismapped():
+    def display_hide(self, toggle=False):
+        value = self.icon.menu.get_item_value(_('Manager'))
+        if toggle:
+            value = not value
+            self.icon.menu.set_item_value(_('Manager'), value)
+        self._visible.set(value)
+        if not value:
             self.withdraw()
             self.save()
         else:
@@ -369,8 +517,15 @@ class EventScheduler(Tk):
         tags.append(str(index % 2))
         self.tree.item(item, tags=tags)
 
+    @staticmethod
+    def to_datetime(date):
+        try:
+            return datetime.strptime(date, '%x')
+        except ValueError:
+            return datetime.strptime(date, '%x %H:%M')
+
     def _sort_by_date(self, col, reverse):
-        l = [(self.events[k][col], k) for k in self.tree.get_children('')]
+        l = [(self.to_datetime(self.tree.set(k, col)), k) for k in self.tree.get_children('')]
         l.sort(reverse=reverse)
 
         # rearrange items in sorted positions
@@ -406,7 +561,7 @@ class EventScheduler(Tk):
             if state:
                 self._task_var.set(state)
                 if '%' in state:
-                    self._img_dot = PhotoImage(master=self, file=DOT)
+                    self._img_dot = PhotoImage(master=self, file=IM_DOT)
                 else:
                     self._img_dot = tkPhotoImage(master=self)
                 self.menu_task.entryconfigure(1, image=self._img_dot)
@@ -420,12 +575,28 @@ class EventScheduler(Tk):
     def _set_progress(self):
         if self.right_click_iid:
             self.events[self.right_click_iid]['Task'] = self._task_var.get()
-            self.tasks_widget.display_tasks()
+            self.widgets['Tasks'].display_tasks()
             if '%' in self._task_var.get():
-                self._img_dot = PhotoImage(master=self, file=DOT)
+                self._img_dot = PhotoImage(master=self, file=IM_DOT)
             else:
                 self._img_dot = PhotoImage(master=self)
             self.menu_task.entryconfigure(1, image=self._img_dot)
+
+    def delete_outdated_events(self):
+        now = datetime.now()
+        outdated = []
+        for iid, prop in self.events.items():
+            if prop['End'] < now:
+                if not prop['Repeat']:
+                    outdated.append(iid)
+                elif prop['Repeat']['Limit'] != 'always':
+                    end = prop['End']
+                    enddate = datetime.fromordinal(prop['Repeat']['EndDate'].toordinal())
+                    enddate.replace(hour=end.hour, minute=end.minute)
+                    if enddate < now:
+                        outdated.append(iid)
+        for item in outdated:
+            self.delete(item)
 
     def delete(self, iid):
         index = self.tree.index(iid)
@@ -437,14 +608,14 @@ class EventScheduler(Tk):
             self.tree.item(item, tags=tags)
 
         self.events[iid].reminder_remove_all()
-        self.cal_widget.remove_event(self.events[iid])
+        self.widgets['Calendar'].remove_event(self.events[iid])
         del(self.events[iid])
-        self.events_widget.display_evts()
-        self.tasks_widget.display_tasks()
+        self.widgets['Events'].display_evts()
+        self.widgets['Tasks'].display_tasks()
         self.save()
 
     def edit(self, iid):
-        self.cal_widget.remove_event(self.events[iid])
+        self.widgets['Calendar'].remove_event(self.events[iid])
         Form(self, self.events[iid])
 
     def _edit_menu(self):
@@ -471,16 +642,16 @@ class EventScheduler(Tk):
         self.events[iid] = event
         self.tree.insert('', 'end', iid, values=event.values())
         self.tree.item(iid, tags=str(self.tree.index(iid) % 2))
-        self.cal_widget.add_event(event)
-        self.events_widget.display_evts()
-        self.tasks_widget.display_tasks()
+        self.widgets['Calendar'].add_event(event)
+        self.widgets['Events'].display_evts()
+        self.widgets['Tasks'].display_tasks()
         self.save()
 
     def event_configure(self, iid):
         self.tree.item(iid, values=self.events[iid].values())
-        self.cal_widget.add_event(self.events[iid])
-        self.events_widget.display_evts()
-        self.tasks_widget.display_tasks()
+        self.widgets['Calendar'].add_event(self.events[iid])
+        self.widgets['Events'].display_evts()
+        self.widgets['Tasks'].display_tasks()
         self.save()
 
     def save(self):
@@ -492,12 +663,21 @@ class EventScheduler(Tk):
 
     def exit(self):
         self.save()
+        rep = self.widgets['Pomodoro'].stop(self.widgets['Pomodoro'].on)
+        if not rep:
+            return
+        self.menu_eyes.quit()
         self.after_cancel(self.after_id)
         try:
             self.scheduler.shutdown()
         except SchedulerNotRunningError:
             pass
         self.destroy()
+
+    def settings(self):
+        dialog = Settings(self)
+        self.wait_window(dialog)
+        self._setup_style()
 
     def get_next_week_events(self):
         """return events scheduled for the next 7 days """
@@ -509,7 +689,7 @@ class EventScheduler(Tk):
 #                next_ev.append(event)
         for d in range(7):
             day = today + timedelta(days=d)
-            evts = self.cal_widget.get_events(day)
+            evts = self.widgets['Calendar'].get_events(day)
             if evts:
                 evts = [self.events[iid] for iid in evts]
                 evts.sort(key=lambda ev: ev.get_start_time())
@@ -541,8 +721,8 @@ class EventScheduler(Tk):
         return next_ev
 
     def get_tasks(self):
-        # --- TODO: find events with repetition in the week
-        # --- TODO: better handling of events on several days
+        # TODO: find events with repetition in the week
+        # TODO: better handling of events on several days
         tasks = []
         for event in self.events.values():
             if event['Task']:

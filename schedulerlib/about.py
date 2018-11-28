@@ -29,23 +29,19 @@ from tkinter.ttk import Button, Label
 from schedulerlib.constants import ICON48
 from schedulerlib.version import __version__
 
-# awaiting translation
-def _(text):
-    return text
 
 class About(Toplevel):
     """ About diaog """
     def __init__(self, master):
         """ create About dialog """
-        Toplevel.__init__(self, master, class_='Scheduler')
+        Toplevel.__init__(self, master)
 
         self.title(_("About Scheduler"))
         self.image = PhotoImage(file=ICON48, master=self)
         Label(self, image=self.image).grid(row=0, columnspan=2, pady=10)
 
         Label(self,
-                  text=_("Scheduler %(version)s")
-                  % ({"version": __version__})).grid(row=1, columnspan=2)
+              text="Scheduler %(version)s" % ({"version": __version__})).grid(row=1, columnspan=2)
         Label(self, text=_("Task scheduling and calendar")).grid(row=2, columnspan=2, padx=10)
         Label(self, text="Copyright (C) Juliette Monsel 2017").grid(row=3, columnspan=2)
         Label(self, text="j_4321@protonmail.com").grid(row=4, columnspan=2)

@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#! /usr/bin/python3
-# -*- coding: utf-8 -*-
 """
 Scheduler - Task scheduling and calendar
 Copyright 2017 Juliette Monsel <j_4321@protonmail.com>
@@ -26,7 +24,7 @@ EventCalendar: Calendar with the possibility to display events.
 
 from tkinter import Menu
 from datetime import datetime
-from schedulerlib.constants import HOLIDAYS, CATEGORIES
+from schedulerlib.constants import HOLIDAYS, CONFIG
 from schedulerlib.ttkcalendar import Calendar
 from schedulerlib.tooltip import TooltipWrapper
 import logging
@@ -68,10 +66,7 @@ class EventCalendar(Calendar):
         self._properties['tooltipforeground'] = tp_fg
         self._properties['tooltipalpha'] = tp_alpha
 
-        for cat, (fg, bg) in CATEGORIES.items():
-            style = '%s.ev_%s.TLabel' % (self._style_prefixe, cat)
-            self.style.configure(style, background=bg, foreground=fg)
-        self._menu = Menu(self, tearoff=False)
+        self.menu = Menu(self)
 
         for i, week in enumerate(self._calendar):
             for j, day in enumerate(week):
@@ -84,22 +79,31 @@ class EventCalendar(Calendar):
         dt = d2 - d
         self.after(int(dt.total_seconds() * 1e3), self._update_sel)
 
+    def update_style(self):
+        cats = {cat: CONFIG.get('Categories', cat).split(', ') for cat in CONFIG.options('Categories')}
+        for cat, (fg, bg) in cats.items():
+            style = '%s.ev_%s.TLabel' % (self._style_prefixe, cat)
+            self.style.configure(style, background=bg, foreground=fg)
+
     def __setitem__(self, item, value):
         if item == 'tooltipbackground':
             self._properties[item] = value
             for line in self._events_tooltips:
                 for tp in line:
-                    tp.configure(background=value)
+                    if tp is not None:
+                        tp.configure(background=value)
         elif item == 'tooltipforeground':
             self._properties[item] = value
             for line in self._events_tooltips:
                 for tp in line:
-                    tp.configure(foreground=value)
+                    if tp is not None:
+                        tp.configure(foreground=value)
         elif item == 'tooltipalpha':
             self._properties[item] = value
             for line in self._events_tooltips:
                 for tp in line:
-                    tp.configure(alpha=value)
+                    if tp is not None:
+                        tp.configure(alpha=value)
         elif item == 'selectmode':
             raise AttributeError('This attribute cannot be modified.')
         else:
@@ -179,7 +183,7 @@ class EventCalendar(Calendar):
     def _add_to_tooltip(self, week_nb, day, txt, cat):
         tp = self._events_tooltips[week_nb][day]
         label = self._calendar[week_nb][day]
-        label.configure(style= '%s.ev_%s.TLabel' % (self._style_prefixe, cat))
+        label.configure(style='%s.ev_%s.TLabel' % (self._style_prefixe, cat))
         if tp is None:
             prop = {'background': self._properties['tooltipbackground'],
                     'foreground': self._properties['tooltipforeground'],
@@ -240,7 +244,7 @@ class EventCalendar(Calendar):
         year, month, day = date.year, date.month, date.day
         if not repeat:
             date2 = date.strftime('%Y/%m/%d')
-            if not date2 in self._events:
+            if date2 not in self._events:
                 self._events[date2] = []
             self._events[date2].append((desc, iid, cat))
             self._show_event(date, desc, cat)
@@ -256,22 +260,22 @@ class EventCalendar(Calendar):
                 elif freq == 'month':
                     m = date.month + nb
                     month = m % 12
-                    year = date.year + m//12
+                    year = date.year + m // 12
                     end = date.replace(year=year, month=month)
                 else:
                     start_day = date.isocalendar()[2] - 1
                     week_days = [(x - start_day) % 7 for x in repeat['WeekDays']]
 
                     nb_per_week = len(repeat['WeekDays'])
-                    nb_week = nb//nb_per_week
+                    nb_week = nb // nb_per_week
                     rem = nb % nb_per_week
-                    end = date + self.timedelta(days=(7*nb_week + week_days[rem] + 1))
+                    end = date + self.timedelta(days=(7 * nb_week + week_days[rem] + 1))
                 end = end.date()
             else:
                 end = None
             if freq == 'year':
                 date2 = date.strftime('*/%m/%d')
-                if not date2 in self._events:
+                if date2 not in self._events:
                     self._events[date2] = []
                 self._events[date2].append((desc, iid, start, end, cat))
                 ev_date = self.date(self._date.year, month, day)
@@ -280,7 +284,7 @@ class EventCalendar(Calendar):
 
             elif freq == 'month':
                 date2 = date.strftime('*/*/%d')
-                if not date2 in self._events:
+                if date2 not in self._events:
                     self._events[date2] = []
                 self._events[date2].append((desc, iid, start, end, cat))
                 # previous month
@@ -295,14 +299,14 @@ class EventCalendar(Calendar):
                         if (end is None or ev_date <= end) and (ev_date >= start):
                             self._show_event(ev_date, desc, cat)
                     except ValueError:
-                        pass # month has no day 'day'
+                        pass  # month has no day 'day'
                 # current month
                 try:
                     ev_date = self.date(self._date.year, self._date.month, day)
                     if (end is None or ev_date <= end) and (ev_date >= start):
                         self._show_event(ev_date, desc, cat)
                 except ValueError:
-                    pass # month has no day 'day'
+                    pass  # month has no day 'day'
                 # next month
                 if day < 15:
                     try:
@@ -315,7 +319,7 @@ class EventCalendar(Calendar):
                         if (end is None or ev_date <= end) and (ev_date >= start):
                             self._show_event(ev_date, desc, cat)
                     except ValueError:
-                        pass # month has no day 'day'
+                        pass  # month has no day 'day'
 
             elif freq == 'week':
                 cal = self._get_cal(self._date.year, self._date.month)
@@ -376,16 +380,16 @@ class EventCalendar(Calendar):
                     elif freq == 'month':
                         m = date.month + nb
                         month = m % 12
-                        year = date.year + m//12
+                        year = date.year + m // 12
                         end = date.replace(year=year, month=month)
                     else:
                         start_day = date.isocalendar()[2] - 1
                         week_days = [(x - start_day) % 7 for x in repeat['WeekDays']]
 
                         nb_per_week = len(repeat['WeekDays'])
-                        nb_week = nb//nb_per_week
+                        nb_week = nb // nb_per_week
                         rem = nb % nb_per_week
-                        end = date + self.timedelta(days=(7*nb_week + week_days[rem] + 1))
+                        end = date + self.timedelta(days=(7 * nb_week + week_days[rem] + 1))
                     end = end.date()
                 else:
                     end = None
@@ -415,14 +419,14 @@ class EventCalendar(Calendar):
                             if (end is None or ev_date <= end) and (ev_date >= start):
                                 self._remove_from_tooltip(ev_date, desc)
                         except ValueError:
-                            pass # month has no day 'day'
+                            pass  # month has no day 'day'
                     # current month
                     try:
                         ev_date = self.date(self._date.year, self._date.month, day)
                         if (end is None or ev_date <= end) and (ev_date >= start):
                             self._remove_from_tooltip(ev_date, desc)
                     except ValueError:
-                        pass # month has no day 'day'
+                        pass  # month has no day 'day'
                     # next month
                     if day < 15:
                         try:
@@ -435,7 +439,7 @@ class EventCalendar(Calendar):
                             if (end is None or ev_date <= end) and (ev_date >= start):
                                 self._remove_from_tooltip(ev_date, desc)
                         except ValueError:
-                            pass # month has no day 'day'
+                            pass  # month has no day 'day'
 
                 elif freq == 'week':
                     cal = self._get_cal(self._date.year, self._date.month)
@@ -450,7 +454,7 @@ class EventCalendar(Calendar):
     def _get_date(self, week_row, day):
         year, month = self._date.year, self._date.month
         now = datetime.now() + self.timedelta(minutes=5)
-        now = now.replace(minute=(now.minute//5)*5)
+        now = now.replace(minute=(now.minute // 5) * 5)
         if week_row == 0 and day > 7:
             # prev month
             if month == 1:
@@ -475,7 +479,7 @@ class EventCalendar(Calendar):
         self.master.master.add(date)
 
     def _post_menu(self, event, w):
-        self._menu.delete(0, 'end')
+        self.menu.delete(0, 'end')
         day = int(event.widget.cget('text'))
         date = self._get_date(w, day)
         date2 = date.date()
@@ -504,30 +508,30 @@ class EventCalendar(Calendar):
             if start <= date2 and (end is None or end >= date2):
                 evts.append((desc, iid))
 
-        self._menu.add_command(label='New Event',
+        self.menu.add_command(label=_('New Event'),
                                command=lambda: self.master.master.add(date))
         if evts:
-            self._menu.add_separator()
-            self._menu.add_separator()
+            self.menu.add_separator()
+            self.menu.add_separator()
             index_edit = 2
             for vals in evts:
                 desc, iid = vals[0], vals[1]
-                self._menu.insert_command(index_edit,
+                self.menu.insert_command(index_edit,
                                           label="Edit %s" % desc,
                                           command=lambda i=iid: self.master.master.edit(i))
                 index_edit += 1
-                self._menu.add_command(label="Delete %s" % desc,
+                self.menu.add_command(label=_("Delete") + " %s" % desc,
                                        command=lambda i=iid: self.master.master.delete(i))
         else:
-            self._menu.add_separator()
+            self.menu.add_separator()
             if date.strftime('%Y/%m/%d') in HOLIDAYS:
-                self._menu.add_command(label='Remove Holiday',
+                self.menu.add_command(label=_('Remove Holiday'),
                                        command=lambda: self.remove_holiday(date.date()))
             else:
-                self._menu.add_command(label='Set Holiday',
+                self.menu.add_command(label=_('Set Holiday'),
                                        command=lambda: self.add_holiday(date.date()))
 
-        self._menu.tk_popup(event.x_root, event.y_root)
+        self.menu.tk_popup(event.x_root, event.y_root)
 
     # --- public methods
     def get_events(self, date):
@@ -624,4 +628,3 @@ class EventCalendar(Calendar):
             widget.bind(*args)
             for w in widget.children.values():
                 w.bind(*args)
-
