@@ -263,6 +263,7 @@ class PomodoroParams(Frame):
             return old_tpsw != tpsw or old_tpsp != tpsp or old_tpsr != old_tpsr
         else:
             showerror(_("Error"), _("There is at least one invalid setting!"))
+            print(tpsw > 0, tpsp > 0, tpsr > 0, os.path.exists(sound), (sound.split('.')[-1] in filetypes))
             return False
 
     def del_task(self, task):

@@ -250,9 +250,6 @@ class Pomodoro(BaseWidget):
 
     def go(self):
         if self.on:
-            self.on = False
-            self.choose_task.state(["!disabled"])
-            self.b_go.configure(image=self.im_go)
             self.stop()
         else:
             self.on = True
@@ -271,6 +268,8 @@ class Pomodoro(BaseWidget):
             rep = askyesno(title=_("Confirmation"),
                            message=_("Are you sure you want to give up the current session?"))
         if rep:
+            self.choose_task.state(["!disabled"])
+            self.b_go.configure(image=self.im_go)
             if self.activite.get() == _("Work"):
                 self.stats(tps)
             self.pomodori.set(0)

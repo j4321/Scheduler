@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Custom tkinter messageboxes
 """
-
 from webbrowser import open as url_open
 from tkinter import Toplevel, PhotoImage, Text
 from tkinter.ttk import Label, Button, Frame, Style
