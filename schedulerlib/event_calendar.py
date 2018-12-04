@@ -233,7 +233,9 @@ class EventCalendar(Calendar):
                                     label.configure(style=self._style_prefixe + ".we_om.TLabel")
 
     def _show_event(self, date, txt, cat):
-        if date.year == self._date.year:
+        y1, y2 = date.year, self._date.year
+        m1, m2 = date.month, self._date.month
+        if y1 == y2 or (y1 - y2 == 1 and m1 == 1 and m2 == 12) or (y2 - y1 == 1 and m2 == 1 and m1 == 12):
             _, w, d = date.isocalendar()
             w -= self._date.isocalendar()[1]
             w %= 52
