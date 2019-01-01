@@ -120,7 +120,7 @@ if not CONFIG.read(CONFIG_PATH):
     CONFIG.set('Reminders', 'window_fg_alternate', 'red')
     CONFIG.set('Reminders', 'notification', 'True')
     CONFIG.set('Reminders', 'mute', 'True')
-    CONFIG.set('Reminders', 'alarm', os.path.join(PATH_SOUNDS, 'alarm.wav'))
+    CONFIG.set('Reminders', 'alarm', os.path.join(PATH_SOUNDS, 'alarm.mp3'))
     CONFIG.set('Reminders', 'blink', 'True')
     CONFIG.set('Reminders', 'timeout', '5')
 
@@ -202,7 +202,7 @@ if not CONFIG.has_section('Pomodoro'):
     CONFIG.set("Pomodoro", "rest_time", "20")
     CONFIG.set("Pomodoro", "rest_bg", "#FF7A40")
     CONFIG.set("Pomodoro", "rest_fg", "#000000")
-    CONFIG.set("Pomodoro", "beep", os.path.join(PATH_SOUNDS, 'ting.wav'))
+    CONFIG.set("Pomodoro", "beep", os.path.join(PATH_SOUNDS, 'ting.mp3'))
     CONFIG.set("Pomodoro", "mute", "False")
 
     CONFIG.add_section("PomodoroTasks")
@@ -217,7 +217,7 @@ if not CONFIG.has_section('Reminders'):
     CONFIG.set('Reminders', 'window_fg_alternate', 'red')
     CONFIG.set('Reminders', 'notification', 'True')
     CONFIG.set('Reminders', 'mute', 'True')
-    CONFIG.set('Reminders', 'alarm', os.path.join(PATH_SOUNDS, 'alarm.wav'))
+    CONFIG.set('Reminders', 'alarm', os.path.join(PATH_SOUNDS, 'alarm.mp3'))
     CONFIG.set('Reminders', 'blink', 'True')
     CONFIG.set('Reminders', 'timeout', '5')
 
