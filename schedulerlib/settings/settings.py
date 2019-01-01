@@ -30,7 +30,7 @@ from .sound import SoundFrame
 from .opacity import OpacityFrame
 from .pomodoro_params import PomodoroParams
 from schedulerlib.constants import save_config, CONFIG, LANGUAGES, REV_LANGUAGES, \
-    TOOLKITS, IM_PLUS, IM_MOINS, only_nb
+    TOOLKITS, IM_ADD, IM_DEL, only_nb
 from schedulerlib.messagebox import showerror, showinfo, askyesno
 from schedulerlib.ttkwidgets import AutoScrollbar
 from PIL.ImageTk import PhotoImage
@@ -46,8 +46,8 @@ class Settings(tk.Toplevel):
 
         self._only_nb = self.register(only_nb)
 
-        self._im_plus = PhotoImage(master=self, file=IM_PLUS)
-        self._im_moins = PhotoImage(master=self, file=IM_MOINS)
+        self._im_plus = PhotoImage(master=self, file=IM_ADD)
+        self._im_moins = PhotoImage(master=self, file=IM_DEL)
 
         frame = ttk.Frame(self, style='border.TFrame', relief='sunken',
                           border=1)

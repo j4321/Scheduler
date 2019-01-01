@@ -26,8 +26,8 @@ from tkinter import StringVar, Menu, IntVar
 from tkinter.ttk import Button, Label, Frame, Menubutton, Sizegrip
 from tkinter.messagebox import askyesno
 import datetime as dt
-from schedulerlib.constants import CONFIG, CMAP, PATH_STATS, IM_PLAY, \
-    STOP, IM_POMODORO, IM_GRAPH, active_color, scrub
+from schedulerlib.constants import CONFIG, CMAP, PATH_STATS, IM_START, \
+    IM_STOP, IM_POMODORO, IM_GRAPH, active_color, scrub
 from .base_widget import BaseWidget
 from schedulerlib.pomodoro_stats import Stats
 import logging
@@ -68,8 +68,8 @@ class Pomodoro(BaseWidget):
         self.pomodori = IntVar(self, 0)
 
         # --- images
-        self.im_go = PhotoImage(master=self, file=IM_PLAY)
-        self.im_stop = PhotoImage(master=self, file=STOP)
+        self.im_go = PhotoImage(master=self, file=IM_START)
+        self.im_stop = PhotoImage(master=self, file=IM_STOP)
         self.im_tomate = PhotoImage(master=self, file=IM_POMODORO)
         self.im_graph = PhotoImage(master=self, file=IM_GRAPH)
 

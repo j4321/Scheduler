@@ -18,13 +18,18 @@ License: GPL-3+
 Files:
     color.png
     icon48.png
-    moins.png
-    plus.png
+    del.png
+    add.png
     params.png
-    play.png
+    start.png
+    start_m.png
     pause.png
-    son.png
+    sound.png
+    sound_dis.png
+    mute.png
+    mute_dis.png
     stop.png
+    stop_m.png
     scheduler.png
 Copyright:
     2007-2013 elementary LLC
@@ -57,6 +62,8 @@ Files:
     dot.png
     graph.png
     layout.png
+    grid.png
+    eye.svg
 Copyright:
     2016-2018 Juliette Monsel <j_4321@protonmail.com>
 License: GPL-3+
@@ -66,7 +73,7 @@ License: GPL-3+
     (at your option) any later version.
     
 Files:
-    tomate.png
+    pomodoro.png
 License: Public domain
     https://openclipart.org/detail/204590/tomatoe-remix
 

@@ -25,7 +25,7 @@ Task editor
 from tkinter import Toplevel, Text, Spinbox, BooleanVar, StringVar
 from tkinter.ttk import Entry, Label, Button, Frame, Style, Combobox
 from tkinter.ttk import Radiobutton, Checkbutton, Notebook
-from schedulerlib.constants import IM_BELL, IM_MOINS, CONFIG, \
+from schedulerlib.constants import IM_BELL, IM_DEL, CONFIG, \
     TASK_REV_TRANSLATION, FREQ_REV_TRANSLATION, only_nb
 from schedulerlib.ttkcalendar import DateEntry, get_calendar
 from schedulerlib.ttkwidgets import LabelFrame
@@ -68,7 +68,7 @@ class Form(Toplevel):
         frame_event.columnconfigure(1, weight=1)
         frame_event.rowconfigure(5, weight=1)
 
-        self.img_moins = PhotoImage(master=self, file=IM_MOINS)
+        self.img_moins = PhotoImage(master=self, file=IM_DEL)
         self.img_bell = PhotoImage(master=self, file=IM_BELL)
         Label(frame_event, text=_('Summary')).grid(row=0, column=0, padx=4, pady=6, sticky='e')
         Label(frame_event, text=_('Place')).grid(row=1, column=0, padx=4, pady=6, sticky='e')

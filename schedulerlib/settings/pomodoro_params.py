@@ -26,7 +26,7 @@ from tkinter import Canvas, Toplevel
 from tkinter.ttk import Notebook, Style, Label, Separator, Frame, Entry, Button
 from tkinter.messagebox import showerror, askyesno
 from schedulerlib.constants import IM_COLOR, only_nb, CONFIG, askcolor, \
-    CMAP, IM_PLUS, IM_MOINS, PATH_STATS, save_config, scrub
+    CMAP, IM_ADD, IM_DEL, PATH_STATS, save_config, scrub
 from schedulerlib.ttkwidgets import AutoScrollbar
 from PIL.ImageTk import PhotoImage
 from .color import ColorFrame
@@ -45,8 +45,8 @@ class PomodoroParams(Frame):
         self.onglets = Notebook(self)
         self.onglets.pack(fill='both', expand=True)
         self.im_color = PhotoImage(master=self, file=IM_COLOR)
-        self.im_plus = PhotoImage(master=self, file=IM_PLUS)
-        self.im_moins = PhotoImage(master=self, file=IM_MOINS)
+        self.im_plus = PhotoImage(master=self, file=IM_ADD)
+        self.im_moins = PhotoImage(master=self, file=IM_DEL)
 
         self.okfct = self.register(only_nb)
 

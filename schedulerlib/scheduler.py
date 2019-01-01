@@ -29,7 +29,7 @@ from schedulerlib.messagebox import showerror
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers import SchedulerNotRunningError
 from datetime import datetime, timedelta
-from schedulerlib.constants import ICON48, ICON, IM_PLUS, CONFIG, IM_DOT, JOBSTORE, \
+from schedulerlib.constants import ICON48, ICON, IM_ADD, CONFIG, IM_DOT, JOBSTORE, \
     DATA_PATH, BACKUP_PATH, IM_SCROLL_ALPHA, active_color, backup, add_trace, \
     IM_SOUND, IM_MUTE, IM_SOUND_DIS, IM_MUTE_DIS, IM_CLOSED, IM_OPENED, \
     IM_CLOSED_SEL, IM_OPENED_SEL
@@ -278,7 +278,7 @@ class EventScheduler(Tk):
 
         # --- toolbar
         toolbar = Frame(self)
-        self.img_plus = PhotoImage(master=self, file=IM_PLUS)
+        self.img_plus = PhotoImage(master=self, file=IM_ADD)
         Button(toolbar, image=self.img_plus, padding=1,
                command=self.add).pack(side="left", padx=4)
         Label(toolbar, text=_("Filter by")).pack(side="left", padx=4)
