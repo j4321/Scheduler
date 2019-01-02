@@ -451,7 +451,7 @@ class Form(Toplevel):
     def ok(self):
         summary = self.summary.get()
         if not summary:
-            showerror(_("Error"), _("Summary cannot be empty."), parent=self)
+            showerror(_("Error"), _("The field 'Summary' cannot be empty."), parent=self)
             return
 
         self.event['Summary'] = summary
