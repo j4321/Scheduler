@@ -124,10 +124,10 @@ class Event:
                 cron_prop['month'] = date.month
 
             job = self.scheduler.add_job(run, trigger=CronTrigger(**cron_prop),
-                                         args=(['python', NOTIF_PATH, str(self)],))
+                                         args=(['python3', NOTIF_PATH, str(self)],))
         else:
             job = self.scheduler.add_job(run, trigger=DateTrigger(date),
-                                         args=(['python', NOTIF_PATH, str(self)],))
+                                         args=(['python3', NOTIF_PATH, str(self)],))
         self._properties['Reminders'][job.id] = date
 
     def reminder_remove(self, job_id):
