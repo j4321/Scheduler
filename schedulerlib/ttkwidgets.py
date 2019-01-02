@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Scheduler - Task scheduling and calendar
+Copyright 1998 Fredrik Lundh
 Copyright 2017 RedFantom
 Copyright 2017 Juliette Monsel <j_4321@protonmail.com>
 
@@ -29,6 +30,8 @@ from tkinter import ttk
 class ScaleEntry(ttk.Frame):
     """
     A simple combination of a Scale and an Entry widget suitable for use with int ranges.
+    
+    Taken from the ttkwidget module: https://github.com/RedFantom/ttkwidgets.
     """
     def __init__(self, master=None, scalewidth=50, entrywidth=5, from_=0, to=50,
                  orient=tk.HORIZONTAL, compound=tk.RIGHT, entryscalepad=0,
@@ -327,8 +330,10 @@ class ToggledFrame(ttk.Frame):
 
 
 class LabelFrame(ttk.Frame):
-    """ LabelFrame with the text hiding part of the border
-        (which is not the case for the ususal LabelFrame in clam theme. """
+    """ 
+    LabelFrame with the text hiding part of the border
+    (which is not the case for the ususal LabelFrame in clam theme.
+    """
     def __init__(self, master=None, **kw):
         kw['relief'] = 'groove'
         kw['borderwidth'] = 1
@@ -416,7 +421,11 @@ class LabelFrame(ttk.Frame):
 
 
 class AutoScrollbar(ttk.Scrollbar):
-    """ Scrollbar that automatically vanishes when not needed """
+    """
+    Scrollbar that automatically vanishes when not needed.
+    
+    Based on code by Fredrik Lundh <http://effbot.org/zone/tkinter-autoscrollbar.htm>.
+    """
     def __init__(self, *args, **kwargs):
         ttk.Scrollbar.__init__(self, *args, **kwargs)
         self._pack_kw = {}
