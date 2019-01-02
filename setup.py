@@ -50,4 +50,4 @@ setup(name='scheduler',
                 'schedulerlib.settings'],
       package_data={'schedulerlib': ['packages.tcl']},
       scripts=["scheduler"],
-      install_requires=["APScheduler", "Pillow", "ewmh", "matplotlib", "numpy"])
+      install_requires=["APScheduler", "sqlalchemy", "Pillow", "ewmh", "matplotlib", "numpy"])
