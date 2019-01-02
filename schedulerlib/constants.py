@@ -237,7 +237,10 @@ REV_LANGUAGES = {val: key for key, val in LANGUAGES.items()}
 
 if LANGUAGE not in LANGUAGES:
     # Check the default locale
-    LANGUAGE = locale.getlocale()[0].split('_')[0]
+    try:
+        LANGUAGE = locale.getdefaultlocale()[0].split('_')[0]
+    except Exception:
+        LANGUAGE = "en"
     if LANGUAGE in LANGUAGES:
         CONFIG.set("General", "language", LANGUAGE)
     else:
