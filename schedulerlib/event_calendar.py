@@ -196,8 +196,9 @@ class EventCalendar(Calendar):
             tp.configure(text='\n'.join([tp.cget('text'), txt]))
 
     def _remove_from_tooltip(self, date, txt):
-        year, month = date.year, date.month
-        if self._date.year == year:
+        y1, y2 = date.year, self._date.year
+        m1, m2 = date.month, self._date.month
+        if y1 == y2 or (y1 - y2 == 1 and m1 == 1 and m2 == 12) or (y2 - y1 == 1 and m2 == 1 and m1 == 12):
             _, week_nb, d = date.isocalendar()
             d -= 1
             week_nb -= self._date.isocalendar()[1]
@@ -221,12 +222,12 @@ class EventCalendar(Calendar):
                         if date == self._sel_date:
                             label.configure(style='sel.%s.TLabel' % self._style_prefixe)
                         elif date.strftime('%Y/%m/%d') in HOLIDAYS:
-                            if month == self._date.month:
+                            if m1 == m2:
                                 label.configure(style='we.%s.TLabel' % self._style_prefixe)
                             else:
                                 label.configure(style='we_om.%s.TLabel' % self._style_prefixe)
                         else:
-                            if month == self._date.month:
+                            if m1 == m2:
                                 if d < 5:
                                     label.configure(style='normal.%s.TLabel' % self._style_prefixe)
                                 else:
