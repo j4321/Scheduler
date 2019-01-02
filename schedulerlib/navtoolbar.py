@@ -28,7 +28,10 @@ import tkinter as tk
 from tkinter import ttk
 from .messagebox import showerror
 from .constants import IM_LAYOUT, IM_GRID
-from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
+try:
+	from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
+except ImportError:
+	from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg as NavigationToolbar2Tk
 import os.path
 from matplotlib import rcParams
 try:
