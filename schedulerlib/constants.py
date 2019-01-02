@@ -59,12 +59,14 @@ if os.access(PATH, os.W_OK) and os.path.exists(os.path.join(PATH, "images")):
     PATH_IMAGES = os.path.join(PATH, 'images')
     PATH_SOUNDS = os.path.join(PATH, 'sounds')
     PATH_LOCALE = os.path.join(PATH, "locale")
+    ICON_NOTIF = os.path.join(PATH_IMAGES, "scheduler-tray.svg")
 else:
     # local directory containing config files
     LOCAL_PATH = os.path.join(os.path.expanduser('~'), '.scheduler')
     PATH_LOCALE = "/usr/share/locale"
     PATH_IMAGES = "/usr/share/scheduler/images"
     PATH_SOUNDS = "/usr/share/scheduler/sounds"
+    ICON_NOTIF = "scheduler"
 
 if not os.path.isdir(LOCAL_PATH):
         os.mkdir(LOCAL_PATH)

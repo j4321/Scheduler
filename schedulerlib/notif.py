@@ -23,9 +23,9 @@ Notification class and script
 
 from tkinter import Tk
 from tkinter.ttk import Label, Button, Style
-import sys
-from schedulerlib.constants import CONFIG, ICON_NAME, active_color
 from subprocess import Popen
+import sys
+from constants import CONFIG, ICON_NOTIF, active_color
 
 
 class Notification(Tk):
@@ -109,12 +109,11 @@ class Notification(Tk):
 
 
 if __name__ == '__main__':
-    print(sys.argv)
     if len(sys.argv) > 1:
         text = sys.argv[1]
         if CONFIG.getboolean('Reminders', 'notification', fallback=True):
             try:
-                Popen(["notify-send", "-i", ICON_NAME, "Scheduler", text])
+                Popen(["notify-send", "-i", ICON_NOTIF, "Scheduler", text])
             except Exception:
                 pass  # notifications not supported
         if CONFIG.getboolean('Reminders', 'window', fallback=True):
