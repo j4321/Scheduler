@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Scheduler - Task scheduling and calendar
-Copyright 2017-2018 Juliette Monsel <j_4321@protonmail.com>
+Copyright 2017-2019 Juliette Monsel <j_4321@protonmail.com>
 
 Scheduler is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ class Settings(tk.Toplevel):
                           border=1)
         self.listbox = tk.Listbox(frame, relief='flat', justify='right',
                                   selectmode='browse', highlightthickness=0,
-                                  width=10, activestyle='none')
+                                  activestyle='none')
         self.listbox.pack(fill='both', expand=True)
         frame.grid(row=0, column=0, sticky='ns', padx=4, pady=4)
 
@@ -66,12 +66,16 @@ class Settings(tk.Toplevel):
         self.frames[_('Timer')] = ttk.Frame(self, relief='raised', border=1, padding=10)
         self.frames[_('Calendar')] = ttk.Notebook(self)
         self.frames[_('Pomodoro')] = PomodoroParams(self)
-
+        
+        w = 0
         for cat in cats:
-            self.listbox.insert('end', _(cat) + ' ')
+            c =  _(cat) + ' '
+            self.listbox.insert('end', c)
+            w = max(len(c), w)
             self.frames[_(cat)].grid(row=0, column=1, sticky='ewns', padx=4, pady=4)
             self.frames[_(cat)].grid_remove()
             self.__getattribute__('_init_{}'.format(cat.lower()))()
+        self.listbox.configure(width=w)
 
         self._current_frame = self.frames[_('General')]
         self._current_frame.grid()
