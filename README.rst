@@ -1,5 +1,5 @@
-Scheduler - Alarms and reminders
-================================
+Scheduler - Task scheduling and calendar
+========================================
 |Linux| |License|
 
 System tray application for Linux to schedule events with possibity to set reminders. 
