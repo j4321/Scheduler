@@ -66,10 +66,10 @@ class Settings(tk.Toplevel):
         self.frames[_('Timer')] = ttk.Frame(self, relief='raised', border=1, padding=10)
         self.frames[_('Calendar')] = ttk.Notebook(self)
         self.frames[_('Pomodoro')] = PomodoroParams(self)
-        
+
         w = 0
         for cat in cats:
-            c =  _(cat) + ' '
+            c = _(cat) + ' '
             self.listbox.insert('end', c)
             w = max(len(c), w)
             self.frames[_(cat)].grid(row=0, column=1, sticky='ewns', padx=4, pady=4)
@@ -136,14 +136,6 @@ class Settings(tk.Toplevel):
         self.eyes_interval.insert(0, CONFIG.get("General", "eyes_interval", fallback='20'))
         self.eyes_interval.grid(row=1, column=1, sticky='w', padx=4, pady=4)
 
-        # --- sound player
-        son_frame = ttk.Frame(self.frames[_('General')])
-        ttk.Label(son_frame, text=_("Audio player"),
-                  style='title.TLabel').pack(side="left", padx=(2, 10))
-        self.player = ttk.Entry(son_frame, justify='center')
-        self.player.insert(0, CONFIG.get("General", "soundplayer"))
-        self.player.pack(side="right", fill="both", expand=True, padx=4)
-
         # --- placement
         ttk.Label(self.frames[_('General')], text=_("Interface"),
                   style='title.TLabel').grid(sticky='w', pady=4)
@@ -152,8 +144,6 @@ class Settings(tk.Toplevel):
         # self.confirm_update.grid(pady=4, sticky='w')
         ttk.Separator(self.frames[_('General')], orient='horizontal').grid(sticky='ew', pady=10)
         frame_eyes.grid(pady=4, sticky="ew")
-        ttk.Separator(self.frames[_('General')], orient='horizontal').grid(sticky='ew', pady=10)
-        son_frame.grid(pady=4, sticky="ew")
 
     def _init_pomodoro(self):
         pass  # already done in custom class
@@ -596,7 +586,6 @@ class Settings(tk.Toplevel):
         if eyes == '':
             eyes = '20'
         CONFIG.set("General", "eyes_interval", eyes)
-        CONFIG.set("General", "soundplayer", self.player.get())
         # --- Reminders
         CONFIG.set("Reminders", 'window', str("selected" in self.reminders_window.state()))
         CONFIG.set("Reminders", 'window_bg', self.reminders_window_bg.get_color())

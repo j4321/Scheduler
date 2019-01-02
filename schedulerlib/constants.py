@@ -41,8 +41,6 @@ from configparser import ConfigParser
 import warnings
 import gettext
 import matplotlib
-from tkinter import Toplevel
-from tkinter.ttk import Label, Entry, Button
 from subprocess import check_output, CalledProcessError
 from tkinter import filedialog
 from tkinter import colorchooser
@@ -110,7 +108,7 @@ if not CONFIG.read(CONFIG_PATH):
     CONFIG.set('General', 'trayicon', '')
     CONFIG.set("General", "language", "")
     CONFIG.set("General", "eyes_interval", "20")
-    CONFIG.set("General", "soundplayer", "")
+    CONFIG.set("General", "soundplayer", "mpg123")
 
     CONFIG.add_section('Reminders')
     CONFIG.set('Reminders', 'window', 'True')
@@ -278,34 +276,6 @@ if '' in HOLIDAYS:
 if not CONFIG.options("PomodoroTasks"):
     # task = color
     CONFIG.set("PomodoroTasks", _("Work"), CMAP[0])
-
-# --- default sound player
-if not CONFIG.get("General", "soundplayer", fallback=''):
-    if os.path.exists("/usr/bin/aplay"):
-        CONFIG.set("General", "soundplayer", "aplay")
-    elif os.path.exists("/usr/bin/paplay"):
-        CONFIG.set("General", "soundplayer", "paplay")
-    elif os.path.exists("/usr/bin/mpg123"):
-        CONFIG.set("General", "soundplayer", "mpg123")
-    elif os.path.exists("/usr/bin/cvlc"):
-        CONFIG.set("General", "soundplayer", "cvlc")
-    else:
-        top = Toplevel()
-        top.resizable((0, 0))
-        top.title(_("Sound configuration"))
-        Label(top, text=_("The automatic detection of command line soundplayer has failed. \
-If you want to hear the beep between work sessions and breaks, please give the \
-name of a command line soundplayer installed on your system. If you do not know, \
-you can install mpg123.")).grid(row=0, columnspan=2)
-        player = Entry(top, justify='center')
-        player.grid(row=1, columnspan=2, sticky="ew")
-
-        def valide():
-            CONFIG.set("General", "soundplayer", player.get())
-            top.destroy()
-
-        Button(top, _("Cancel"), command=top.destroy).grid(row=2, column=0)
-        Button(top, _("Ok"), command=valide).grid(row=2, column=1)
 
 
 # --- images
