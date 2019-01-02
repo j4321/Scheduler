@@ -1,17 +1,17 @@
 #! /usr/bin/python3
 # -*- coding:Utf-8 -*-
 """
-arxivfeed - arXiv feed viewer
+Scheduler - Task scheduling and calendar
 Copyright 2018 Juliette Monsel <j_4321@protonmail.com>
 The tcl part of the code was take from http://wiki.tcl.tk/15780
 by Paweł Salawa copyright 2011
 
-arxivfeed is free software: you can redistribute it and/or modify
+Scheduler is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-arxivfeed is distributed in the hope that it will be useful,
+Scheduler is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.

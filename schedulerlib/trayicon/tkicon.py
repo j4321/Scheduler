@@ -1,7 +1,7 @@
 #! /usr/bin/python3
 # -*- coding:Utf-8 -*-
 """
-Scheduler - System tray unread mail checker
+Scheduler - Task scheduling and calendar
 Copyright 2016-2018 Juliette Monsel <j_4321@protonmail.com>
 based on code by Michael Lange <klappnase@web.de> copyright 2010
 

@@ -28,7 +28,7 @@ with open('README.rst', encoding='utf-8') as f:
 
 setup(name='scheduler',
       version=__version__,
-      description='Alarms and reminders',
+      description='Task scheduling and calendar',
       long_description=long_description,
       url='https://github.com/j4321/Scheduler',
       author='Juliette Monsel',
