@@ -26,7 +26,8 @@ from tkinter.ttk import Entry, Label, Button, Frame, Style, Combobox
 from tkinter.ttk import Radiobutton, Checkbutton, Notebook
 from schedulerlib.constants import IM_BELL, IM_DEL, CONFIG, \
     TASK_REV_TRANSLATION, FREQ_REV_TRANSLATION, only_nb
-from schedulerlib.ttkcalendar import DateEntry, get_calendar
+from tkcalendar import DateEntry
+from babel.dates import get_day_names
 from schedulerlib.ttkwidgets import LabelFrame
 from datetime import timedelta, time, datetime
 from PIL.ImageTk import PhotoImage
@@ -216,8 +217,8 @@ class Form(Toplevel):
         frame_days = Frame(frame_freq)
         frame_days.grid(row=2, column=2, padx=4, pady=2, sticky='nw')
         self._week_days = []
-        cal = get_calendar(locale)
-        days = cal.formatweekheader(10).split()
+        days = get_day_names("wide", locale=locale)
+        days = [days[i] for i in range(7)]
         for day in days:
             ch = Checkbutton(frame_days, text=day)
             ch.pack(anchor='w')
@@ -365,7 +366,7 @@ class Form(Toplevel):
         combo.selection_clear()
 
     def _select_start(self, event=None):
-        dt = self.start_entry.get_date() - self.start_date
+        dt = self.start_entry.get_date() - self.start_date.date()
         self.end_date = self.end_date + dt
         self.end_entry.set_date(self.end_date)
         self.start_date = self.start_entry.get_date()
@@ -417,7 +418,7 @@ class Form(Toplevel):
         if date:
             hour = int(self.start_hour.get())
             minute = int(self.start_min.get())
-            dt = self.start_entry.get_date().replace(hour=hour, minute=minute) - date
+            dt = datetime.combine(self.start_entry.get_date(), time(hour=hour, minute=minute)) - date
             if dt.days > 0:
                 when.insert(0, str(dt.days))
                 what.set(_('days'))
@@ -449,10 +450,10 @@ class Form(Toplevel):
     def ok(self):
         self.event['Summary'] = self.summary.get()
         self.event['Place'] = self.place.get()
-        self.event['Start'] = "%s %s:%s" % (self.start_entry.get(),
+        self.event['Start'] = "%s %s:%s" % (self.start_entry.get_date().strftime("%Y-%m-%d"),
                                             self.start_hour.get(),
                                             self.start_min.get())
-        self.event['End'] = "%s %s:%s" % (self.end_entry.get(),
+        self.event['End'] = "%s %s:%s" % (self.end_entry.get_date().strftime("%Y-%m-%d"),
                                           self.end_hour.get(),
                                           self.end_min.get())
         self.event['Description'] = self.desc.get('1.0', 'end')
@@ -478,7 +479,7 @@ class Form(Toplevel):
             repeat = {'Frequency': self._repeat_freq.get(),
                       'Limit': self._repeat_lim.get(),
                       'NbTimes': int(self.s_after.get()),
-                      'EndDate': datetime.strptime(self.until_entry.get(), '%x').date(),
+                      'EndDate': self.until_entry.get_date(),
                       'WeekDays': days}
             self.event['Repeat'] = repeat
 

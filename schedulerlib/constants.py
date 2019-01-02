@@ -46,6 +46,8 @@ from tkinter.ttk import Label, Entry, Button
 from subprocess import check_output, CalledProcessError
 from tkinter import filedialog
 from tkinter import colorchooser
+from babel import dates
+
 
 APP_NAME = "scheduler"
 
@@ -103,7 +105,7 @@ CONFIG = ConfigParser()
 
 if not CONFIG.read(CONFIG_PATH):
     CONFIG.add_section('General')
-    CONFIG.set('General', 'locale', '.'.join(locale.getdefaultlocale()))
+    CONFIG.set('General', 'locale', locale.getdefaultlocale()[0])
     CONFIG.set('General', 'backups', '10')
     CONFIG.set('General', 'trayicon', '')
     CONFIG.set("General", "language", "")
@@ -228,8 +230,6 @@ def save_config():
 
 
 # --- language
-locale.setlocale(locale.LC_ALL, CONFIG.get('General', 'locale'))
-
 LANGUAGE = CONFIG.get('General', 'language', fallback='')
 
 LANGUAGES = {"fr": "Français", "en": "English"}
@@ -252,6 +252,22 @@ gettext.translation(APP_NAME, PATH_LOCALE,
                     fallback=True).install()
 
 FREQ_REV_TRANSLATION = {_("hours"): "hours", _("minutes"): "minutes", _("days"): "days"}
+
+
+# change babel formatting default arguments
+def format_date(date=None, format="short", locale=CONFIG.get("General", "locale")):
+    return dates.format_date(date, format, locale)
+
+
+def format_datetime(datetime=None, format='short', tzinfo=None,
+                    locale=CONFIG.get("General", "locale")):
+    return dates.format_datetime(datetime, format, tzinfo, locale)
+
+
+def format_time(time=None, format='short', tzinfo=None,
+                locale=CONFIG.get("General", "locale")):
+    return dates.format_time(time, format, tzinfo, locale)
+
 
 # --- retrieve holidays
 HOLIDAYS = set(CONFIG.get('Calendar', 'holidays').split(', '))
