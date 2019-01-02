@@ -31,8 +31,7 @@ from datetime import datetime, timedelta
 from schedulerlib.constants import ICON48, ICON, IM_ADD, CONFIG, IM_DOT, JOBSTORE, \
     DATA_PATH, BACKUP_PATH, IM_SCROLL_ALPHA, active_color, backup, add_trace, \
     IM_SOUND, IM_MUTE, IM_SOUND_DIS, IM_MUTE_DIS, IM_CLOSED, IM_OPENED, \
-    IM_CLOSED_SEL, IM_OPENED_SEL, ICON_FALLBACK, \
-    format_date, format_datetime, format_time
+    IM_CLOSED_SEL, IM_OPENED_SEL, ICON_FALLBACK, format_time
 from schedulerlib.trayicon import TrayIcon, SubMenu
 from schedulerlib.form import Form
 from schedulerlib.event import Event
@@ -692,22 +691,11 @@ apply {name {
                 evts.sort(key=lambda ev: ev.get_start_time())
                 desc = []
                 for ev in evts:
-                    dt = ev['End'].date() - ev['Start'].date()
                     if ev["WholeDay"]:
-                        if dt.days == 0:
-                            date = ""
-                        else:
-                            date = "%s - %s " % (format_date(day, locale=locale),
-                                                 format_date(day + dt, locale=locale))
+                        date = ""
                     else:
-                        if dt.days == 0:
-                            date = "%s - %s " % (format_time(ev['Start'], locale=locale),
-                                                 format_time(ev['End'], locale=locale))
-                        else:
-                            start = datetime.combine(day, ev['Start'].time())
-                            end = datetime.combine(day + dt, ev['End'].time())
-                            date = "%s - %s " % (format_datetime(start, locale=locale),
-                                                 format_date(end, locale=locale))
+                        date = "%s - %s " % (format_time(ev['Start'], locale=locale),
+                                             format_time(ev['End'], locale=locale))
                     place = "(%s)" % ev['Place']
                     if place == "()":
                         place = ""
