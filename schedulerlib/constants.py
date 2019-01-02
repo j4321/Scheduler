@@ -294,6 +294,7 @@ you can install mpg123.")).grid(row=0, columnspan=2)
 
 # --- images
 ICON_NAME = "scheduler-tray"  # gtk / qt tray icon
+ICON_FALLBACK = os.path.join(PATH_IMAGES, "scheduler-tray.svg")  # gtk / qt fallback tray icon
 ICON48 = os.path.join(PATH_IMAGES, 'icon48.png')
 TKTRAY_ICON = os.path.join(PATH_IMAGES, 'scheduler.png')
 IM_BELL = os.path.join(PATH_IMAGES, 'bell.png')
