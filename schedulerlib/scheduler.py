@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Scheduler - Task scheduling and calendar
-Copyright 2017-2018 Juliette Monsel <j_4321@protonmail.com>
+Copyright 2017-2019 Juliette Monsel <j_4321@protonmail.com>
 
 Scheduler is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ from datetime import datetime, timedelta
 from schedulerlib.constants import ICON48, ICON, IM_ADD, CONFIG, IM_DOT, JOBSTORE, \
     DATA_PATH, BACKUP_PATH, IM_SCROLL_ALPHA, active_color, backup, add_trace, \
     IM_SOUND, IM_MUTE, IM_SOUND_DIS, IM_MUTE_DIS, IM_CLOSED, IM_OPENED, \
-    IM_CLOSED_SEL, IM_OPENED_SEL
+    IM_CLOSED_SEL, IM_OPENED_SEL, ICON_FALLBACK
 from schedulerlib.trayicon import TrayIcon, SubMenu
 from schedulerlib.form import Form
 from schedulerlib.event import Event
@@ -61,7 +61,7 @@ class EventScheduler(Tk):
         self.iconphoto(True, self.icon_img)
 
         # --- systray icon
-        self.icon = TrayIcon(ICON, fallback_icon_path=ICON48)
+        self.icon = TrayIcon(ICON, fallback_icon_path=ICON_FALLBACK)
 
         # --- menu
         self.menu_widgets = SubMenu(parent=self.icon.menu)
