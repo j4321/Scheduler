@@ -29,6 +29,7 @@ from schedulerlib.constants import IM_BELL, IM_DEL, CONFIG, \
 from tkcalendar import DateEntry
 from babel.dates import get_day_names
 from schedulerlib.ttkwidgets import LabelFrame
+from schedulerlib.messagebox import showerror
 from datetime import timedelta, time, datetime
 from PIL.ImageTk import PhotoImage
 
@@ -448,7 +449,12 @@ class Form(Toplevel):
         rem.pack()
 
     def ok(self):
-        self.event['Summary'] = self.summary.get()
+        summary = self.summary.get()
+        if not summary:
+            showerror(_("Error"), _("Summary cannot be empty."), parent=self)
+            return
+
+        self.event['Summary'] = summary
         self.event['Place'] = self.place.get()
         self.event['Start'] = "%s %s:%s" % (self.start_entry.get_date().strftime("%Y-%m-%d"),
                                             self.start_hour.get(),
