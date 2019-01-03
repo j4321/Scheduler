@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-03 00:22+0100\n"
+"POT-Creation-Date: 2019-01-03 12:23+0100\n"
 "PO-Revision-Date: 2018-11-28 13:58+0100\n"
 "Last-Translator: Unknown <juliette@Juliette-MacBook>\n"
 "Language-Team: French\n"
@@ -647,8 +647,8 @@ msgid "New category"
 msgstr "Nouvelle catégorie"
 
 #: schedulerlib/settings/sound.py:69
-msgid "sound file"
-msgstr "fichier son"
+msgid "All files"
+msgstr "Tous les fichiers"
 
 #: schedulerlib/event_calendar.py:531 schedulerlib/scheduler.py:84
 msgid "Delete"
@@ -711,6 +711,9 @@ msgstr "date"
 #, python-brace-format
 msgid "Scheduler is already running. If not deletes {pidfile}."
 msgstr "Scheduler est déjà lancé, si ce n'est pas le cas, supprimez {pidfile}."
+
+msgid "sound file"
+msgstr "fichier son"
 
 msgid "Year"
 msgstr "Année"

@@ -66,10 +66,7 @@ class SoundFrame(ttk.Frame):
             self.b_choose.state(['!disabled'])
 
     def choose(self):
-        filetypes = [(_("sound file"), '*.mp3|*.ogg|*.wav'),
-                     ('OGG', '*.ogg'),
-                     ('MP3', '*.mp3'),
-                     ('WAV', '*.wav')]
+        filetypes = [('MP3', '*.mp3'), (_("All files"), "*")]
         init = self.path.get()
         if not os.path.exists(init):
             init = self._soundfile
