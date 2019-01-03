@@ -117,7 +117,10 @@ class Stats(tk.Toplevel):
             self.ax.set_xlabel(_("date"))
             self.ax.xaxis_date()
             lgd = self.ax.legend(fontsize=10)
-            lgd.set_draggable(True)
+            try:
+                lgd.set_draggable(True)
+            except AttributeError:
+                lgd.draggable(True)
             max_y = yy0.max()
             self.ax.set_ylim(0, max_y + 0.1 * max_y)
             self.ax.tick_params('x', rotation=70)

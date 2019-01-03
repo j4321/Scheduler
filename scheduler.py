@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Scheduler - Task scheduling and calendar
-Copyright 2017 Juliette Monsel <j_4321@protonmail.com>
-code based on http://effbot.org/zone/tkinter-autoscrollbar.htm
+Copyright 2017-2018 Juliette Monsel <j_4321@protonmail.com>
 
 Scheduler is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

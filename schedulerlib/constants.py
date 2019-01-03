@@ -41,11 +41,11 @@ from configparser import ConfigParser
 import warnings
 import gettext
 import matplotlib
-from tkinter import Toplevel
-from tkinter.ttk import Label, Entry, Button
 from subprocess import check_output, CalledProcessError
 from tkinter import filedialog
 from tkinter import colorchooser
+from babel import dates
+
 
 APP_NAME = "scheduler"
 
@@ -59,12 +59,14 @@ if os.access(PATH, os.W_OK) and os.path.exists(os.path.join(PATH, "images")):
     PATH_IMAGES = os.path.join(PATH, 'images')
     PATH_SOUNDS = os.path.join(PATH, 'sounds')
     PATH_LOCALE = os.path.join(PATH, "locale")
+    ICON_NOTIF = os.path.join(PATH_IMAGES, "scheduler-tray.svg")
 else:
     # local directory containing config files
     LOCAL_PATH = os.path.join(os.path.expanduser('~'), '.scheduler')
     PATH_LOCALE = "/usr/share/locale"
     PATH_IMAGES = "/usr/share/scheduler/images"
     PATH_SOUNDS = "/usr/share/scheduler/sounds"
+    ICON_NOTIF = "scheduler"
 
 if not os.path.isdir(LOCAL_PATH):
         os.mkdir(LOCAL_PATH)
@@ -103,12 +105,12 @@ CONFIG = ConfigParser()
 
 if not CONFIG.read(CONFIG_PATH):
     CONFIG.add_section('General')
-    CONFIG.set('General', 'locale', '.'.join(locale.getdefaultlocale()))
+    CONFIG.set('General', 'locale', locale.getdefaultlocale()[0])
     CONFIG.set('General', 'backups', '10')
     CONFIG.set('General', 'trayicon', '')
     CONFIG.set("General", "language", "")
     CONFIG.set("General", "eyes_interval", "20")
-    CONFIG.set("General", "soundplayer", "")
+    CONFIG.set("General", "soundplayer", "mpg123")
 
     CONFIG.add_section('Reminders')
     CONFIG.set('Reminders', 'window', 'True')
@@ -228,8 +230,6 @@ def save_config():
 
 
 # --- language
-locale.setlocale(locale.LC_ALL, CONFIG.get('General', 'locale'))
-
 LANGUAGE = CONFIG.get('General', 'language', fallback='')
 
 LANGUAGES = {"fr": "Français", "en": "English"}
@@ -237,7 +237,10 @@ REV_LANGUAGES = {val: key for key, val in LANGUAGES.items()}
 
 if LANGUAGE not in LANGUAGES:
     # Check the default locale
-    LANGUAGE = locale.getlocale()[0].split('_')[0]
+    try:
+        LANGUAGE = locale.getdefaultlocale()[0].split('_')[0]
+    except Exception:
+        LANGUAGE = "en"
     if LANGUAGE in LANGUAGES:
         CONFIG.set("General", "language", LANGUAGE)
     else:
@@ -253,6 +256,22 @@ gettext.translation(APP_NAME, PATH_LOCALE,
 
 FREQ_REV_TRANSLATION = {_("hours"): "hours", _("minutes"): "minutes", _("days"): "days"}
 
+
+# change babel formatting default arguments
+def format_date(date=None, format="short", locale=CONFIG.get("General", "locale")):
+    return dates.format_date(date, format, locale)
+
+
+def format_datetime(datetime=None, format='short', tzinfo=None,
+                    locale=CONFIG.get("General", "locale")):
+    return dates.format_datetime(datetime, format, tzinfo, locale)
+
+
+def format_time(time=None, format='short', tzinfo=None,
+                locale=CONFIG.get("General", "locale")):
+    return dates.format_time(time, format, tzinfo, locale)
+
+
 # --- retrieve holidays
 HOLIDAYS = set(CONFIG.get('Calendar', 'holidays').split(', '))
 if '' in HOLIDAYS:
@@ -262,34 +281,6 @@ if '' in HOLIDAYS:
 if not CONFIG.options("PomodoroTasks"):
     # task = color
     CONFIG.set("PomodoroTasks", _("Work"), CMAP[0])
-
-# --- default sound player
-if not CONFIG.get("General", "soundplayer", fallback=''):
-    if os.path.exists("/usr/bin/aplay"):
-        CONFIG.set("General", "soundplayer", "aplay")
-    elif os.path.exists("/usr/bin/paplay"):
-        CONFIG.set("General", "soundplayer", "paplay")
-    elif os.path.exists("/usr/bin/mpg123"):
-        CONFIG.set("General", "soundplayer", "mpg123")
-    elif os.path.exists("/usr/bin/cvlc"):
-        CONFIG.set("General", "soundplayer", "cvlc")
-    else:
-        top = Toplevel()
-        top.resizable((0, 0))
-        top.title(_("Sound configuration"))
-        Label(top, text=_("The automatic detection of command line soundplayer has failed. \
-If you want to hear the beep between work sessions and breaks, please give the \
-name of a command line soundplayer installed on your system. If you do not know, \
-you can install mpg123.")).grid(row=0, columnspan=2)
-        player = Entry(top, justify='center')
-        player.grid(row=1, columnspan=2, sticky="ew")
-
-        def valide():
-            CONFIG.set("General", "soundplayer", player.get())
-            top.destroy()
-
-        Button(top, _("Cancel"), command=top.destroy).grid(row=2, column=0)
-        Button(top, _("Ok"), command=valide).grid(row=2, column=1)
 
 
 # --- images

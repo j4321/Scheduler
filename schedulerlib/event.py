@@ -26,7 +26,8 @@ from apscheduler.triggers.cron import CronTrigger
 from apscheduler.jobstores.base import JobLookupError
 from subprocess import run
 from datetime import timedelta, datetime, time
-from schedulerlib.constants import NOTIF_PATH, TASK_STATE, CONFIG
+from schedulerlib.constants import NOTIF_PATH, TASK_STATE, CONFIG,\
+    format_date, format_datetime
 
 
 class Event:
@@ -59,7 +60,7 @@ class Event:
             if type(value) is datetime:
                 self._properties[item] = value
             else:
-                self._properties[item] = datetime.strptime(value, '%x %H:%M')
+                self._properties[item] = datetime.strptime(value, '%Y-%m-%d %H:%M')
         elif item == 'WholeDay':
             self._properties[item] = bool(value)
         elif item == 'Repeat':
@@ -123,10 +124,10 @@ class Event:
                 cron_prop['month'] = date.month
 
             job = self.scheduler.add_job(run, trigger=CronTrigger(**cron_prop),
-                                         args=(['python', NOTIF_PATH, str(self)],))
+                                         args=(['python3', NOTIF_PATH, str(self)],))
         else:
             job = self.scheduler.add_job(run, trigger=DateTrigger(date),
-                                         args=(['python', NOTIF_PATH, str(self)],))
+                                         args=(['python3', NOTIF_PATH, str(self)],))
         self._properties['Reminders'][job.id] = date
 
     def reminder_remove(self, job_id):
@@ -144,12 +145,13 @@ class Event:
     def values(self):
         """ return the values (Summary, Place, Start, End)
             to put in the main window treeview """
+        locale = CONFIG.get("General", "locale")
         if self['WholeDay']:
-            start = self['Start'].strftime('%x')
-            end = self['End'].strftime('%x')
+            start = format_date(self['Start'], locale=locale)
+            end = format_date(self['End'], locale=locale)
         else:
-            start = self['Start'].strftime('%x %H:%M')
-            end = self['End'].strftime('%x %H:%M')
+            start = format_datetime(self['Start'], locale=locale)
+            end = format_datetime(self['End'], locale=locale)
         return self['Summary'], self['Place'], start, end, self['Category']
 
     def get(self, key):

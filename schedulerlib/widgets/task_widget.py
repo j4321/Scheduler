@@ -23,7 +23,7 @@ Task desktop widget
 
 from tkinter import Text
 from tkinter.ttk import Label, Separator, Sizegrip
-from schedulerlib.constants import CONFIG, TASK_STATE, active_color
+from schedulerlib.constants import CONFIG, TASK_STATE, active_color, format_date, format_datetime
 from schedulerlib.ttkwidgets import AutoScrollbar
 from .base_widget import BaseWidget
 
@@ -96,9 +96,9 @@ class TaskWidget(BaseWidget):
         for ev in tasks:
             if not self.hide_completed or ev['Task'] != 'Completed':
                 if ev["WholeDay"]:
-                    end = ev['End'].strftime('%x')
+                    end = format_date(ev['End'], locale=CONFIG.get("General", "locale"))
                 else:
-                    end = ev['End'].strftime('%x %H:%M')
+                    end = format_datetime(ev['End'], locale=CONFIG.get("General", "locale"))
                 picto = TASK_STATE.get(ev['Task'], ev['Task'])
                 txt = "\t%s\t%s [%s]\n" % (picto, ev['Summary'], end)
                 self.display.insert('end', txt)

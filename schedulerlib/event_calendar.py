@@ -23,8 +23,8 @@ EventCalendar: Calendar with the possibility to display events.
 
 from tkinter import Menu
 from datetime import datetime
-from schedulerlib.constants import HOLIDAYS, CONFIG
-from schedulerlib.ttkcalendar import Calendar
+from schedulerlib.constants import HOLIDAYS, CONFIG, format_date, format_time
+from tkcalendar import Calendar
 from schedulerlib.tooltip import TooltipWrapper
 import logging
 
@@ -81,7 +81,7 @@ class EventCalendar(Calendar):
     def update_style(self):
         cats = {cat: CONFIG.get('Categories', cat).split(', ') for cat in CONFIG.options('Categories')}
         for cat, (fg, bg) in cats.items():
-            style = '%s.ev_%s.TLabel' % (self._style_prefixe, cat)
+            style = 'ev_%s.%s.TLabel' % (cat, self._style_prefixe)
             self.style.configure(style, background=bg, foreground=fg)
 
     def __setitem__(self, item, value):
@@ -138,20 +138,23 @@ class EventCalendar(Calendar):
                     tp.destroy()
                     self._events_tooltips[i][j] = None
 
-        we_style = self._style_prefixe + '.we.TLabel'
-        we_om_style = self._style_prefixe + '.we_om.TLabel'
+        we_style = 'we.%s.TLabel' % self._style_prefixe
+        we_om_style = 'we_om.%s.TLabel' % self._style_prefixe
 
         # --- display events and holidays
         for w in range(6):
             for d in range(7):
                 day = cal[w][d]
+                label = self._calendar[w][d]
+                if not label.cget('text'):
+                    continue
                 date = day.strftime('%Y/%m/%d')
                 # --- holidays
                 if date in HOLIDAYS:
                     if month == day.month:
-                        self._calendar[w][d].configure(style=we_style)
+                        label.configure(style=we_style)
                     else:
-                        self._calendar[w][d].configure(style=we_om_style)
+                        label.configure(style=we_om_style)
                 # --- one time event
                 if date in self._events:
                     evts = self._events[date]
@@ -182,7 +185,7 @@ class EventCalendar(Calendar):
     def _add_to_tooltip(self, week_nb, day, txt, cat):
         tp = self._events_tooltips[week_nb][day]
         label = self._calendar[week_nb][day]
-        label.configure(style='%s.ev_%s.TLabel' % (self._style_prefixe, cat))
+        label.configure(style='ev_%s.%s.TLabel' % (cat, self._style_prefixe))
         if tp is None:
             prop = {'background': self._properties['tooltipbackground'],
                     'foreground': self._properties['tooltipforeground'],
@@ -193,8 +196,9 @@ class EventCalendar(Calendar):
             tp.configure(text='\n'.join([tp.cget('text'), txt]))
 
     def _remove_from_tooltip(self, date, txt):
-        year, month = date.year, date.month
-        if self._date.year == year:
+        y1, y2 = date.year, self._date.year
+        m1, m2 = date.month, self._date.month
+        if y1 == y2 or (y1 - y2 == 1 and m1 == 1 and m2 == 12) or (y2 - y1 == 1 and m2 == 1 and m1 == 12):
             _, week_nb, d = date.isocalendar()
             d -= 1
             week_nb -= self._date.isocalendar()[1]
@@ -216,20 +220,23 @@ class EventCalendar(Calendar):
                         if type(date) == datetime:
                             date = date.date()
                         if date == self._sel_date:
-                            label.configure(style=self._style_prefixe + ".sel.TLabel")
+                            label.configure(style='sel.%s.TLabel' % self._style_prefixe)
                         elif date.strftime('%Y/%m/%d') in HOLIDAYS:
-                            label.configure(style=self._style_prefixe + ".we.TLabel")
+                            if m1 == m2:
+                                label.configure(style='we.%s.TLabel' % self._style_prefixe)
+                            else:
+                                label.configure(style='we_om.%s.TLabel' % self._style_prefixe)
                         else:
-                            if month == self._date.month:
+                            if m1 == m2:
                                 if d < 5:
-                                    label.configure(style=self._style_prefixe + ".normal.TLabel")
+                                    label.configure(style='normal.%s.TLabel' % self._style_prefixe)
                                 else:
-                                    label.configure(style=self._style_prefixe + ".we.TLabel")
+                                    label.configure(style='we.%s.TLabel' % self._style_prefixe)
                             else:
                                 if d < 5:
-                                    label.configure(style=self._style_prefixe + ".normal_om.TLabel")
+                                    label.configure(style='normal_om.%s.TLabel' % self._style_prefixe)
                                 else:
-                                    label.configure(style=self._style_prefixe + ".we_om.TLabel")
+                                    label.configure(style='we_om.%s.TLabel' % self._style_prefixe)
 
     def _show_event(self, date, txt, cat):
         y1, y2 = date.year, self._date.year
@@ -510,7 +517,7 @@ class EventCalendar(Calendar):
                 evts.append((desc, iid))
 
         self.menu.add_command(label=_('New Event'),
-                               command=lambda: self.master.master.add(date))
+                              command=lambda: self.master.master.add(date))
         if evts:
             self.menu.add_separator()
             self.menu.add_separator()
@@ -518,19 +525,19 @@ class EventCalendar(Calendar):
             for vals in evts:
                 desc, iid = vals[0], vals[1]
                 self.menu.insert_command(index_edit,
-                                          label="Edit %s" % desc,
-                                          command=lambda i=iid: self.master.master.edit(i))
+                                         label="Edit %s" % desc,
+                                         command=lambda i=iid: self.master.master.edit(i))
                 index_edit += 1
                 self.menu.add_command(label=_("Delete") + " %s" % desc,
-                                       command=lambda i=iid: self.master.master.delete(i))
+                                      command=lambda i=iid: self.master.master.delete(i))
         else:
             self.menu.add_separator()
             if date.strftime('%Y/%m/%d') in HOLIDAYS:
                 self.menu.add_command(label=_('Remove Holiday'),
-                                       command=lambda: self.remove_holiday(date.date()))
+                                      command=lambda: self.remove_holiday(date.date()))
             else:
                 self.menu.add_command(label=_('Set Holiday'),
-                                       command=lambda: self.add_holiday(date.date()))
+                                      command=lambda: self.add_holiday(date.date()))
 
         self.menu.tk_popup(event.x_root, event.y_root)
 
@@ -562,10 +569,10 @@ class EventCalendar(Calendar):
             w %= 52
             if 0 <= w and w < 6:
                 style = self._calendar[w][d - 1].cget('style')
-                we_style = self._style_prefixe + ".we.TLabel"
-                we_om_style = self._style_prefixe + ".we_om.TLabel"
-                normal_style = self._style_prefixe + ".normal.TLabel"
-                normal_om_style = self._style_prefixe + ".normal_om.TLabel"
+                we_style = 'we.%s.TLabel' % self._style_prefixe
+                we_om_style = 'we_om.%s.TLabel' % self._style_prefixe
+                normal_style = 'normal.%s.TLabel' % self._style_prefixe
+                normal_om_style = 'normal_om.%s.TLabel' % self._style_prefixe
                 if style == normal_style:
                     self._calendar[w][d - 1].configure(style=we_style)
                 elif style == normal_om_style:
@@ -581,23 +588,23 @@ class EventCalendar(Calendar):
                 w %= 52
                 if 0 <= w and w < 6:
                     style = self._calendar[w][d - 1].cget('style')
-                    we_style = self._style_prefixe + ".we.TLabel"
-                    we_om_style = self._style_prefixe + ".we_om.TLabel"
-                    normal_style = self._style_prefixe + ".normal.TLabel"
-                    normal_om_style = self._style_prefixe + ".normal_om.TLabel"
+                    we_style = 'we.%s.TLabel' % self._style_prefixe
+                    we_om_style = 'we_om.%s.TLabel' % self._style_prefixe
+                    normal_style = 'normal.%s.TLabel' % self._style_prefixe
+                    normal_om_style = 'normal_om.%s.TLabel' % self._style_prefixe
                     if style == we_style:
                         self._calendar[w][d - 1].configure(style=normal_style)
                     elif style == we_om_style:
                         self._calendar[w][d - 1].configure(style=normal_om_style)
         except ValueError:
-            raise ValueError('%s is not a holiday.' % date.strftime('%x'))
+            raise ValueError('%s is not a holiday.' % format_date(date, locale=self["locale"]))
 
     def add_event(self, event):
         start = event['Start']
         end = event['End']
         if not event["WholeDay"]:
-            deb = start.strftime('%H:%M')
-            fin = end.strftime('%H:%M')
+            deb = format_time(start, locale=self["locale"])
+            fin = format_time(end, locale=self["locale"])
             desc = '➢ %s - %s %s' % (deb, fin, event['Summary'])
         else:
             desc = '➢ %s' % event['Summary']
@@ -611,8 +618,8 @@ class EventCalendar(Calendar):
         start = event['Start']
         end = event['End']
         if not event["WholeDay"]:
-            deb = start.strftime('%H:%M')
-            fin = end.strftime('%H:%M')
+            deb = format_time(start, locale=self["locale"])
+            fin = format_time(end, locale=self["locale"])
             desc = '➢ %s - %s %s' % (deb, fin, event['Summary'])
         else:
             desc = '➢ %s' % event['Summary']
@@ -624,8 +631,9 @@ class EventCalendar(Calendar):
 
     def bind(self, *args):
         Calendar.bind(self, *args)
-        self._header.bind(*args)
-        for widget in self._header.children.values():
+        header = self._header_month.master.master
+        header.bind(*args)
+        for widget in header.children.values():
             widget.bind(*args)
             for w in widget.children.values():
                 w.bind(*args)

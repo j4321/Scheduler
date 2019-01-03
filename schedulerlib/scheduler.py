@@ -31,7 +31,7 @@ from datetime import datetime, timedelta
 from schedulerlib.constants import ICON48, ICON, IM_ADD, CONFIG, IM_DOT, JOBSTORE, \
     DATA_PATH, BACKUP_PATH, IM_SCROLL_ALPHA, active_color, backup, add_trace, \
     IM_SOUND, IM_MUTE, IM_SOUND_DIS, IM_MUTE_DIS, IM_CLOSED, IM_OPENED, \
-    IM_CLOSED_SEL, IM_OPENED_SEL, ICON_FALLBACK
+    IM_CLOSED_SEL, IM_OPENED_SEL, ICON_FALLBACK, format_time
 from schedulerlib.trayicon import TrayIcon, SubMenu
 from schedulerlib.form import Form
 from schedulerlib.event import Event
@@ -47,6 +47,8 @@ import logging
 import traceback
 from PIL import Image
 from PIL.ImageTk import PhotoImage
+from dateutil.parser import parse
+from babel.dates import get_date_format
 
 
 class EventScheduler(Tk):
@@ -516,10 +518,10 @@ apply {name {
 
     @staticmethod
     def to_datetime(date):
-        try:
-            return datetime.strptime(date, '%x')
-        except ValueError:
-            return datetime.strptime(date, '%x %H:%M')
+        date_format = get_date_format("short", CONFIG.get("General", "locale")).pattern
+        dayfirst = date_format.startswith("d")
+        yearfirst = date_format.startswith("y")
+        return parse(date, dayfirst=dayfirst, yearfirst=yearfirst)
 
     def _sort_by_date(self, col, reverse):
         l = [(self.to_datetime(self.tree.set(k, col)), k) for k in self.tree.get_children('')]
@@ -678,6 +680,7 @@ apply {name {
 
     def get_next_week_events(self):
         """return events scheduled for the next 7 days """
+        locale = CONFIG.get("General", "locale")
         next_ev = {}
         today = datetime.now().date()
         for d in range(7):
@@ -688,24 +691,11 @@ apply {name {
                 evts.sort(key=lambda ev: ev.get_start_time())
                 desc = []
                 for ev in evts:
-                    dt = ev['End'].date() - ev['Start'].date()
                     if ev["WholeDay"]:
-                        if dt.days == 0:
-                            date = ""
-                        else:
-                            start = day.strftime('%x')
-                            end = (day + dt).strftime('%x')
-                            date = "%s - %s " % (start, end)
+                        date = ""
                     else:
-                        start = ev['Start'].strftime('%H:%M')
-                        end = ev['End'].strftime('%H:%M')
-                        if dt.days == 0:
-                            date = "%s - %s " % (start, end)
-                        else:
-                            date = "%s %s - %s %s " % (day.strftime('%x'),
-                                                       start,
-                                                       (day + dt).strftime('%x'),
-                                                       end)
+                        date = "%s - %s " % (format_time(ev['Start'], locale=locale),
+                                             format_time(ev['End'], locale=locale))
                     place = "(%s)" % ev['Place']
                     if place == "()":
                         place = ""
