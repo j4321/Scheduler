@@ -24,6 +24,7 @@ Pomodoro stats viewer
 import tkinter as tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+from matplotlib.dates import DateFormatter
 from schedulerlib.constants import CONFIG, PATH_STATS, scrub
 from schedulerlib.navtoolbar import NavigationToolbar
 import datetime as dt
@@ -61,7 +62,6 @@ class Stats(tk.Toplevel):
         coul = [CONFIG.get("PomodoroTasks", task) for task in tasks]
         stats_x = []
         stats_y = []
-        print(PATH_STATS)
         demain = dt.date.today().toordinal() + 1
         min_x = demain
 
@@ -109,9 +109,7 @@ class Stats(tk.Toplevel):
                 self.ax.bar(xx, yy, bottom=yy0, width=0.8, label=task, color=coul[i])
                 yy0 += yy
             axx = np.array([int(xt) for xt in self.ax.get_xticks() if xt.is_integer()])
-            self.ax.set_xticks(axx)
-            self.ax.set_xticklabels([dt.date.fromordinal(i).strftime("%x") for i in axx])
-            # plt.gcf().autofmt_xdate()
+            self.ax.xaxis.set_major_formatter(DateFormatter('%x'))
             self.ax.set_xlim(min_x - 0.5, demain - 0.5)
             self.ax.set_ylabel(_("time (h)"))
             self.ax.set_xlabel(_("date"))

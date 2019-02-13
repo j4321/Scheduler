@@ -69,7 +69,7 @@ else:
     ICON_NOTIF = "scheduler"
 
 if not os.path.isdir(LOCAL_PATH):
-        os.mkdir(LOCAL_PATH)
+    os.mkdir(LOCAL_PATH)
 
 PATH_CONFIG = os.path.join(LOCAL_PATH, "scheduler.ini")
 PATH_STATS = os.path.join(LOCAL_PATH, "pomodoro_stats.sqlite")
@@ -270,6 +270,14 @@ def format_datetime(datetime=None, format='short', tzinfo=None,
 def format_time(time=None, format='short', tzinfo=None,
                 locale=CONFIG.get("General", "locale")):
     return dates.format_time(time, format, tzinfo, locale)
+
+
+# set locale for pomodoro stats display
+try:
+    locale.setlocale(locale.LC_ALL, '')
+except Exception:
+    # on some platforms there are issues with the default locale format
+    pass
 
 
 # --- retrieve holidays
