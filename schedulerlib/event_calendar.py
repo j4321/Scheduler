@@ -525,7 +525,7 @@ class EventCalendar(Calendar):
             for vals in evts:
                 desc, iid = vals[0], vals[1]
                 self.menu.insert_command(index_edit,
-                                         label="Edit %s" % desc,
+                                         label=_("Edit") + " %s" % desc,
                                          command=lambda i=iid: self.master.master.edit(i))
                 index_edit += 1
                 self.menu.add_command(label=_("Delete") + " %s" % desc,
