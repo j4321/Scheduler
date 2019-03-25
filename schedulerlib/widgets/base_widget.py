@@ -78,14 +78,14 @@ class BaseWidget(Toplevel):
 
     def _populate_menu(self):
         self.menu_pos = Menu(self.menu, relief='sunken', activeborderwidth=0)
-        self.menu_pos.add_radiobutton(label='Normal', value='normal',
+        self.menu_pos.add_radiobutton(label=_('Normal'), value='normal',
                                       variable=self._position, command=self.show)
-        self.menu_pos.add_radiobutton(label='Above', value='above',
+        self.menu_pos.add_radiobutton(label=_('Above'), value='above',
                                       variable=self._position, command=self.show)
-        self.menu_pos.add_radiobutton(label='Below', value='below',
+        self.menu_pos.add_radiobutton(label=_('Below'), value='below',
                                       variable=self._position, command=self.show)
-        self.menu.add_cascade(label='Position', menu=self.menu_pos)
-        self.menu.add_command(label='Hide', command=self.hide)
+        self.menu.add_cascade(label=_('Position'), menu=self.menu_pos)
+        self.menu.add_command(label=_('Hide'), command=self.hide)
 
     def update_style(self):
         bg = CONFIG.get(self.name, 'background', fallback='grey10')
