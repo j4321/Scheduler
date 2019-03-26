@@ -1,9 +1,23 @@
 Scheduler - Alarms and reminders
 ================================
-Copyright 2016-2018 Juliette Monsel <j_4321@protonmail.com>
+Copyright 2016-2019 Juliette Monsel <j_4321@protonmail.com>
 
 Changelog
 ---------
+
+- Version 1.1.1
+	* Fix widget disappearance in Plasma desktop
+	* Improve dates in pomodoro stat graph 
+	* Fix French translation
+
+- Version 1.1.0
+	* Add compatibility with matplotlib<3.0.0
+	* Use [tkcalendar](https://github.com/j4321/tkcalendar/) module
+	* Use babel to display dates in local format
+	* Improve dates displayed in events widget
+	* Use mpg123 as sound player
+	* Show error if 'Summary' field is empty
+	* Fix call to notify.py for Ubuntu
 
 - Version 1.0.0
     * Initial release
