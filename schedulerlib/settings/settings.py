@@ -136,12 +136,21 @@ class Settings(tk.Toplevel):
         self.eyes_interval.insert(0, CONFIG.get("General", "eyes_interval", fallback='20'))
         self.eyes_interval.grid(row=1, column=1, sticky='w', padx=4, pady=4)
 
+        # --- Splash supported
+        self.splash_support = ttk.Checkbutton(self.frames[_('General')],
+                                              text=_("Check this box if the widgets disappear when you click"))
+        if not CONFIG.getboolean('General', 'splash_supported', fallback=True):
+            self.splash_support.state(('selected', '!alternate'))
+        else:
+            self.splash_support.state(('!selected', '!alternate'))
+
         # --- placement
         ttk.Label(self.frames[_('General')], text=_("Interface"),
                   style='title.TLabel').grid(sticky='w', pady=4)
         lang_frame.grid(pady=4, sticky="ew")
         frame_gui.grid(pady=4, sticky="ew")
         # self.confirm_update.grid(pady=4, sticky='w')
+        self.splash_support.grid(pady=4, sticky='w')
         ttk.Separator(self.frames[_('General')], orient='horizontal').grid(sticky='ew', pady=10)
         frame_eyes.grid(pady=4, sticky="ew")
 
@@ -582,6 +591,8 @@ class Settings(tk.Toplevel):
         CONFIG.set("General", "language", REV_LANGUAGES[self.lang.get()])
         CONFIG.set("General", "trayicon", self.gui.get().lower())
         # CONFIG.set("General", "check_update", str('selected' in self.confirm_update.state()))
+        CONFIG.set('General', 'splash_supported', str(not self.splash_support.instate(('selected',))))
+
         eyes = self.eyes_interval.get()
         if eyes == '':
             eyes = '20'

@@ -36,7 +36,10 @@ class BaseWidget(Toplevel):
         """
         Toplevel.__init__(self, master)
         self.name = name
-        self.attributes('-type', 'splash')
+        if CONFIG.getboolean('General', 'splash_supported', fallback=True):
+            self.attributes('-type', 'splash')
+        else:
+            self.attributes('-type', 'toolbar')
 
         self.style = Style(self)
 
@@ -98,6 +101,15 @@ class BaseWidget(Toplevel):
         self.menu_pos.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
                                 activebackground=active_bg)
 
+    def update_position(self):
+        if self._position.get() == 'normal':
+            if CONFIG.getboolean('General', 'splash_supported', fallback=True):
+                self.attributes('-type', 'splash')
+            else:
+                self.attributes('-type', 'toolbar')
+        self.withdraw()
+        self.deiconify()
+
     def _on_configure(self, event):
         CONFIG.set(self.name, 'geometry', self.geometry())
         save_config()
@@ -112,23 +124,39 @@ class BaseWidget(Toplevel):
         ''' make widget sticky '''
         self.deiconify()
         self.update_idletasks()
+        splash_supp = CONFIG.getboolean('General', 'splash_supported', fallback=True)
         try:
             pos = self._position.get()
             for w in self.ewmh.getClientList():
                 if w.get_wm_name() == self.title():
                     if pos == 'above':
+                        self.attributes('-type', 'dock')
                         self.ewmh.setWmState(w, 1, '_NET_WM_STATE_ABOVE')
                         self.ewmh.setWmState(w, 0, '_NET_WM_STATE_BELOW')
                         self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_SKIP_TASKBAR')
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_SKIP_PAGER')
                     elif pos == 'below':
+                        self.attributes('-type', 'desktop')
                         self.ewmh.setWmState(w, 0, '_NET_WM_STATE_ABOVE')
                         self.ewmh.setWmState(w, 1, '_NET_WM_STATE_BELOW')
                         self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_SKIP_TASKBAR')
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_SKIP_PAGER')
                     else:
+                        if splash_supp:
+                            self.attributes('-type', 'splash')
+                        else:
+                            self.attributes('-type', 'toolbar')
                         self.ewmh.setWmState(w, 0, '_NET_WM_STATE_BELOW')
                         self.ewmh.setWmState(w, 0, '_NET_WM_STATE_ABOVE')
                         self.ewmh.setWmState(w, 1, '_NET_WM_STATE_STICKY')
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_SKIP_TASKBAR')
+                        self.ewmh.setWmState(w, 1, '_NET_WM_STATE_SKIP_PAGER')
             self.ewmh.display.flush()
+            if not splash_supp:
+                self.withdraw()
+                self.deiconify()
             CONFIG.set(self.name, 'visible', 'True')
             self.variable.set(True)
             save_config()
