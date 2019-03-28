@@ -107,8 +107,9 @@ class BaseWidget(Toplevel):
                 self.attributes('-type', 'splash')
             else:
                 self.attributes('-type', 'toolbar')
-        self.withdraw()
-        self.deiconify()
+        if self.variable.get():
+            self.withdraw()
+            self.deiconify()
 
     def _on_configure(self, event):
         CONFIG.set(self.name, 'geometry', self.geometry())
