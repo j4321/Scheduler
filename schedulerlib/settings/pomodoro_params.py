@@ -172,8 +172,19 @@ class PomodoroParams(Frame):
         # --- Tasks
         self.stats = Frame(self.onglets, padding=10)
         self.stats.columnconfigure(0, weight=1)
-        self.stats.rowconfigure(1, weight=1)
+        self.stats.rowconfigure(2, weight=1)
         self.onglets.add(self.stats, text=_("Tasks"))
+        # graph legend
+        legend_frame = Frame(self.stats)
+        Label(legend_frame, style='title.TLabel',
+              text=_('Maximum number of rows in the legend')).pack(side='left')
+        self.legend_row_nb = Entry(legend_frame, width=4, justify='center',
+                                   validatecommand=(self.okfct, '%P'),
+                                   validate='key')
+        self.legend_row_nb.insert(0, CONFIG.get('Pomodoro', 'legend_max_height', fallback='6'))
+        self.legend_row_nb.pack(side='left', padx=4)
+
+        # task colors
         can = Canvas(self.stats, bg=self.style.lookup('TFrame', 'background'),
                      highlightthickness=0, width=1,
                      relief='flat')
@@ -197,11 +208,12 @@ class PomodoroParams(Frame):
         if len(tasks) == 1:
             self._tasks_btns[tasks[0]].state(['disabled'])
 
+        legend_frame.grid(row=0, columnspan=2, sticky='w', pady=4)
         Label(self.stats, text=_('Colors in the statistic graph'),
-              style='title.TLabel').grid(row=0, column=0, sticky='w', pady=4)
-        can.grid(row=1, column=0, sticky='ewns')
-        scroll.grid(row=1, column=1, sticky='ns')
-        Button(self.stats, image=self.im_plus, command=self.add_task).grid(row=2, column=0, sticky='w')
+              style='title.TLabel').grid(row=1, column=0, sticky='w', pady=4)
+        can.grid(row=2, column=0, sticky='ewns')
+        scroll.grid(row=2, column=1, sticky='ns')
+        Button(self.stats, image=self.im_plus, command=self.add_task).grid(row=3, column=0, sticky='w')
 
         self.update_idletasks()
         can.configure(width=self.task_frame.winfo_reqwidth())
@@ -231,47 +243,66 @@ class PomodoroParams(Frame):
         old_tpsw = CONFIG.getint("Pomodoro", "work_time")
         old_tpsp = CONFIG.getint("Pomodoro", "break_time")
         old_tpsr = CONFIG.getint("Pomodoro", "rest_time")
-        tpsw = int(self.travail.get())
-        tpsp = int(self.pause.get())
-        tpsr = int(self.rest.get())
+        try:
+            tpsw = int(self.travail.get())
+        except ValueError:  # empty entry
+            tpsw = 0
+        if tpsw == 0:
+            tpsw = old_tpsw
+        try:
+            tpsp = int(self.pause.get())
+        except ValueError:
+            tpsp = 0
+        if tpsp == 0:
+            tpsp = old_tpsp
+        try:
+            tpsr = int(self.rest.get())
+        except ValueError:
+            tpsr = 0
+        if tpsr == 0:
+            tpsr = old_tpsr
+
         sound, mute = self.sound.get()
         font_prop = self.font.get_font()
         font = "{} {}".format(font_prop['family'].replace(' ', '\ '),
                               font_prop['size'])
-        filetypes = ["ogg", "wav", "mp3"]
+        try:
+            legend_rows = int(self.legend_row_nb.get())
+        except ValueError:
+            legend_rows = 0
+        if legend_rows == 0:
+            legend_rows = CONFIG.getint("Pomodoro", "legend_max_height")
 
-        if (tpsw > 0 and tpsp > 0 and tpsr > 0 and
-           os.path.exists(sound) and (sound.split('.')[-1] in filetypes)):
-            CONFIG.set("Pomodoro", "alpha", str(self.opacity.get_opacity()))
-            CONFIG.set("Pomodoro", "font", font)
-            CONFIG.set("Pomodoro", "background", self.bg.get_color())
-            CONFIG.set("Pomodoro", "foreground", self.fg.get_color())
-            CONFIG.set("Pomodoro", "work_time", str(tpsw))
-            CONFIG.set("Pomodoro", "work_bg", self.work_bg.get_color())
-            CONFIG.set("Pomodoro", "work_fg", self.work_fg.get_color())
-            CONFIG.set("Pomodoro", "break_time", str(tpsp))
-            CONFIG.set("Pomodoro", "break_bg", self.break_bg.get_color())
-            CONFIG.set("Pomodoro", "break_fg", self.break_fg.get_color())
-            CONFIG.set("Pomodoro", "rest_time", str(tpsr))
-            CONFIG.set("Pomodoro", "rest_bg", self.rest_bg.get_color())
-            CONFIG.set("Pomodoro", "rest_fg", self.rest_fg.get_color())
-            CONFIG.set("Pomodoro", "beep", sound)
-            CONFIG.set("Pomodoro", "mute", str(mute))
-            for task, widget in self.tasks.items():
-                CONFIG.set("PomodoroTasks", task, widget.get_color())
+        if not os.path.exists(sound):
+            showerror(_("Error"), _("The file {filepath} does not exists, the old file will be used.").format(filepath=sound))
+            sound = CONFIG.get("Pomodoro", "beep")
 
-            return old_tpsw != tpsw or old_tpsp != tpsp or old_tpsr != old_tpsr
-        else:
-            showerror(_("Error"), _("There is at least one invalid setting!"))
-            print(tpsw > 0, tpsp > 0, tpsr > 0, os.path.exists(sound), (sound.split('.')[-1] in filetypes))
-            return False
+        CONFIG.set("Pomodoro", "alpha", str(self.opacity.get_opacity()))
+        CONFIG.set("Pomodoro", "font", font)
+        CONFIG.set("Pomodoro", "background", self.bg.get_color())
+        CONFIG.set("Pomodoro", "foreground", self.fg.get_color())
+        CONFIG.set("Pomodoro", "work_time", str(tpsw))
+        CONFIG.set("Pomodoro", "work_bg", self.work_bg.get_color())
+        CONFIG.set("Pomodoro", "work_fg", self.work_fg.get_color())
+        CONFIG.set("Pomodoro", "break_time", str(tpsp))
+        CONFIG.set("Pomodoro", "break_bg", self.break_bg.get_color())
+        CONFIG.set("Pomodoro", "break_fg", self.break_fg.get_color())
+        CONFIG.set("Pomodoro", "rest_time", str(tpsr))
+        CONFIG.set("Pomodoro", "rest_bg", self.rest_bg.get_color())
+        CONFIG.set("Pomodoro", "rest_fg", self.rest_fg.get_color())
+        CONFIG.set("Pomodoro", "beep", sound)
+        CONFIG.set("Pomodoro", "mute", str(mute))
+        CONFIG.set("Pomodoro", "legend_max_height", str(legend_rows))
+        for task, widget in self.tasks.items():
+            CONFIG.set("PomodoroTasks", task, widget.get_color())
+
+        return old_tpsw != tpsw or old_tpsp != tpsp or old_tpsr != old_tpsr
 
     def del_task(self, task):
         """ Suppression de tâches """
         rep = askyesno(_("Confirmation"),
                        _("Are you sure you want to delete the task {task}? This action cannot be undone.").format(task=task.capitalize()))
         if rep:
-            print(CONFIG.options("PomodoroTasks"))
             CONFIG.remove_option("PomodoroTasks", task)
             # remove stats
             db = sqlite3.connect(PATH_STATS)
@@ -290,7 +321,6 @@ class PomodoroParams(Frame):
             if len(CONFIG.options("PomodoroTasks")) == 1:
                 CONFIG.set("PomodoroTasks", _("Work"), CMAP[0])
                 self._tasks_btns[CONFIG.options("PomodoroTasks")[0]].state(['disabled'])
-            print(CONFIG.options("PomodoroTasks"))
             save_config()
 
     def add_task(self):
