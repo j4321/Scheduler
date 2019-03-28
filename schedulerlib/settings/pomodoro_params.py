@@ -276,8 +276,11 @@ class PomodoroParams(Frame):
             # remove stats
             db = sqlite3.connect(PATH_STATS)
             cursor = db.cursor()
-            cursor.execute('DROP TABLE {}'.format(scrub(task.lower().replace(' ', '_'))))
-            db.commit()
+            try:
+                cursor.execute('DROP TABLE {}'.format(scrub(task.lower().replace(' ', '_'))))
+                db.commit()
+            except sqlite3.OperationalError:
+                pass   # no stats yet
             db.close()
             self.tasks[task].destroy()
             self._tasks_btns[task].destroy()
