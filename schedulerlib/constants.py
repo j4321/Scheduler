@@ -110,6 +110,8 @@ if not CONFIG.read(CONFIG_PATH):
     CONFIG.set('General', 'trayicon', '')
     CONFIG.set("General", "language", "")
     CONFIG.set("General", "eyes_interval", "20")
+    CONFIG.set("General", "splash_supported",
+               str(os.environ.get('DESKTOP_SESSION') != 'plasma'))
     CONFIG.set("General", "soundplayer", "mpg123")
 
     CONFIG.add_section('Reminders')

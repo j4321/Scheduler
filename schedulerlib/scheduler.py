@@ -674,9 +674,13 @@ apply {name {
         self.destroy()
 
     def settings(self):
+        splash_supp = CONFIG.get('General', 'splash_supported', fallback=True)
         dialog = Settings(self)
         self.wait_window(dialog)
         self._setup_style()
+        if splash_supp != CONFIG.get('General', 'splash_supported'):
+            for widget in self.widgets.values():
+                widget.update_position()
 
     def get_next_week_events(self):
         """return events scheduled for the next 7 days """
