@@ -7,8 +7,9 @@ Changelog
 
 - Version 1.1.1
 	* Fix widget disappearance in Plasma desktop
-	* Improve dates in pomodoro stat graph 
+	* Improve dates and legend in pomodoro stat graph
 	* Fix French translation
+        * Fix error when deleting unworked task
 
 - Version 1.1.0
 	* Add compatibility with matplotlib<3.0.0
