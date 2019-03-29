@@ -207,6 +207,7 @@ if not CONFIG.has_section('Pomodoro'):
     CONFIG.set("Pomodoro", "rest_fg", "#000000")
     CONFIG.set("Pomodoro", "beep", os.path.join(PATH_SOUNDS, 'ting.mp3'))
     CONFIG.set("Pomodoro", "mute", "False")
+    CONFIG.set("Pomodoro", "legend_max_height", "6")
 
     CONFIG.add_section("PomodoroTasks")
 

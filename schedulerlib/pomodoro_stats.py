@@ -34,7 +34,7 @@ import sqlite3
 
 class Stats(tk.Toplevel):
     def __init__(self, master):
-        tk.Toplevel.__init__(self, master)
+        tk.Toplevel.__init__(self, master, class_='Scheduler')
         self.title(_('Pomodoro - statistics'))
 
         bg = self.winfo_toplevel()['bg']
@@ -108,13 +108,15 @@ class Stats(tk.Toplevel):
                 yy = np.concatenate((yy, [y[-1]], np.zeros(len(xxx) - 1, dtype=int)))
                 self.ax.bar(xx, yy, bottom=yy0, width=0.8, label=task, color=coul[i])
                 yy0 += yy
-            axx = np.array([int(xt) for xt in self.ax.get_xticks() if xt.is_integer()])
             self.ax.xaxis.set_major_formatter(DateFormatter('%x'))
             self.ax.set_xlim(min_x - 0.5, demain - 0.5)
             self.ax.set_ylabel(_("time (h)"))
             self.ax.set_xlabel(_("date"))
             self.ax.xaxis_date()
-            lgd = self.ax.legend(fontsize=10)
+            rows = CONFIG.getint("Pomodoro", "legend_max_height", fallback=6)
+            ncol = int(np.ceil(len(tasks) / rows))
+
+            lgd = self.ax.legend(fontsize=10, ncol=ncol, columnspacing=0.7, handlelength=0.9, handletextpad=0.5)
             try:
                 lgd.set_draggable(True)
             except AttributeError:
