@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-26 13:59+0100\n"
+"POT-Creation-Date: 2019-03-29 10:04+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,8 +17,8 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: scheduler.py:45 schedulerlib/settings/pomodoro_params.py:265
-#: schedulerlib/settings/pomodoro_params.py:298
+#: scheduler.py:45 schedulerlib/settings/pomodoro_params.py:277
+#: schedulerlib/settings/pomodoro_params.py:331
 #: schedulerlib/settings/settings.py:557 schedulerlib/form.py:454
 #: schedulerlib/navtoolbar.py:102
 msgid "Error"
@@ -107,11 +107,11 @@ msgstr ""
 msgid "Pomodoro - statistics"
 msgstr ""
 
-#: schedulerlib/pomodoro_stats.py:114
+#: schedulerlib/pomodoro_stats.py:113
 msgid "time (h)"
 msgstr ""
 
-#: schedulerlib/pomodoro_stats.py:115
+#: schedulerlib/pomodoro_stats.py:114
 msgid "date"
 msgstr ""
 
@@ -182,13 +182,13 @@ msgstr ""
 #: schedulerlib/widgets/pomodoro_widget.py:95
 #: schedulerlib/widgets/pomodoro_widget.py:175
 #: schedulerlib/widgets/pomodoro_widget.py:178
-#: schedulerlib/widgets/pomodoro_widget.py:273
-#: schedulerlib/widgets/pomodoro_widget.py:279
-#: schedulerlib/widgets/pomodoro_widget.py:303
-#: schedulerlib/widgets/pomodoro_widget.py:320
+#: schedulerlib/widgets/pomodoro_widget.py:276
+#: schedulerlib/widgets/pomodoro_widget.py:282
+#: schedulerlib/widgets/pomodoro_widget.py:306
+#: schedulerlib/widgets/pomodoro_widget.py:323
 #: schedulerlib/settings/pomodoro_params.py:67
 #: schedulerlib/settings/pomodoro_params.py:152
-#: schedulerlib/settings/pomodoro_params.py:288 schedulerlib/constants.py:293
+#: schedulerlib/settings/pomodoro_params.py:322 schedulerlib/constants.py:294
 msgid "Work"
 msgstr ""
 
@@ -196,7 +196,7 @@ msgstr ""
 #: schedulerlib/widgets/pomodoro_widget.py:58
 #: schedulerlib/widgets/pomodoro_widget.py:176
 #: schedulerlib/widgets/pomodoro_widget.py:179
-#: schedulerlib/widgets/pomodoro_widget.py:316
+#: schedulerlib/widgets/pomodoro_widget.py:319
 #: schedulerlib/settings/pomodoro_params.py:73
 #: schedulerlib/settings/pomodoro_params.py:159
 msgid "Break"
@@ -206,7 +206,7 @@ msgstr ""
 #: schedulerlib/widgets/pomodoro_widget.py:59
 #: schedulerlib/widgets/pomodoro_widget.py:177
 #: schedulerlib/widgets/pomodoro_widget.py:180
-#: schedulerlib/widgets/pomodoro_widget.py:311
+#: schedulerlib/widgets/pomodoro_widget.py:314
 #: schedulerlib/settings/pomodoro_params.py:79
 #: schedulerlib/settings/pomodoro_params.py:166
 msgid "Rest"
@@ -216,13 +216,13 @@ msgstr ""
 msgid "Task: "
 msgstr ""
 
-#: schedulerlib/widgets/pomodoro_widget.py:268
-#: schedulerlib/settings/pomodoro_params.py:271
+#: schedulerlib/widgets/pomodoro_widget.py:271
+#: schedulerlib/settings/pomodoro_params.py:303
 #: schedulerlib/settings/settings.py:543
 msgid "Confirmation"
 msgstr ""
 
-#: schedulerlib/widgets/pomodoro_widget.py:269
+#: schedulerlib/widgets/pomodoro_widget.py:272
 msgid "Are you sure you want to give up the current session?"
 msgstr ""
 
@@ -308,37 +308,42 @@ msgstr ""
 msgid "Foreground"
 msgstr ""
 
-#: schedulerlib/settings/pomodoro_params.py:200
+#: schedulerlib/settings/pomodoro_params.py:180
+msgid "Maximum number of rows in the legend"
+msgstr ""
+
+#: schedulerlib/settings/pomodoro_params.py:212
 msgid "Colors in the statistic graph"
 msgstr ""
 
-#: schedulerlib/settings/pomodoro_params.py:265
-msgid "There is at least one invalid setting!"
+#: schedulerlib/settings/pomodoro_params.py:277
+#, python-brace-format
+msgid "The file {filepath} does not exists, the old file will be used."
 msgstr ""
 
-#: schedulerlib/settings/pomodoro_params.py:272
+#: schedulerlib/settings/pomodoro_params.py:304
 #, python-brace-format
 msgid ""
 "Are you sure you want to delete the task {task}? This action cannot be "
 "undone."
 msgstr ""
 
-#: schedulerlib/settings/pomodoro_params.py:299
+#: schedulerlib/settings/pomodoro_params.py:332
 #, python-brace-format
 msgid "The task {task} already exists."
 msgstr ""
 
-#: schedulerlib/settings/pomodoro_params.py:315
+#: schedulerlib/settings/pomodoro_params.py:348
 msgid "New task"
 msgstr ""
 
-#: schedulerlib/settings/pomodoro_params.py:322
+#: schedulerlib/settings/pomodoro_params.py:355
 #: schedulerlib/settings/settings.py:88 schedulerlib/messagebox.py:269
 #: schedulerlib/messagebox.py:392
 msgid "Cancel"
 msgstr ""
 
-#: schedulerlib/settings/pomodoro_params.py:323
+#: schedulerlib/settings/pomodoro_params.py:356
 #: schedulerlib/settings/settings.py:87 schedulerlib/form.py:64
 #: schedulerlib/messagebox.py:31 schedulerlib/messagebox.py:94
 #: schedulerlib/messagebox.py:326 schedulerlib/messagebox.py:392
@@ -643,17 +648,17 @@ msgid "Deadline"
 msgstr ""
 
 #: schedulerlib/form.py:417 schedulerlib/form.py:437 schedulerlib/form.py:440
-#: schedulerlib/constants.py:259
+#: schedulerlib/constants.py:260
 msgid "minutes"
 msgstr ""
 
 #: schedulerlib/form.py:417 schedulerlib/form.py:430
-#: schedulerlib/constants.py:259
+#: schedulerlib/constants.py:260
 msgid "hours"
 msgstr ""
 
 #: schedulerlib/form.py:417 schedulerlib/form.py:425
-#: schedulerlib/constants.py:259
+#: schedulerlib/constants.py:260
 msgid "days"
 msgstr ""
 
@@ -714,6 +719,6 @@ msgstr ""
 msgid "Save the figure"
 msgstr ""
 
-#: schedulerlib/constants.py:606
+#: schedulerlib/constants.py:607
 msgid "Open"
 msgstr ""
