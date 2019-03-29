@@ -242,8 +242,11 @@ class Pomodoro(BaseWidget):
 
     def display_stats(self):
         """ affiche les statistiques """
-        self._stats = Stats(self)
-        self._stats.bind('<Destroy>', self._on_close_stats)
+        if self._stats is None:
+            self._stats = Stats(self)
+            self._stats.bind('<Destroy>', self._on_close_stats)
+        else:
+            self._stats.lift()
 
     def _on_close_stats(self, event):
         self._stats = None
