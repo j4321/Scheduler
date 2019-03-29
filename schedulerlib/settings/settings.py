@@ -36,8 +36,8 @@ from PIL.ImageTk import PhotoImage
 
 
 class Settings(tk.Toplevel):
-    def __init__(self, master=None, **kw):
-        tk.Toplevel.__init__(self, master, **kw)
+    def __init__(self, master=None):
+        tk.Toplevel.__init__(self, master, class_='Scheduler')
         self.title(_('Settings'))
         self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)

@@ -34,7 +34,7 @@ import sqlite3
 
 class Stats(tk.Toplevel):
     def __init__(self, master):
-        tk.Toplevel.__init__(self, master)
+        tk.Toplevel.__init__(self, master, class_='Scheduler')
         self.title(_('Pomodoro - statistics'))
 
         bg = self.winfo_toplevel()['bg']
