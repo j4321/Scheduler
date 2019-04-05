@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Scheduler - Task scheduling and calendar
-Copyright 2017 Juliette Monsel <j_4321@protonmail.com>
+Copyright 2017-2019 Juliette Monsel <j_4321@protonmail.com>
 
 Scheduler is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ from PIL.ImageTk import PhotoImage
 
 
 class About(Toplevel):
-    """ About diaog """
+    """ About dialog """
     def __init__(self, master):
         """ create About dialog """
         Toplevel.__init__(self, master, class_='Scheduler')
@@ -43,7 +43,7 @@ class About(Toplevel):
         Label(self,
               text="Scheduler %(version)s" % ({"version": __version__})).grid(row=1, columnspan=2)
         Label(self, text=_("Task scheduling and calendar")).grid(row=2, columnspan=2, padx=10)
-        Label(self, text="Copyright (C) Juliette Monsel 2017").grid(row=3, columnspan=2)
+        Label(self, text="Copyright (C) Juliette Monsel 2017-2019").grid(row=3, columnspan=2)
         Label(self, text="j_4321@protonmail.com").grid(row=4, columnspan=2)
         Button(self, text=_("License"), command=self._license).grid(row=5, column=0, pady=20, padx=4)
         Button(self, text=_("Close"), command=self.exit).grid(row=5, column=1, pady=20, padx=4)
