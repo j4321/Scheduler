@@ -52,4 +52,4 @@ setup(name='scheduler',
       scripts=["scheduler"],
       install_requires=["APScheduler", "sqlalchemy", "Pillow", "ewmh",
                         "matplotlib", "numpy", "babel", "tkcalendar",
-                        "dateutil"])
+                        "python-dateutil"])
