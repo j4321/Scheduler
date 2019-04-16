@@ -127,3 +127,7 @@ class Stats(tk.Toplevel):
             self.update_idletasks()
             self.fig.tight_layout()
         self.figAgg.draw()
+        self.toolbar.push_current()
+        self.ax.set_xlim(max(demain - 30, min_x) - 0.5, demain - 0.5)
+        self.toolbar.push_current()
+        self.figAgg.draw()
