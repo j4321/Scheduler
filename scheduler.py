@@ -28,9 +28,8 @@ import signal
 from tkinter import Tk
 from tkinter.messagebox import showerror
 
-from schedulerlib.scheduler import EventScheduler
 from schedulerlib.constants import PIDFILE, save_config
-from schedulerlib.version import __version__
+
 
 # parse command line arguments
 parser = argparse.ArgumentParser(description=_("Scheduler - Task scheduling and calendar"),
@@ -43,6 +42,7 @@ parser.add_argument('-U', '--update-date',
 args = parser.parse_args()
 
 if args.version:
+    from schedulerlib.version import __version__
     print('scheduler ' + __version__)
     sys.exit()
 
@@ -78,6 +78,8 @@ if args.update_date:
 open(PIDFILE, 'w').write(pid)
 
 try:
+    from schedulerlib.scheduler import EventScheduler
+
     app = EventScheduler()
     if '--withdraw' not in sys.argv:
         app.show()
@@ -94,4 +96,3 @@ finally:
         # PIDFILE might have been deleted
         pass
     logging.info('Quit')
-
