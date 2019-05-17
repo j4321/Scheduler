@@ -22,14 +22,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Pomodoro stats viewer
 """
 import tkinter as tk
+import datetime as dt
+import sqlite3
+
+import numpy as np
+import matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 from matplotlib.dates import DateFormatter
+
 from schedulerlib.constants import CONFIG, PATH_STATS, scrub
 from schedulerlib.navtoolbar import NavigationToolbar
-import datetime as dt
-import numpy as np
-import sqlite3
+
+
+# matplotlib config
+matplotlib.rc("axes.formatter", use_locale=True)
+matplotlib.rc('text', usetex=False)
+matplotlib.rc('font', size=12)
 
 
 class Stats(tk.Toplevel):

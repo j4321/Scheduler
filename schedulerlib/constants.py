@@ -40,7 +40,6 @@ import locale
 from configparser import ConfigParser
 import warnings
 import gettext
-import matplotlib
 from subprocess import check_output, CalledProcessError
 from tkinter import filedialog
 from tkinter import colorchooser
@@ -472,11 +471,6 @@ TASK_STATE = {'Pending': '⌛', 'In Progress': '✎', 'Completed': '✔',
               'Cancelled': '✗'}
 
 TASK_REV_TRANSLATION = {_(task): task for task in TASK_STATE}
-
-# --- matplotlib config
-matplotlib.rc("axes.formatter", use_locale=True)
-matplotlib.rc('text', usetex=False)
-matplotlib.rc('font', size=12)
 
 
 # --- system tray icon
