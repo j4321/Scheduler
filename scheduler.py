@@ -37,7 +37,10 @@ parser = argparse.ArgumentParser(description=_("Scheduler - Task scheduling and 
 parser.add_argument('-V', '--version', help=_('show version and exit'),
                     action='store_true')
 parser.add_argument('-U', '--update-date',
-                    help=_('if scheduler is running, update selected date in calendar (done automatically every day at 00:01)'),
+                    help=_('if scheduler is running, update selected date in calendar (done automatically every day at 00:00:01)'),
+                    action='store_true')
+parser.add_argument('-W', '--withdraw',
+                    help=_('start scheduler without displaying the manager window'),
                     action='store_true')
 args = parser.parse_args()
 
@@ -81,7 +84,7 @@ try:
     from schedulerlib.scheduler import EventScheduler
 
     app = EventScheduler()
-    if '--withdraw' not in sys.argv:
+    if not args.withdraw:
         app.show()
     app.mainloop()
 finally:
