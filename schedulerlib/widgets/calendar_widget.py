@@ -72,6 +72,9 @@ class CalendarWidget(BaseWidget):
         CONFIG.set(self.name, 'geometry', '+%s+%s' % tuple(geo))
         save_config()
 
+    def update_date(self):
+        self._calendar.update_sel()
+
     def add_event(self, event):
         self._calendar.add_event(event)
 

@@ -20,13 +20,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Task manager (main app)
 """
-
 from tkinter import Tk, Menu, StringVar, TclError, BooleanVar
 from tkinter import PhotoImage as tkPhotoImage
 from tkinter.ttk import Button, Treeview, Style, Label, Combobox, Frame
 from schedulerlib.messagebox import showerror
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers import SchedulerNotRunningError
+from apscheduler.triggers.cron import CronTrigger
 from datetime import datetime, timedelta
 from schedulerlib.constants import ICON48, ICON, IM_ADD, CONFIG, IM_DOT, JOBSTORE, \
     DATA_PATH, BACKUP_PATH, IM_SCROLL_ALPHA, active_color, backup, add_trace, \
@@ -48,6 +48,7 @@ import traceback
 from PIL import Image
 from PIL.ImageTk import PhotoImage
 from dateutil.parser import parse
+import signal
 from babel.dates import get_date_format
 
 
@@ -109,6 +110,7 @@ class EventScheduler(Tk):
                                              misfire_grace_time=86400)
         self.scheduler.add_jobstore('sqlalchemy',
                                     url='sqlite:///%s' % JOBSTORE)
+        self.scheduler.add_jobstore('memory', alias='memo')
         # --- style
         self.style = Style(self)
         self.style.theme_use("clam")
@@ -388,6 +390,15 @@ apply {name {
     ttk::style map $name {*}$newmap
 }} Treeview
         """)
+
+        # react to scheduler --update-date in command line
+        signal.signal(signal.SIGUSR1, lambda *args: self.widgets['Calendar'].update_date())
+
+        # update selected date in calendar every day
+        self.scheduler.add_job(self.widgets['Calendar'].update_date,
+                               CronTrigger(hour=0, minute=0, second=1),
+                               jobstore='memo')
+
         self.scheduler.start()
 
     def _setup_style(self):
