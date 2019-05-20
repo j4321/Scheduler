@@ -1,0 +1,11 @@
+[Unit]
+Description=Update selected date in scheduler's calendar to current date
+After=sleep.target
+
+[Service]
+User=%I
+Type=simple
+ExecStart=/usr/bin/scheduler -U
+
+[Install]
+WantedBy=sleep.target

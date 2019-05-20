@@ -42,9 +42,6 @@ parser.add_argument('-U', '--update-date',
 parser.add_argument('-W', '--withdraw',
                     help=_('start scheduler without displaying the manager window'),
                     action='store_true')
-parser.add_argument('-W', '--withdraw',
-                    help=_('start scheduler without displaying the manager window'),
-                    action='store_true')
 args = parser.parse_args()
 
 if args.version:
