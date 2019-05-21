@@ -20,19 +20,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Settings
 """
-
 import tkinter as tk
 from tkinter import ttk
+
+from PIL.ImageTk import PhotoImage
+
+from schedulerlib.constants import save_config, CONFIG, LANGUAGES, REV_LANGUAGES, \
+    TOOLKITS, IM_ADD, IM_DEL, only_nb
+from schedulerlib.messagebox import showerror, showinfo, askyesno
+from schedulerlib.ttkwidgets import AutoScrollbar
 from .font import FontFrame
 from .color import ColorFrame
 from .sound import SoundFrame
 from .opacity import OpacityFrame
 from .pomodoro_params import PomodoroParams
-from schedulerlib.constants import save_config, CONFIG, LANGUAGES, REV_LANGUAGES, \
-    TOOLKITS, IM_ADD, IM_DEL, only_nb
-from schedulerlib.messagebox import showerror, showinfo, askyesno
-from schedulerlib.ttkwidgets import AutoScrollbar
-from PIL.ImageTk import PhotoImage
 
 
 class Settings(tk.Toplevel):

@@ -3,7 +3,7 @@
 
 """
 Scheduler - Task scheduling and calendar
-Copyright 2015-2017 Juliette Monsel <j_4321@protonmail.com>
+Copyright 2015-2019 Juliette Monsel <j_4321@protonmail.com>
 
 Scheduler is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,20 +20,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Settings GUI
 """
-
 import os
+import sqlite3
 from tkinter import Canvas, Toplevel
 from tkinter.ttk import Notebook, Style, Label, Separator, Frame, Entry, Button
 from tkinter.messagebox import showerror, askyesno
+
+from PIL.ImageTk import PhotoImage
+
 from schedulerlib.constants import IM_COLOR, only_nb, CONFIG, askcolor, \
     CMAP, IM_ADD, IM_DEL, PATH_STATS, save_config, scrub
 from schedulerlib.ttkwidgets import AutoScrollbar
-from PIL.ImageTk import PhotoImage
 from .color import ColorFrame
 from .opacity import OpacityFrame
 from .font import FontFrame
 from .sound import SoundFrame
-import sqlite3
 
 
 class PomodoroParams(Frame):

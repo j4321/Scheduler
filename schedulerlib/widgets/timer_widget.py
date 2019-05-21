@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Scheduler - Task scheduling and calendar
-Copyright 2017-2018 Juliette Monsel <j_4321@protonmail.com>
+Copyright 2017-2019 Juliette Monsel <j_4321@protonmail.com>
 
 Scheduler is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -23,9 +23,11 @@ Timer desktop widget
 
 from tkinter import Text
 from tkinter.ttk import Button, Label, Sizegrip
+
+from PIL.ImageTk import PhotoImage
+
 from schedulerlib.constants import IM_START, IM_PAUSE, IM_STOP, CONFIG, active_color
 from .base_widget import BaseWidget
-from PIL.ImageTk import PhotoImage
 
 
 class Timer(BaseWidget):

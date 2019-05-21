@@ -20,14 +20,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 About dialog
 """
-
-
 from webbrowser import open as webOpen
 from tkinter import Text, Toplevel
 from tkinter.ttk import Button, Label
+
+from PIL.ImageTk import PhotoImage
+
 from schedulerlib.constants import ICON48
 from schedulerlib.version import __version__
-from PIL.ImageTk import PhotoImage
 
 
 class About(Toplevel):

@@ -20,14 +20,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Task manager (main app)
 """
+import os
+import shutil
+import logging
+import traceback
+import signal
+from pickle import Pickler, Unpickler
 from tkinter import Tk, Menu, StringVar, TclError, BooleanVar
 from tkinter import PhotoImage as tkPhotoImage
 from tkinter.ttk import Button, Treeview, Style, Label, Combobox, Frame
-from schedulerlib.messagebox import showerror
+from datetime import datetime, timedelta
+
+from babel.dates import get_date_format
+from PIL import Image
+from PIL.ImageTk import PhotoImage
+from dateutil.parser import parse
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers import SchedulerNotRunningError
 from apscheduler.triggers.cron import CronTrigger
-from datetime import datetime, timedelta
+
+from schedulerlib.messagebox import showerror
 from schedulerlib.constants import ICON48, ICON, IM_ADD, CONFIG, IM_DOT, JOBSTORE, \
     DATA_PATH, BACKUP_PATH, IM_SCROLL_ALPHA, active_color, backup, add_trace, \
     IM_SOUND, IM_MUTE, IM_SOUND_DIS, IM_MUTE_DIS, IM_CLOSED, IM_OPENED, \
@@ -40,16 +52,6 @@ from schedulerlib.settings import Settings
 from schedulerlib.ttkwidgets import AutoScrollbar
 from schedulerlib.about import About
 from schedulerlib.eyes import Eyes
-import os
-import shutil
-from pickle import Pickler, Unpickler
-import logging
-import traceback
-from PIL import Image
-from PIL.ImageTk import PhotoImage
-from dateutil.parser import parse
-import signal
-from babel.dates import get_date_format
 
 
 class EventScheduler(Tk):

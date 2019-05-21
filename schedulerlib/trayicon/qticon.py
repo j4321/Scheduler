@@ -2,7 +2,7 @@
 # -*- coding:Utf-8 -*-
 """
 Scheduler - Task scheduling and calendar
-Copyright 2016-2018 Juliette Monsel <j_4321@protonmail.com>
+Copyright 2016-2019 Juliette Monsel <j_4321@protonmail.com>
 
 Scheduler is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 System tray icon using Qt.
 """
+import sys
 
 try:
     from PyQt5.QtWidgets import QApplication, QSystemTrayIcon, QMenu, QAction
@@ -28,7 +29,6 @@ except ImportError:
         from PyQt4.QtGui import QApplication, QSystemTrayIcon, QMenu, QAction, QIcon
     except ImportError:
         from PySide.QtGui import QApplication, QSystemTrayIcon, QMenu, QAction, QIcon
-import sys
 
 
 class SubMenu(QMenu):

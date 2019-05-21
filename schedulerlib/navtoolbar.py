@@ -23,22 +23,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Adaptation of matplotlib.backends.backend_tkagg.NavigationToolbar2Tk to use
 ttk.Button, translatable tooltips and tkfilebrowser.saveasfilename dialog.
 """
-
 import tkinter as tk
 from tkinter import ttk
-from .messagebox import showerror
-from .constants import IM_LAYOUT, IM_GRID
-try:
-	from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
-except ImportError:
-	from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg as NavigationToolbar2Tk
 import os.path
-from matplotlib import rcParams
+
+from PIL.ImageTk import PhotoImage
 try:
     from tkfilebrowser import asksaveasfilename
 except ImportError:
     from tkinter.filedialog import asksaveasfilename
-from PIL.ImageTk import PhotoImage
+try:
+	from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
+except ImportError:
+	from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg as NavigationToolbar2Tk
+from matplotlib import rcParams
+
+from .messagebox import showerror
+from .constants import IM_LAYOUT, IM_GRID
 
 
 class NavigationToolbar(NavigationToolbar2Tk):

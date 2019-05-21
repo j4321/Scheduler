@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Scheduler - Task scheduling and calendar
-Copyright 2017-2018 Juliette Monsel <j_4321@protonmail.com>
+Copyright 2017-2019 Juliette Monsel <j_4321@protonmail.com>
 
 Scheduler is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,13 +20,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 EventCalendar: Calendar with the possibility to display events.
 """
-
 from tkinter import Menu
 from datetime import datetime
-from schedulerlib.constants import HOLIDAYS, CONFIG, format_date, format_time
-from tkcalendar import Calendar
-from schedulerlib.tooltip import TooltipWrapper
 import logging
+
+from tkcalendar import Calendar
+
+from schedulerlib.constants import HOLIDAYS, CONFIG, format_date, format_time
+from schedulerlib.tooltip import TooltipWrapper
 
 
 class EventCalendar(Calendar):

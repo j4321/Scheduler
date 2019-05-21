@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Scheduler - Task scheduling and calendar
-Copyright 2017-2018 Juliette Monsel <j_4321@protonmail.com>
+Copyright 2017-2019 Juliette Monsel <j_4321@protonmail.com>
 
 Scheduler is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,18 +20,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Task editor
 """
-
 from tkinter import Toplevel, Text, Spinbox, BooleanVar, StringVar
 from tkinter.ttk import Entry, Label, Button, Frame, Style, Combobox
 from tkinter.ttk import Radiobutton, Checkbutton, Notebook
+from datetime import timedelta, time, datetime
+
+from PIL.ImageTk import PhotoImage
+from babel.dates import get_day_names
+from tkcalendar import DateEntry
+
 from schedulerlib.constants import IM_BELL, IM_DEL, CONFIG, \
     TASK_REV_TRANSLATION, FREQ_REV_TRANSLATION, only_nb
-from tkcalendar import DateEntry
-from babel.dates import get_day_names
 from schedulerlib.ttkwidgets import LabelFrame
 from schedulerlib.messagebox import showerror
-from datetime import timedelta, time, datetime
-from PIL.ImageTk import PhotoImage
 
 
 class Form(Toplevel):

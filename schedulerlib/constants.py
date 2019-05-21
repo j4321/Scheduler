@@ -29,20 +29,20 @@ The images in ICONS were taken from "icons.tcl":
 
     Copyright (c) 2009 Pat Thoyts <patthoyts@users.sourceforge.net>
 
+
 Constants and functions.
 """
-
-
 import os
+import locale
 import logging
 from logging.handlers import TimedRotatingFileHandler
-import locale
 from configparser import ConfigParser
 import warnings
 import gettext
 from subprocess import check_output, CalledProcessError
 from tkinter import filedialog
 from tkinter import colorchooser
+
 from babel import dates
 
 
