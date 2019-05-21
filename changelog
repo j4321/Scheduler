@@ -10,6 +10,8 @@ Changelog
     * Improve dates and legend in pomodoro stat graph
     * Fix French translation
     * Fix error when deleting unworked task
+    * Add command line argument -U to update highlighted date in the calendar widget
+    * Add service file scheduler@.service to update the highlighted date on resume
 
 - Version 1.1.0
 	* Add compatibility with matplotlib<3.0.0
