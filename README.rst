@@ -11,7 +11,6 @@ It also provides the following desktop widgets:
 - a timer
 - a pomodoro timer (https://en.wikipedia.org/wiki/Pomodoro_Technique) recording statistics
 
-.. contents:: Table of Contents
 
 Install
 -------
