@@ -72,8 +72,6 @@ Source code
 Troubleshooting
 ---------------
 
-If you encounter bugs or if you have suggestions, please open an issue
-on `GitHub <https://github.com/j4321/Scheduler/issues>`_.
 
 Current day highlighting in the calendar
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -107,6 +105,8 @@ Widget disappearance
     when you click'.
 
 
+If you encounter bugs or if you have suggestions, please open an issue
+on `GitHub <https://github.com/j4321/Scheduler/issues>`_.
 
 .. |Linux| image:: https://img.shields.io/badge/platform-Linux-blue.svg
     :alt: Linux
