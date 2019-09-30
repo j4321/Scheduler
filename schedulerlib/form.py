@@ -27,7 +27,7 @@ from datetime import timedelta, time, datetime
 
 from PIL.ImageTk import PhotoImage
 from babel.dates import get_day_names
-from tkcalendar import DateEntry
+from tkcalendar import DateEntry as TDateEntry
 
 from schedulerlib.constants import IM_BELL, IM_DEL, CONFIG, \
     TASK_REV_TRANSLATION, FREQ_REV_TRANSLATION, only_nb
@@ -232,6 +232,7 @@ class Form(Toplevel):
         # --- *--- Limit
         frame_lim = LabelFrame(frame_rep, text=_('Limit'))
         frame_lim.grid(row=1, column=1, sticky='eswn', padx=(3, 0))
+        frame_lim.grid(row=1, column=1, sticky='eswn', padx=(3, 0))
         self._repeat_lim = StringVar(self, repeat['Limit'])
 
         # always
@@ -284,8 +285,8 @@ class Form(Toplevel):
         self.end_hour.bind("<<ComboboxSelected>>", self._select_end_time)
         self.bind_class("TCombobox", "<<ComboboxSelected>>", self.__clear_selection, add=True)
 
-        self.wait_visibility(self)
-        self.grab_set()
+        # self.wait_visibility(self)
+        # self.grab_set()
         self.summary.focus_set()
 
     def _toggle_lim(self, val=True):
