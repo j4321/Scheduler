@@ -27,7 +27,7 @@ from datetime import timedelta, time, datetime
 
 from PIL.ImageTk import PhotoImage
 from babel.dates import get_day_names
-from tkcalendar import DateEntry as TDateEntry
+from tkcalendar import DateEntry
 
 from schedulerlib.constants import IM_BELL, IM_DEL, CONFIG, \
     TASK_REV_TRANSLATION, FREQ_REV_TRANSLATION, only_nb
