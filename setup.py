@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from setuptools import setup
 import os
-
+from setuptools import setup
 
 images = [os.path.join("schedulerlib/images/", img) for img in os.listdir("schedulerlib/images/")]
 sounds = [os.path.join("schedulerlib/sounds/", s) for s in os.listdir("schedulerlib/sounds/")]

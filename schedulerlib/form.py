@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Scheduler - Task scheduling and calendar
-Copyright 2017-2018 Juliette Monsel <j_4321@protonmail.com>
+Copyright 2017-2019 Juliette Monsel <j_4321@protonmail.com>
 
 Scheduler is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,18 +20,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Task editor
 """
-
 from tkinter import Toplevel, Text, Spinbox, BooleanVar, StringVar
 from tkinter.ttk import Entry, Label, Button, Frame, Style, Combobox
 from tkinter.ttk import Radiobutton, Checkbutton, Notebook
+from datetime import timedelta, time, datetime
+
+from PIL.ImageTk import PhotoImage
+from babel.dates import get_day_names
+from tkcalendar import DateEntry
+
 from schedulerlib.constants import IM_BELL, IM_DEL, CONFIG, \
     TASK_REV_TRANSLATION, FREQ_REV_TRANSLATION, only_nb
-from tkcalendar import DateEntry
-from babel.dates import get_day_names
 from schedulerlib.ttkwidgets import LabelFrame
 from schedulerlib.messagebox import showerror
-from datetime import timedelta, time, datetime
-from PIL.ImageTk import PhotoImage
 
 
 class Form(Toplevel):
@@ -231,6 +232,7 @@ class Form(Toplevel):
         # --- *--- Limit
         frame_lim = LabelFrame(frame_rep, text=_('Limit'))
         frame_lim.grid(row=1, column=1, sticky='eswn', padx=(3, 0))
+        frame_lim.grid(row=1, column=1, sticky='eswn', padx=(3, 0))
         self._repeat_lim = StringVar(self, repeat['Limit'])
 
         # always
@@ -283,8 +285,8 @@ class Form(Toplevel):
         self.end_hour.bind("<<ComboboxSelected>>", self._select_end_time)
         self.bind_class("TCombobox", "<<ComboboxSelected>>", self.__clear_selection, add=True)
 
-        self.wait_visibility(self)
-        self.grab_set()
+        # self.wait_visibility(self)
+        # self.grab_set()
         self.summary.focus_set()
 
     def _toggle_lim(self, val=True):

@@ -1,12 +1,25 @@
-.TH "Scheduler" "1" "April 2019" "Scheduler 1.1.1" ""
+.TH "Scheduler" "1" "May 2019" "Scheduler 1.1.1" ""
 .SH NAME
-Scheduler \- Alarms and reminders
+Scheduler \-  Task scheduling and calendar
 .SH SYNOPSIS
-.B scheduler [ \fI\-\-withdraw\fR ]
+.B scheduler [ \fIoptions\fR ]
 .SH DESCRIPTION
 System tray application for Linux to schedule events with possibity to set reminders. 
 It also provides the following desktop widgets: a calendar to display and add events,
 the list of the week's events, a list of tasks, a timer, a pomodoro timer recording statistics.
+.SH OPTIONS
+.TP
+.BR -h,\ \-\-help
+Show help message and exit.
+.TP
+.BR -V,\ \-\-version
+Show version and exit.
+.TP
+.BR -U,\ \-\-update-date
+If scheduler is running, update selected date in calendar (done automatically every day at 00:00:01).
+.TP
+.BR -W,\ \-\-withdraw
+Start scheduler without displaying the manager window.
 .SH AUTHOR
 Scheduler is developped by Juliette Monsel <j_4321@protonmail.com>
 .SH BUGS

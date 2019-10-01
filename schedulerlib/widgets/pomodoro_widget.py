@@ -20,19 +20,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Pomodoro widget
 """
-
+import logging
+import sqlite3
+import datetime as dt
 from subprocess import Popen
 from tkinter import StringVar, Menu, IntVar
 from tkinter.ttk import Button, Label, Frame, Menubutton, Sizegrip
 from tkinter.messagebox import askyesno
-import datetime as dt
+
+from PIL.ImageTk import PhotoImage
+
+from schedulerlib.pomodoro_stats import Stats
 from schedulerlib.constants import CONFIG, CMAP, PATH_STATS, IM_START, \
     IM_STOP, IM_POMODORO, IM_GRAPH, active_color, scrub
 from .base_widget import BaseWidget
-from schedulerlib.pomodoro_stats import Stats
-import logging
-import sqlite3
-from PIL.ImageTk import PhotoImage
 
 
 class Pomodoro(BaseWidget):

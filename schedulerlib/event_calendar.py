@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Scheduler - Task scheduling and calendar
-Copyright 2017-2018 Juliette Monsel <j_4321@protonmail.com>
+Copyright 2017-2019 Juliette Monsel <j_4321@protonmail.com>
 
 Scheduler is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,13 +20,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 EventCalendar: Calendar with the possibility to display events.
 """
-
 from tkinter import Menu
 from datetime import datetime
-from schedulerlib.constants import HOLIDAYS, CONFIG, format_date, format_time
-from tkcalendar import Calendar
-from schedulerlib.tooltip import TooltipWrapper
 import logging
+
+from tkcalendar import Calendar
+
+from schedulerlib.constants import HOLIDAYS, CONFIG, format_date, format_time
+from schedulerlib.tooltip import TooltipWrapper
 
 
 class EventCalendar(Calendar):
@@ -72,12 +73,6 @@ class EventCalendar(Calendar):
                 day.bind('<Double-1>', lambda e, w=i: self._on_dbclick(e, w))
                 day.bind('<3>', lambda e, w=i: self._post_menu(e, w))
 
-        # --- update current day every day
-        d = datetime.now()
-        d2 = d.replace(hour=0, minute=0, second=1, microsecond=0) + self.timedelta(days=1)
-        dt = d2 - d
-        self.after(int(dt.total_seconds() * 1e3), self._update_sel)
-
     def update_style(self):
         cats = {cat: CONFIG.get('Categories', cat).split(', ') for cat in CONFIG.options('Categories')}
         for cat, (fg, bg) in cats.items():
@@ -119,10 +114,10 @@ class EventCalendar(Calendar):
             cal.append(self._cal.monthdatescalendar(y, m)[1])
         return cal
 
-    def _update_sel(self):
+    def update_sel(self):
+        """Update current day"""
         logging.info('Update current day to %s' % self.date.today())
         self.selection_set(self.date.today())
-        self.after(24 * 3600 * 1000, self._update_sel)
 
     def _display_calendar(self):
         Calendar._display_calendar(self)

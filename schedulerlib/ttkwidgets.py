@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Miscellaneous tkinter widgets.
 """
-
 import tkinter as tk
 from tkinter import ttk
 

@@ -2,7 +2,7 @@
 # -*- coding:Utf-8 -*-
 """
 Scheduler - Task scheduling and calendar
-Copyright 2016-2018 Juliette Monsel <j_4321@protonmail.com>
+Copyright 2016-2019 Juliette Monsel <j_4321@protonmail.com>
 
 Scheduler is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ Custom tkinter messageboxes
 from webbrowser import open as url_open
 from tkinter import Toplevel, PhotoImage, Text
 from tkinter.ttk import Label, Button, Frame, Style
+
 from schedulerlib.ttkwidgets import AutoScrollbar as Scrollbar
 from schedulerlib.constants import ICONS
 

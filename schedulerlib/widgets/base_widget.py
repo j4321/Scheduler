@@ -20,12 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Base desktop widget class
 """
-
-
 from tkinter import Toplevel, BooleanVar, StringVar, Menu
 from tkinter.ttk import Style
-from schedulerlib.constants import CONFIG, save_config, active_color
+
 from ewmh import EWMH
+
+from schedulerlib.constants import CONFIG, save_config, active_color
 
 
 class BaseWidget(Toplevel):
