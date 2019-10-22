@@ -93,7 +93,7 @@ CMAP = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#17becf', '#ff00ff', '#7f7f
 
 # --- log
 handler = TimedRotatingFileHandler(LOG_PATH, when='midnight', backupCount=7)
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                     datefmt='%Y-%m-%d %H:%M:%S',
                     format='%(asctime)s %(levelname)s: %(message)s',
                     handlers=[handler])
