@@ -26,7 +26,7 @@ from tkinter import ttk
 from PIL.ImageTk import PhotoImage
 
 from schedulerlib.constants import save_config, CONFIG, LANGUAGES, REV_LANGUAGES, \
-    TOOLKITS, IM_ADD, IM_DEL, only_nb
+    TOOLKITS, IM_ADD, IM_DEL, only_nb, IM_CLEANUP, IM_REFRESH
 from schedulerlib.messagebox import showerror, showinfo, askyesno
 from schedulerlib.ttkwidgets import AutoScrollbar
 from .font import FontFrame
@@ -48,6 +48,8 @@ class Settings(tk.Toplevel):
 
         self._im_plus = PhotoImage(master=self, file=IM_ADD)
         self._im_moins = PhotoImage(master=self, file=IM_DEL)
+        self._im_cleanup = PhotoImage(master=self, file=IM_CLEANUP)
+        self._im_refresh = PhotoImage(master=self, file=IM_REFRESH)
 
         frame = ttk.Frame(self, style='border.TFrame', relief='sunken',
                           border=1)
@@ -145,6 +147,27 @@ class Settings(tk.Toplevel):
         else:
             self.splash_support.state(('!selected', '!alternate'))
 
+        # --- Maintenance
+        frame_maintenance = ttk.Frame(self.frames[_('General')])
+        ttk.Label(frame_maintenance, text=_("Maintenance"),
+                  style='title.TLabel').grid(sticky='w', padx=4, pady=4)
+        ttk.Label(frame_maintenance,
+                  text=_("Delete all outdated events")).grid(row=1, column=0,
+                                                             sticky='w',
+                                                             padx=4, pady=4)
+        ttk.Button(frame_maintenance, image=self._im_cleanup, padding=1,
+                   command=self.cleanup).grid(row=1, column=1,
+                                              sticky='w', padx=4, pady=4)
+        ttk.Label(frame_maintenance,
+                  text=_("Refresh scheduled reminders\n(needed after APScheduler's updates)")).grid(row=2,
+                                                                                                   column=0,
+                                                                                                   sticky='w',
+                                                                                                   padx=4,
+                                                                                                   pady=4)
+        ttk.Button(frame_maintenance, image=self._im_refresh, padding=1,
+                   command=self.refresh).grid(row=2, column=1,
+                                              sticky='w', padx=4, pady=4)
+
         # --- placement
         ttk.Label(self.frames[_('General')], text=_("Interface"),
                   style='title.TLabel').grid(sticky='w', pady=4)
@@ -154,6 +177,8 @@ class Settings(tk.Toplevel):
         self.splash_support.grid(pady=4, sticky='w')
         ttk.Separator(self.frames[_('General')], orient='horizontal').grid(sticky='ew', pady=10)
         frame_eyes.grid(pady=4, sticky="ew")
+        ttk.Separator(self.frames[_('General')], orient='horizontal').grid(sticky='ew', pady=10)
+        frame_maintenance.grid(pady=4, sticky="ew")
 
     def _init_pomodoro(self):
         pass  # already done in custom class
@@ -586,6 +611,14 @@ class Settings(tk.Toplevel):
         name.focus_set()
         name.bind('<Escape>', lambda e: top.destroy())
         name.bind('<Return>', ok)
+
+    def cleanup(self):
+        self.master.delete_outdated_events()
+        showinfo(_("Information"), _('Outdated events have been deleted.'), self)
+
+    def refresh(self):
+        self.master.refresh_reminders()
+        showinfo(_("Information"), _('All reminders have been rescheduled.'), self)
 
     def ok(self):
         # --- General

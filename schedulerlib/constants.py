@@ -322,6 +322,8 @@ IM_SCROLL_ALPHA = os.path.join(PATH_IMAGES, "scroll.png")
 IM_EYE = os.path.join(PATH_IMAGES, "eye.svg")
 IM_START_M = os.path.join(PATH_IMAGES, "start_m.png")
 IM_STOP_M = os.path.join(PATH_IMAGES, "stop_m.png")
+IM_CLEANUP = os.path.join(PATH_IMAGES, "cleanup.png")
+IM_REFRESH = os.path.join(PATH_IMAGES, "refresh.png")
 
 IM_ERROR_DATA = """
 iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAABiRJREFU
