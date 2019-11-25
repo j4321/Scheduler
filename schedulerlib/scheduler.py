@@ -571,6 +571,20 @@ apply {name {
                         outdated.append(iid)
         for item in outdated:
             self.delete(item)
+        logging.info('Deleted outdated events')
+
+    def refresh_reminders(self):
+        """
+        Reschedule all reminders.
+
+        Required when APScheduler is updated.
+        """
+        for event in self.events.values():
+            reminders = [date for date in event['Reminders'].values()]
+            event.reminder_remove_all()
+            for date in reminders:
+                event.reminder_add(date)
+        logging.info('Refreshed reminders')
 
     # --- sorting
     def _move_item(self, item, index):
@@ -705,7 +719,7 @@ apply {name {
 
     # --- week schedule
     def get_next_week_events(self):
-        """return events scheduled for the next 7 days """
+        """Return events scheduled for the next 7 days """
         locale = CONFIG.get("General", "locale")
         next_ev = {}
         today = datetime.now().date()
