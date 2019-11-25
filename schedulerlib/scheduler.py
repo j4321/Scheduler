@@ -465,11 +465,21 @@ apply {name {
         items = list(self.events.keys())
         if not col:
             for item in items:
+                tags = [str(int(item) % 2)]
+                if 'outdated' in self.tree.item(item, 'tags'):
+                    tags.append('outdated')
+                self.tree.item(item, tags=tags)
                 self.tree.move(item, "", int(item))
         else:
+            i = 0
             for item in items:
                 if self.tree.set(item, col) == val:
+                    tags = [str(i % 2)]
+                    if 'outdated' in self.tree.item(item, 'tags'):
+                        tags.append('outdated')
+                    self.tree.item(item, tags=tags)
                     self.tree.move(item, "", int(item))
+                    i += 1
                 else:
                     self.tree.detach(item)
 
