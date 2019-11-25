@@ -445,44 +445,6 @@ apply {name {
         event.widget.selection_range(0, "end")
         return "break"
 
-    # --- filter
-    def update_filter_val(self, event):
-        col = self.filter_col.get()
-        self.filter_val.set("")
-        if col:
-            l = set()
-            for k in self.events:
-                l.add(self.tree.set(k, col))
-
-            self.filter_val.configure(values=tuple(l))
-        else:
-            self.filter_val.configure(values=[])
-            self.apply_filter(event)
-
-    def apply_filter(self, event):
-        col = self.filter_col.get()
-        val = self.filter_val.get()
-        items = list(self.events.keys())
-        if not col:
-            for item in items:
-                tags = [str(int(item) % 2)]
-                if 'outdated' in self.tree.item(item, 'tags'):
-                    tags.append('outdated')
-                self.tree.item(item, tags=tags)
-                self.tree.move(item, "", int(item))
-        else:
-            i = 0
-            for item in items:
-                if self.tree.set(item, col) == val:
-                    tags = [str(i % 2)]
-                    if 'outdated' in self.tree.item(item, 'tags'):
-                        tags.append('outdated')
-                    self.tree.item(item, tags=tags)
-                    self.tree.move(item, "", int(item))
-                    i += 1
-                else:
-                    self.tree.detach(item)
-
     def check_outdated(self):
         """check for outdated events every 15 min """
         now = datetime.now()
@@ -498,6 +460,7 @@ apply {name {
         if not self.tree.identify_row(event.y):
             self.tree.selection_remove(*self.tree.selection())
 
+    # --- show / hide
     def _menu_widgets_trace(self, item):
         self.menu_widgets.set_item_value(_(item), self.widgets[item].variable.get())
 
@@ -532,6 +495,7 @@ apply {name {
         else:
             self.deiconify()
 
+    # --- sorting
     def _move_item(self, item, index):
         self.tree.move(item, "", index)
         tags = [t for t in self.tree.item(item, 'tags')
@@ -569,6 +533,36 @@ apply {name {
         # reverse sort next time
         self.tree.heading(col,
                           command=lambda: self._sort_by_desc(col, not reverse))
+
+    # --- filter
+    def update_filter_val(self, event):
+        col = self.filter_col.get()
+        self.filter_val.set("")
+        if col:
+            l = set()
+            for k in self.events:
+                l.add(self.tree.set(k, col))
+
+            self.filter_val.configure(values=tuple(l))
+        else:
+            self.filter_val.configure(values=[])
+            self.apply_filter(event)
+
+    def apply_filter(self, event):
+        col = self.filter_col.get()
+        val = self.filter_val.get()
+        items = list(self.events.keys())
+        if not col:
+            for item in items:
+                self._move_item(item, int(item))
+        else:
+            i = 0
+            for item in items:
+                if self.tree.set(item, col) == val:
+                    self._move_item(item, i)
+                    i += 1
+                else:
+                    self.tree.detach(item)
 
     def _post_menu(self, event):
         self.right_click_iid = self.tree.identify_row(event.y)
