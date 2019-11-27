@@ -93,7 +93,7 @@ CMAP = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#17becf', '#ff00ff', '#7f7f
 
 # --- log
 handler = TimedRotatingFileHandler(LOG_PATH, when='midnight', backupCount=7)
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                     datefmt='%Y-%m-%d %H:%M:%S',
                     format='%(asctime)s %(levelname)s: %(message)s',
                     handlers=[handler])
@@ -322,6 +322,8 @@ IM_SCROLL_ALPHA = os.path.join(PATH_IMAGES, "scroll.png")
 IM_EYE = os.path.join(PATH_IMAGES, "eye.svg")
 IM_START_M = os.path.join(PATH_IMAGES, "start_m.png")
 IM_STOP_M = os.path.join(PATH_IMAGES, "stop_m.png")
+IM_CLEANUP = os.path.join(PATH_IMAGES, "cleanup.png")
+IM_REFRESH = os.path.join(PATH_IMAGES, "refresh.png")
 
 IM_ERROR_DATA = """
 iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAABiRJREFU

@@ -434,6 +434,24 @@ apply {name {
         logging.error(err)
         showerror('Exception', str(args[1]), err, parent=self)
 
+    def save(self):
+        logging.info('Save event database')
+        data = [ev.to_dict() for ev in self.events.values()]
+        with open(DATA_PATH, 'wb') as file:
+            pick = Pickler(file)
+            pick.dump(data)
+
+    # --- bindings
+    def _select(self, event):
+        if not self.tree.identify_row(event.y):
+            self.tree.selection_remove(*self.tree.selection())
+
+    def _edit_on_click(self, event):
+        sel = self.tree.selection()
+        if sel:
+            sel = sel[0]
+            self.edit(sel)
+
     # --- class bindings
     @staticmethod
     def clear_selection(event):
@@ -445,49 +463,7 @@ apply {name {
         event.widget.selection_range(0, "end")
         return "break"
 
-    # --- filter
-    def update_filter_val(self, event):
-        col = self.filter_col.get()
-        self.filter_val.set("")
-        if col:
-            l = set()
-            for k in self.events:
-                l.add(self.tree.set(k, col))
-
-            self.filter_val.configure(values=tuple(l))
-        else:
-            self.filter_val.configure(values=[])
-            self.apply_filter(event)
-
-    def apply_filter(self, event):
-        col = self.filter_col.get()
-        val = self.filter_val.get()
-        items = list(self.events.keys())
-        if not col:
-            for item in items:
-                self.tree.move(item, "", int(item))
-        else:
-            for item in items:
-                if self.tree.set(item, col) == val:
-                    self.tree.move(item, "", int(item))
-                else:
-                    self.tree.detach(item)
-
-    def check_outdated(self):
-        """check for outdated events every 15 min """
-        now = datetime.now()
-        for iid, event in self.events.items():
-            if not event['Repeat'] and event['Start'] < now:
-                tags = list(self.tree.item(iid, 'tags'))
-                if 'outdated' not in tags:
-                    tags.append('outdated')
-                self.tree.item(iid, tags=tags)
-        self.after_id = self.after(15 * 60 * 1000, self.check_outdated)
-
-    def _select(self, event):
-        if not self.tree.identify_row(event.y):
-            self.tree.selection_remove(*self.tree.selection())
-
+    # --- show / hide
     def _menu_widgets_trace(self, item):
         self.menu_widgets.set_item_value(_(item), self.widgets[item].variable.get())
 
@@ -522,6 +498,95 @@ apply {name {
         else:
             self.deiconify()
 
+    # --- event management
+    def event_add(self, event):
+        self.nb += 1
+        iid = str(self.nb)
+        self.events[iid] = event
+        self.tree.insert('', 'end', iid, values=event.values())
+        self.tree.item(iid, tags=str(self.tree.index(iid) % 2))
+        self.widgets['Calendar'].add_event(event)
+        self.widgets['Events'].display_evts()
+        self.widgets['Tasks'].display_tasks()
+        self.save()
+
+    def event_configure(self, iid):
+        self.tree.item(iid, values=self.events[iid].values())
+        self.widgets['Calendar'].add_event(self.events[iid])
+        self.widgets['Events'].display_evts()
+        self.widgets['Tasks'].display_tasks()
+        self.save()
+
+    def add(self, date=None):
+        iid = str(self.nb + 1)
+        if date is not None:
+            event = Event(self.scheduler, iid=iid, Start=date)
+        else:
+            event = Event(self.scheduler, iid=iid)
+        Form(self, event, new=True)
+
+    def delete(self, iid):
+        index = self.tree.index(iid)
+        self.tree.delete(iid)
+        for k, item in enumerate(self.tree.get_children('')[index:]):
+            tags = [t for t in self.tree.item(item, 'tags')
+                    if t not in ['1', '0']]
+            tags.append(str((index + k) % 2))
+            self.tree.item(item, tags=tags)
+
+        self.events[iid].reminder_remove_all()
+        self.widgets['Calendar'].remove_event(self.events[iid])
+        del(self.events[iid])
+        self.widgets['Events'].display_evts()
+        self.widgets['Tasks'].display_tasks()
+        self.save()
+
+    def edit(self, iid):
+        self.widgets['Calendar'].remove_event(self.events[iid])
+        Form(self, self.events[iid])
+
+    def check_outdated(self):
+        """Check for outdated events every 15 min."""
+        now = datetime.now()
+        for iid, event in self.events.items():
+            if not event['Repeat'] and event['Start'] < now:
+                tags = list(self.tree.item(iid, 'tags'))
+                if 'outdated' not in tags:
+                    tags.append('outdated')
+                self.tree.item(iid, tags=tags)
+        self.after_id = self.after(15 * 60 * 1000, self.check_outdated)
+
+    def delete_outdated_events(self):
+        now = datetime.now()
+        outdated = []
+        for iid, prop in self.events.items():
+            if prop['End'] < now:
+                if not prop['Repeat']:
+                    outdated.append(iid)
+                elif prop['Repeat']['Limit'] != 'always':
+                    end = prop['End']
+                    enddate = datetime.fromordinal(prop['Repeat']['EndDate'].toordinal())
+                    enddate.replace(hour=end.hour, minute=end.minute)
+                    if enddate < now:
+                        outdated.append(iid)
+        for item in outdated:
+            self.delete(item)
+        logging.info('Deleted outdated events')
+
+    def refresh_reminders(self):
+        """
+        Reschedule all reminders.
+
+        Required when APScheduler is updated.
+        """
+        for event in self.events.values():
+            reminders = [date for date in event['Reminders'].values()]
+            event.reminder_remove_all()
+            for date in reminders:
+                event.reminder_add(date)
+        logging.info('Refreshed reminders')
+
+    # --- sorting
     def _move_item(self, item, index):
         self.tree.move(item, "", index)
         tags = [t for t in self.tree.item(item, 'tags')
@@ -560,6 +625,37 @@ apply {name {
         self.tree.heading(col,
                           command=lambda: self._sort_by_desc(col, not reverse))
 
+    # --- filter
+    def update_filter_val(self, event):
+        col = self.filter_col.get()
+        self.filter_val.set("")
+        if col:
+            l = set()
+            for k in self.events:
+                l.add(self.tree.set(k, col))
+
+            self.filter_val.configure(values=tuple(l))
+        else:
+            self.filter_val.configure(values=[])
+            self.apply_filter(event)
+
+    def apply_filter(self, event):
+        col = self.filter_col.get()
+        val = self.filter_val.get()
+        items = list(self.events.keys())
+        if not col:
+            for item in items:
+                self._move_item(item, int(item))
+        else:
+            i = 0
+            for item in items:
+                if self.tree.set(item, col) == val:
+                    self._move_item(item, i)
+                    i += 1
+                else:
+                    self.tree.detach(item)
+
+    # --- manager's menu
     def _post_menu(self, event):
         self.right_click_iid = self.tree.identify_row(event.y)
         self.tree.selection_remove(*self.tree.selection())
@@ -584,6 +680,10 @@ apply {name {
         if self.right_click_iid:
             self.delete(self.right_click_iid)
 
+    def _edit_menu(self):
+        if self.right_click_iid:
+            self.edit(self.right_click_iid)
+
     def _set_progress(self):
         if self.right_click_iid:
             self.events[self.right_click_iid]['Task'] = self._task_var.get()
@@ -594,85 +694,7 @@ apply {name {
                 self._img_dot = tkPhotoImage(master=self)
             self.menu_task.entryconfigure(1, image=self._img_dot)
 
-    def delete_outdated_events(self):
-        now = datetime.now()
-        outdated = []
-        for iid, prop in self.events.items():
-            if prop['End'] < now:
-                if not prop['Repeat']:
-                    outdated.append(iid)
-                elif prop['Repeat']['Limit'] != 'always':
-                    end = prop['End']
-                    enddate = datetime.fromordinal(prop['Repeat']['EndDate'].toordinal())
-                    enddate.replace(hour=end.hour, minute=end.minute)
-                    if enddate < now:
-                        outdated.append(iid)
-        for item in outdated:
-            self.delete(item)
-
-    def delete(self, iid):
-        index = self.tree.index(iid)
-        self.tree.delete(iid)
-        for k, item in enumerate(self.tree.get_children('')[index:]):
-            tags = [t for t in self.tree.item(item, 'tags')
-                    if t not in ['1', '0']]
-            tags.append(str((index + k) % 2))
-            self.tree.item(item, tags=tags)
-
-        self.events[iid].reminder_remove_all()
-        self.widgets['Calendar'].remove_event(self.events[iid])
-        del(self.events[iid])
-        self.widgets['Events'].display_evts()
-        self.widgets['Tasks'].display_tasks()
-        self.save()
-
-    def edit(self, iid):
-        self.widgets['Calendar'].remove_event(self.events[iid])
-        Form(self, self.events[iid])
-
-    def _edit_menu(self):
-        if self.right_click_iid:
-            self.edit(self.right_click_iid)
-
-    def _edit_on_click(self, event):
-        sel = self.tree.selection()
-        if sel:
-            sel = sel[0]
-            self.edit(sel)
-
-    def add(self, date=None):
-        iid = str(self.nb + 1)
-        if date is not None:
-            event = Event(self.scheduler, iid=iid, Start=date)
-        else:
-            event = Event(self.scheduler, iid=iid)
-        Form(self, event, new=True)
-
-    def event_add(self, event):
-        self.nb += 1
-        iid = str(self.nb)
-        self.events[iid] = event
-        self.tree.insert('', 'end', iid, values=event.values())
-        self.tree.item(iid, tags=str(self.tree.index(iid) % 2))
-        self.widgets['Calendar'].add_event(event)
-        self.widgets['Events'].display_evts()
-        self.widgets['Tasks'].display_tasks()
-        self.save()
-
-    def event_configure(self, iid):
-        self.tree.item(iid, values=self.events[iid].values())
-        self.widgets['Calendar'].add_event(self.events[iid])
-        self.widgets['Events'].display_evts()
-        self.widgets['Tasks'].display_tasks()
-        self.save()
-
-    def save(self):
-        logging.info('Save event database')
-        data = [ev.to_dict() for ev in self.events.values()]
-        with open(DATA_PATH, 'wb') as file:
-            pick = Pickler(file)
-            pick.dump(data)
-
+    # --- icon menu
     def exit(self):
         self.save()
         rep = self.widgets['Pomodoro'].stop(self.widgets['Pomodoro'].on)
@@ -695,8 +717,9 @@ apply {name {
             for widget in self.widgets.values():
                 widget.update_position()
 
+    # --- week schedule
     def get_next_week_events(self):
-        """return events scheduled for the next 7 days """
+        """Return events scheduled for the next 7 days """
         locale = CONFIG.get("General", "locale")
         next_ev = {}
         today = datetime.now().date()
@@ -720,6 +743,7 @@ apply {name {
                 next_ev[day.strftime('%A')] = desc
         return next_ev
 
+    # --- tasks
     def get_tasks(self):
         # TODO: find events with repetition in the week
         # TODO: better handling of events on several days

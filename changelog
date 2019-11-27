@@ -4,14 +4,18 @@ Copyright 2016-2019 Juliette Monsel <j_4321@protonmail.com>
 
 Changelog
 ---------
-
+- Version 1.2.0
+    * Add command line argument -U to update highlighted date in the calendar widget
+    * Add service file scheduler@.service to update the highlighted date on resume
+    * Add a button in Settings to refresh reminders after APScheduler's updates
+    * Fix invisible timer widget when changing screen size
+    * Fix row colors when filtering events by category
+    
 - Version 1.1.1
     * Fix widget disappearance in Plasma desktop
     * Improve dates and legend in pomodoro stat graph
     * Fix French translation
     * Fix error when deleting unworked task
-    * Add command line argument -U to update highlighted date in the calendar widget
-    * Add service file scheduler@.service to update the highlighted date on resume
 
 - Version 1.1.0
 	* Add compatibility with matplotlib<3.0.0

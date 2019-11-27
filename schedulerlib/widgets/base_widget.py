@@ -63,14 +63,15 @@ class BaseWidget(Toplevel):
         self.x = None
         self.y = None
 
-        if CONFIG.getboolean(self.name, 'visible', fallback=True):
-            self.show()
-
         # --- geometry
         geometry = CONFIG.get(self.name, 'geometry')
         self.update_idletasks()
         if geometry:
             self.geometry(geometry)
+        self.update_idletasks()
+
+        if CONFIG.getboolean(self.name, 'visible', fallback=True):
+            self.show()
 
         # --- bindings
         self.bind('<Configure>', self._on_configure)

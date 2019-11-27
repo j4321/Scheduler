@@ -117,12 +117,17 @@ class Timer(BaseWidget):
         self._corner.state(('!active',))
 
     def show(self):
+        self.deiconify()
+        self.update_idletasks()
         self.withdraw()
         if self._position.get() == 'above':
             self.overrideredirect(True)
         else:
             self.overrideredirect(False)
         BaseWidget.show(self)
+        self.update_idletasks()
+        self.withdraw()
+        self.deiconify()
 
     def _run(self):
         if self._on:
