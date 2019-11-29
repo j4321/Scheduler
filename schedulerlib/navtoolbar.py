@@ -33,9 +33,9 @@ try:
 except ImportError:
     from tkinter.filedialog import asksaveasfilename
 try:
-	from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
+    from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 except ImportError:
-	from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg as NavigationToolbar2Tk
+    from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg as NavigationToolbar2Tk
 from matplotlib import rcParams
 
 from .messagebox import showerror
