@@ -10,6 +10,7 @@ Changelog
     * Add a button in Settings to refresh reminders after APScheduler's updates
     * Fix invisible timer widget when changing screen size
     * Fix row colors when filtering events by category
+    * Fix crash when changing twice the date of an event
     
 - Version 1.1.1
     * Fix widget disappearance in Plasma desktop
