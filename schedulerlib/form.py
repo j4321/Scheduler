@@ -155,6 +155,7 @@ class Form(Toplevel):
         self.start_min.set('%02d' % self.start_date.minute)
         self.start_entry.pack(side='left', padx=(0, 18))
         self.start_hour.pack(side='left', padx=(4, 0))
+        self.start_date = self.start_date.date()
         Label(frame_start, text=':').pack(side='left')
         self.start_min.pack(side='left', padx=(0, 4))
         Checkbutton(frame_start, text=_("whole day"), variable=self._whole_day,
@@ -181,6 +182,7 @@ class Form(Toplevel):
         self.end_hour.pack(side='left', padx=(4, 0))
         Label(frame_end, text=':').pack(side='left')
         self.end_min.pack(side='left', padx=(0, 4))
+        self.end_date = self.end_date.date()
 
         for date in self.event['Reminders'].values():
             self.add_reminder(date)
@@ -369,7 +371,7 @@ class Form(Toplevel):
         combo.selection_clear()
 
     def _select_start(self, event=None):
-        dt = self.start_entry.get_date() - self.start_date.date()
+        dt = self.start_entry.get_date() - self.start_date
         self.end_date = self.end_date + dt
         self.end_entry.set_date(self.end_date)
         self.start_date = self.start_entry.get_date()
