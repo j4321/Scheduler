@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-11-25 13:34+0100\n"
-"PO-Revision-Date:  2019-11-25 14:11+0200\n"
+"POT-Creation-Date: 2020-02-03 11:24+0100\n"
+"PO-Revision-Date:  2020-02-03 11:24+0100\n"
 "Last-Translator:  Juliette Monsel <j_4321@protonmail.com>\n"
 "Language-Team: French\n"
 "Language: fr\n"
@@ -43,7 +43,7 @@ msgstr "Lance scheduler sans afficher le gestionnaire d'événements"
 
 #: scheduler.py:71 schedulerlib/settings/pomodoro_params.py:278
 #: schedulerlib/settings/pomodoro_params.py:332
-#: schedulerlib/settings/settings.py:583 schedulerlib/form.py:456
+#: schedulerlib/settings/settings.py:583 schedulerlib/form.py:458
 #: schedulerlib/navtoolbar.py:103
 msgid "Error"
 msgstr "Erreur"
@@ -79,16 +79,16 @@ msgstr "À propos"
 msgid "Quit"
 msgstr "Quitter"
 
-#: schedulerlib/scheduler.py:86 schedulerlib/event_calendar.py:523
+#: schedulerlib/scheduler.py:86 schedulerlib/event_calendar.py:525
 msgid "Edit"
 msgstr "Éditer"
 
-#: schedulerlib/scheduler.py:87 schedulerlib/event_calendar.py:526
+#: schedulerlib/scheduler.py:87 schedulerlib/event_calendar.py:528
 msgid "Delete"
 msgstr "Supprimer"
 
 #: schedulerlib/scheduler.py:105 schedulerlib/form.py:118
-#: schedulerlib/form.py:128 schedulerlib/form.py:344 schedulerlib/form.py:473
+#: schedulerlib/form.py:128 schedulerlib/form.py:346 schedulerlib/form.py:475
 msgid "In Progress"
 msgstr "En cours"
 
@@ -106,7 +106,7 @@ msgid "Start"
 msgstr "Début"
 
 #: schedulerlib/scheduler.py:271 schedulerlib/form.py:78
-#: schedulerlib/form.py:359
+#: schedulerlib/form.py:361
 msgid "End"
 msgstr "Fin"
 
@@ -139,15 +139,15 @@ msgstr "temps (h)"
 msgid "date"
 msgstr "date"
 
-#: schedulerlib/event_calendar.py:514 schedulerlib/form.py:50
+#: schedulerlib/event_calendar.py:516 schedulerlib/form.py:50
 msgid "New Event"
 msgstr "Nouvel événement"
 
-#: schedulerlib/event_calendar.py:531
+#: schedulerlib/event_calendar.py:533
 msgid "Remove Holiday"
 msgstr "Pas férié"
 
-#: schedulerlib/event_calendar.py:534
+#: schedulerlib/event_calendar.py:536
 msgid "Set Holiday"
 msgstr "Férié"
 
@@ -439,7 +439,7 @@ msgstr "Cochez cette case si les widgets disparaissent quand vous cliquez"
 
 #: schedulerlib/settings/settings.py:152
 msgid "Maintenance"
-msgstr ""
+msgstr "Maintenance"
 
 #: schedulerlib/settings/settings.py:155
 msgid "Delete all outdated events"
@@ -664,7 +664,7 @@ msgstr "Tâche"
 msgid "Pending"
 msgstr "En attente"
 
-#: schedulerlib/form.py:119 schedulerlib/form.py:347
+#: schedulerlib/form.py:119 schedulerlib/form.py:349
 msgid "Completed"
 msgstr "Terminée"
 
@@ -672,70 +672,70 @@ msgstr "Terminée"
 msgid "Cancelled"
 msgstr "Annulée"
 
-#: schedulerlib/form.py:160
+#: schedulerlib/form.py:161
 msgid "whole day"
 msgstr "journé entière"
 
-#: schedulerlib/form.py:192
+#: schedulerlib/form.py:194
 msgid "Repetition"
 msgstr "Répétition"
 
-#: schedulerlib/form.py:203
+#: schedulerlib/form.py:205
 msgid "Repeat event"
 msgstr "Répéter l'événement"
 
-#: schedulerlib/form.py:207
+#: schedulerlib/form.py:209
 msgid "Frequency"
 msgstr "Fréquence"
 
-#: schedulerlib/form.py:209
+#: schedulerlib/form.py:211
 msgid "Every:"
 msgstr "Tous les :"
 
-#: schedulerlib/form.py:233
+#: schedulerlib/form.py:235
 msgid "Limit"
 msgstr "Limite"
 
-#: schedulerlib/form.py:239
+#: schedulerlib/form.py:241
 msgid "Always"
 msgstr "Toujours"
 
-#: schedulerlib/form.py:243
+#: schedulerlib/form.py:245
 msgid "Until"
 msgstr "Jusqu'au"
 
-#: schedulerlib/form.py:257
+#: schedulerlib/form.py:259
 msgid "After"
 msgstr "Après"
 
-#: schedulerlib/form.py:269
+#: schedulerlib/form.py:271
 msgid "times"
 msgstr "fois"
 
-#: schedulerlib/form.py:355
+#: schedulerlib/form.py:357
 msgid "Deadline"
 msgstr "Date butoire"
 
-#: schedulerlib/form.py:419 schedulerlib/form.py:439 schedulerlib/form.py:442
+#: schedulerlib/form.py:421 schedulerlib/form.py:441 schedulerlib/form.py:444
 #: schedulerlib/constants.py:259
 msgid "minutes"
 msgstr "minutes"
 
-#: schedulerlib/form.py:419 schedulerlib/form.py:432
+#: schedulerlib/form.py:421 schedulerlib/form.py:434
 #: schedulerlib/constants.py:259
 msgid "hours"
 msgstr "heures"
 
-#: schedulerlib/form.py:419 schedulerlib/form.py:427
+#: schedulerlib/form.py:421 schedulerlib/form.py:429
 #: schedulerlib/constants.py:259
 msgid "days"
 msgstr "jours"
 
-#: schedulerlib/form.py:446
+#: schedulerlib/form.py:448
 msgid "Reminder:"
 msgstr "Rappel :"
 
-#: schedulerlib/form.py:456
+#: schedulerlib/form.py:458
 msgid "The field 'Summary' cannot be empty."
 msgstr "Le champ 'Résumé' ne peut pas être vide."
 
@@ -798,5 +798,5 @@ msgstr "Année"
 msgid "Month"
 msgstr "Mois"
 
-msgid "Week" 
+msgid "Week"
 msgstr "Semaine"
