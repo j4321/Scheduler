@@ -11,6 +11,7 @@ Changelog
     * Fix invisible timer widget when changing screen size
     * Fix row colors when filtering events by category
     * Fix crash when changing twice the date of an event
+    * Fix update of today's date in the calendar
     
 - Version 1.1.1
     * Fix widget disappearance in Plasma desktop

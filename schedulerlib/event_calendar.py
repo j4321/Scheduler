@@ -117,7 +117,9 @@ class EventCalendar(Calendar):
     def update_sel(self):
         """Update current day"""
         logging.info('Update current day to %s' % self.date.today())
+        self.configure(selectmode='day')
         self.selection_set(self.date.today())
+        self.configure(selectmode='none')
 
     def _display_calendar(self):
         Calendar._display_calendar(self)
