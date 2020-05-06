@@ -433,11 +433,7 @@ class Form(Toplevel):
                     when.insert(0, h)
                     what.set(_('hours'))
                 else:
-                    while m[0] == '0':
-                        m = m[1:]
-                    if not m:
-                        m = '0'
-                    when.insert(0, m)
+                    when.insert(0, str(int(m)))
                     what.set(_('minutes'))
         else:
             when.insert(0, '15')
