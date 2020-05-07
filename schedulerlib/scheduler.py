@@ -40,7 +40,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers import SchedulerNotRunningError
 from apscheduler.triggers.cron import CronTrigger
 
-from schedulerlib.messagebox import showerror
+from schedulerlib.messagebox import showerror, askokcancel
 from schedulerlib.constants import ICON48, ICON, IM_ADD, CONFIG, IM_DOT, JOBSTORE, \
     DATA_PATH, BACKUP_PATH, IM_SCROLL_ALPHA, active_color, backup, add_trace, \
     IM_SOUND, IM_MUTE, IM_SOUND_DIS, IM_MUTE_DIS, IM_CLOSED, IM_OPENED, \
@@ -347,6 +347,7 @@ class EventScheduler(Tk):
         self.tree.bind('<3>', self._post_menu)
         self.tree.bind('<1>', self._select)
         self.tree.bind('<Double-1>', self._edit_on_click)
+        self.tree.bind('<Delete>', self._delete_events)
         self.menu.bind('<FocusOut>', lambda e: self.menu.unpost())
         self.filter_col.bind("<<ComboboxSelected>>", self.update_filter_val)
         self.filter_val.bind("<<ComboboxSelected>>", self.apply_filter)
@@ -459,6 +460,13 @@ apply {name {
             sel = sel[0]
             self.edit(sel)
 
+    def _delete_events(self, event):
+        sel = self.tree.selection()
+        if sel:
+            ans = askokcancel(_("Confirmation"), _("Delete selected events?"), parent=self)
+            if ans:
+                self.delete(*sel)
+
     # --- class bindings
     @staticmethod
     def clear_selection(event):
@@ -561,18 +569,19 @@ apply {name {
         self.widgets['Tasks'].display_tasks()
         self.save()
 
-    def delete(self, iid):
-        index = self.tree.index(iid)
-        self.tree.delete(iid)
-        for k, item in enumerate(self.tree.get_children('')[index:]):
-            tags = [t for t in self.tree.item(item, 'tags')
-                    if t not in ['1', '0']]
-            tags.append(str((index + k) % 2))
-            self.tree.item(item, tags=tags)
+    def delete(self, *iids):
+        for iid in iids:
+            index = self.tree.index(iid)
+            self.tree.delete(iid)
+            for k, item in enumerate(self.tree.get_children('')[index:]):
+                tags = [t for t in self.tree.item(item, 'tags')
+                        if t not in ['1', '0']]
+                tags.append(str((index + k) % 2))
+                self.tree.item(item, tags=tags)
 
-        self.events[iid].reminder_remove_all()
-        self.widgets['Calendar'].remove_event(self.events[iid])
-        del(self.events[iid])
+            self.events[iid].reminder_remove_all()
+            self.widgets['Calendar'].remove_event(self.events[iid])
+            del(self.events[iid])
         self.widgets['Events'].display_evts()
         self.widgets['Tasks'].display_tasks()
         self.save()
@@ -605,8 +614,7 @@ apply {name {
                     enddate.replace(hour=end.hour, minute=end.minute)
                     if enddate < now:
                         outdated.append(iid)
-        for item in outdated:
-            self.delete(item)
+        self.delete(*outdated)
         logging.info('Deleted outdated events')
 
     def refresh_reminders(self):
