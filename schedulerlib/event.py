@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Event class
 """
 from subprocess import run
-from datetime import timedelta, datetime, time
+from datetime import timedelta, datetime, time, date, timezone
 
 from apscheduler.triggers.date import DateTrigger
 from apscheduler.triggers.cron import CronTrigger
@@ -44,6 +44,33 @@ class Event:
         defaults.update(kw)
         self._properties = defaults
         self.iid = iid
+
+    @classmethod
+    def from_vevent(cls, vevent, scheduler, category):
+        """Create Event from icalendar VEVENT"""
+        props = {"Category": category}
+        props['Summary'] = vevent.get('summary')
+        props['Description'] = vevent.get('description')
+        props['Place'] = vevent.get('location')
+        print(vevent.get('dtstart').dt)
+        start = vevent.get('dtstart').dt
+        end = vevent.get('dtend').dt
+        if isinstance(start, datetime):
+            props['Start'] = start.replace(tzinfo=timezone.utc).astimezone(tz=None).replace(tzinfo=None)
+            props['End'] = end.replace(tzinfo=timezone.utc).astimezone(tz=None).replace(tzinfo=None)
+            props['WholeDay'] = False
+        else:
+            props['Start'] = datetime(start.year, start.month, start.day)
+            props['End'] = datetime(end.year, end.month, end.day, 23, 59, 0)
+            props['WholeDay'] = True
+        ev = cls(scheduler, iid=vevent.get("uid"), **props)
+        for component in vevent.walk():
+            if component.name == 'VALARM':
+                action = component.get("action")
+                if action and action != "NONE":
+                    dt = props['Start'] + component.get("trigger").dt
+                    ev.reminder_add(dt)
+        return ev
 
     def __str__(self):
         return '%s\n%s - %s - %s' % self.values()[:-1]
@@ -200,4 +227,6 @@ class Event:
         return self._properties.items()
 
     def to_dict(self):
-        return self._properties
+        ev = {"iid": self.iid}
+        ev.update(self._properties)
+        return ev

@@ -35,6 +35,7 @@ from babel.dates import get_date_format
 from PIL import Image
 from PIL.ImageTk import PhotoImage
 from dateutil.parser import parse
+import icalendar
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers import SchedulerNotRunningError
 from apscheduler.triggers.cron import CronTrigger
@@ -43,7 +44,7 @@ from schedulerlib.messagebox import showerror
 from schedulerlib.constants import ICON48, ICON, IM_ADD, CONFIG, IM_DOT, JOBSTORE, \
     DATA_PATH, BACKUP_PATH, IM_SCROLL_ALPHA, active_color, backup, add_trace, \
     IM_SOUND, IM_MUTE, IM_SOUND_DIS, IM_MUTE_DIS, IM_CLOSED, IM_OPENED, \
-    IM_CLOSED_SEL, IM_OPENED_SEL, ICON_FALLBACK, format_time
+    IM_CLOSED_SEL, IM_OPENED_SEL, ICON_FALLBACK, format_time, askopenfilename
 from schedulerlib.trayicon import TrayIcon, SubMenu
 from schedulerlib.form import Form
 from schedulerlib.event import Event
@@ -75,6 +76,8 @@ class EventScheduler(Tk):
         self.icon.menu.add_cascade(label=_('Widgets'), menu=self.menu_widgets)
         self.icon.menu.add_cascade(label=_("Eyes' rest"), menu=self.menu_eyes)
         self.icon.menu.add_command(label=_('Settings'), command=self.settings)
+        self.icon.menu.add_separator()
+        self.icon.menu.add_command(label=_("Load .ics file"), command=self.load_ics_file)
         self.icon.menu.add_separator()
         self.icon.menu.add_command(label=_('About'), command=lambda: About(self))
         self.icon.menu.add_command(label=_('Quit'), command=self.exit)
@@ -307,7 +310,6 @@ class EventScheduler(Tk):
         # --- restore data
         data = {}
         self.events = {}
-        self.nb = 0
         try:
             with open(DATA_PATH, 'rb') as file:
                 dp = Unpickler(file)
@@ -321,13 +323,12 @@ class EventScheduler(Tk):
                 with open(DATA_PATH, 'rb') as file:
                     dp = Unpickler(file)
                     data = dp.load()
-        self.nb = len(data)
         backup()
         now = datetime.now()
         for i, prop in enumerate(data):
-            iid = str(i)
-            self.events[iid] = Event(self.scheduler, iid=iid, **prop)
-            self.tree.insert('', 'end', iid, values=self.events[str(i)].values())
+            iid = prop.setdefault("iid", "I%.3i" % i)
+            self.events[iid] = Event(self.scheduler, **prop)
+            self.tree.insert('', 'end', iid, values=self.events[iid].values())
             tags = [str(self.tree.index(iid) % 2)]
             self.tree.item(iid, tags=tags)
             if not prop['Repeat']:
@@ -506,10 +507,10 @@ apply {name {
 
     # --- event management
     def event_add(self, event):
-        self.nb += 1
-        iid = str(self.nb)
+        iid = self.tree.insert('', 'end', iid=event.iid, values=event.values())
+        if event.iid is None:
+            event.iid = iid
         self.events[iid] = event
-        self.tree.insert('', 'end', iid, values=event.values())
         self.tree.item(iid, tags=str(self.tree.index(iid) % 2))
         self.widgets['Calendar'].add_event(event)
         self.widgets['Events'].display_evts()
@@ -524,12 +525,41 @@ apply {name {
         self.save()
 
     def add(self, date=None):
-        iid = str(self.nb + 1)
         if date is not None:
-            event = Event(self.scheduler, iid=iid, Start=date)
+            event = Event(self.scheduler, Start=date)
         else:
-            event = Event(self.scheduler, iid=iid)
+            event = Event(self.scheduler)
         Form(self, event, new=True)
+
+    def load_ics_file(self):
+        filetypes = [('iCal', '*.ics'), (_("All files"), "*")]
+        filename = askopenfilename(filetypes=filetypes,
+                                   initialdir=os.path.expanduser("~"))
+        if not filename:
+            return
+        with open(filename, 'rb') as icalfile:
+            cal = icalendar.Calendar.from_ical(icalfile.read())
+        category = cal.get('X-WR-CALNAME', CONFIG.options('Categories')[0]).lower()
+        if not CONFIG.has_option("Categories", category):
+            CONFIG.set("Categories", category, "white, #186CBE")
+            self.widgets['Calendar'].update_style()
+        for component in cal.walk():
+            if component.name == "VEVENT":
+                event = Event.from_vevent(component, self.scheduler, category)
+                iid = event.iid
+                if iid not in self.events:
+                    self.tree.insert('', 'end', iid, values=event.values())
+                    self.tree.item(iid, tags=str(self.tree.index(iid) % 2))
+                else:
+                    self.tree.item(iid, values=self.events[iid].values())
+                    self.widgets['Calendar'].remove_event(self.events[iid])
+                    self.events[iid].reminder_remove_all()
+                    del(self.events[iid])
+                self.events[iid] = event
+                self.widgets['Calendar'].add_event(event)
+        self.widgets['Events'].display_evts()
+        self.widgets['Tasks'].display_tasks()
+        self.save()
 
     def delete(self, iid):
         index = self.tree.index(iid)
