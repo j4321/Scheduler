@@ -21,17 +21,46 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Event class
 """
 from subprocess import run
-from datetime import timedelta, datetime, time, date, timezone
+from datetime import timedelta, datetime, time, timezone
 
 from apscheduler.triggers.date import DateTrigger
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.jobstores.base import JobLookupError
+from babel.dates import get_day_names
+from dateutil import rrule as drrule
+from dateutil import relativedelta
 
 from schedulerlib.constants import NOTIF_PATH, TASK_STATE, CONFIG,\
     format_date, format_datetime
 
+DRRULE_FREQS = {"year": drrule.YEARLY, "month": drrule.MONTHLY,
+                "week": drrule.WEEKLY, "day": drrule.DAILY}
+FREQS = {"YEARLY": "year", "MONTHLY": "month", "WEEKLY": "week", "DAILY": "day"}
+
+
+class Rrule(drrule.rrule):
+    def replace(self, **kwargs):
+        """Return new rrule with same attributes except for those attributes given new
+           values by whichever keyword arguments are specified."""
+        new_kwargs = {"interval": self._interval,
+                      "count": self._count,
+                      "dtstart": self._dtstart,
+                      "freq": self._freq,
+                      "until": self._until,
+                      "wkst": self._wkst,
+                      "cache": False if self._cache is None else True}
+        new_kwargs.update(self._original_rule)
+        new_kwargs.update(kwargs)
+        return Rrule(**new_kwargs)
+
+    def between(self, after, before, inc=True, count=1):
+        after_dt = datetime(after.year, after.month, after.day, 0, 0)
+        before_dt = datetime(before.year, before.month, before.day, 23, 59)
+        return drrule.rrule.between(self, after_dt, before_dt, inc=inc, count=count)
+
 
 class Event:
+
     def __init__(self, scheduler, iid=None, **kw):
         d = datetime.now() + timedelta(minutes=5)
         d = d.replace(minute=(d.minute // 5) * 5)
@@ -49,10 +78,11 @@ class Event:
     def from_vevent(cls, vevent, scheduler, category):
         """Create Event from icalendar VEVENT"""
         props = {"Category": category}
-        props['Summary'] = vevent.get('summary')
-        props['Description'] = vevent.get('description')
-        props['Place'] = vevent.get('location')
-        print(vevent.get('dtstart').dt)
+        # info
+        props['Summary'] = str(vevent.get('summary'))
+        props['Description'] = str(vevent.get('description'))
+        props['Place'] = str(vevent.get('location'))
+        # start / end
         start = vevent.get('dtstart').dt
         end = vevent.get('dtend').dt
         if isinstance(start, datetime):
@@ -63,13 +93,57 @@ class Event:
             props['Start'] = datetime(start.year, start.month, start.day)
             props['End'] = datetime(end.year, end.month, end.day, 23, 59, 0)
             props['WholeDay'] = True
-        ev = cls(scheduler, iid=vevent.get("uid"), **props)
+        # repeat
+        rrule = vevent.get("rrule")
+        if rrule:
+            freq = FREQS[rrule.get("freq")[0]]
+            count = rrule.get("count")
+            if count:
+                limit = "after"
+                count = count[0]
+                until = datetime.now() + timedelta(days=1)
+            else:
+                count = 1
+                until = rrule.get("until")
+                if until:
+                    until = until[0]
+                    limit = "until"
+                else:
+                    limit = "always"
+                    until = datetime.now() + timedelta(days=1)
+            mday = "abs"
+            days = {d.upper(): i for i, d in get_day_names("short", locale="en_US").items()}
+            if freq == "week":
+                byday = [days[d] for d in rrule.get("byday")]
+            else:
+                byday = [props['Start'].weekday()]
+                if freq == "month":
+                    bmday = rrule.get("byday")
+                    if bmday:
+                        day = bmday[0][-2:]
+                        wnb = int(bmday[0][:-2])
+                        if wnb == -1:
+                            mday = f"last {days[day]}"
+                        else:
+                            mday = f"{wnb % 5}th {days[day]}"
+
+            props["Repeat"] = {'Frequency': freq,
+                               'Every': rrule.get("interval", [1])[0],
+                               'Limit': limit,  # always until after
+                               'NbTimes': count,
+                               'EndDate': until.date(),
+                               'MonthDay': mday,
+                               'WeekDays': byday}
+
+        # reminders
+        ev = cls(scheduler, iid=str(vevent.get("uid")), **props)
         for component in vevent.walk():
             if component.name == 'VALARM':
                 action = component.get("action")
                 if action and action != "NONE":
                     dt = props['Start'] + component.get("trigger").dt
                     ev.reminder_add(dt)
+        print(ev.to_dict())
         return ev
 
     def __str__(self):
@@ -115,41 +189,41 @@ class Event:
             cron_prop['hour'] = date.hour
             cron_prop['minute'] = date.minute
             cron_prop['second'] = date.second
-            cron_prop['year'] = '*'
             if repeat['Limit'] == 'until':
                 end = repeat['EndDate']
                 cron_prop['end_date'] = date.replace(year=end.year,
                                                      month=end.month,
-                                                     day=end.day)
+                                                     day=end.day) + timedelta(hours=1)
             elif repeat['Limit'] == 'after':
-                nb = repeat['NbTimes'] - 1  # date is the first time
-                if repeat['Frequency'] == 'year':
-                    cron_prop['end_date'] = date.replace(year=date.year + nb) + timedelta(hours=1)
-                elif repeat['Frequency'] == 'month':
-                    m = date.month + nb
-                    month = m % 12
-                    year = date.year + m // 12
-                    cron_prop['end_date'] = date.replace(year=year, month=month) + timedelta(hours=1)
-                else:
-                    start_day = date.isocalendar()[2] - 1
-                    week_days = [(x - start_day) % 7 for x in repeat['WeekDays']]
-
-                    nb_per_week = len(repeat['WeekDays'])
-                    nb_week = nb // nb_per_week
-                    rem = nb % nb_per_week
-                    cron_prop['end_date'] = date + timedelta(days=(7 * nb_week + week_days[rem] + 1))
+                cron_prop['end_date'] = self.get_last_date() + timedelta(hours=1)
             else:
                 cron_prop['end_date'] = None
 
-            if repeat['Frequency'] == 'week':
+            every = repeat.get("Every", 1)
+            if every > 1:
+                every = f"/{every}"
+            else:
+                every = ""
+            if repeat['Frequency'] == 'day':
+                cron_prop['day'] = '*' + every
+                cron_prop['month'] = '*'
+                cron_prop['year'] = '*'
+            elif repeat['Frequency'] == 'week':
                 cron_prop['day_of_week'] = ','.join([str(i) for i in repeat['WeekDays']])
+                cron_prop['week'] = '*' + every
                 cron_prop['month'] = '*'
+                cron_prop['year'] = '*'
             elif repeat['Frequency'] == 'month':
-                cron_prop['day'] = date.day
-                cron_prop['month'] = '*'
+                mday = repeat.get("MonthDay", "abs")
+                if mday == "abs":
+                    mday = date.day
+                cron_prop['day'] = mday
+                cron_prop['month'] = '*' + every
+                cron_prop['year'] = '*'
             else:
                 cron_prop['day'] = date.day
                 cron_prop['month'] = date.month
+                cron_prop['year'] = '*' + every
 
             job = self.scheduler.add_job(run, trigger=CronTrigger(**cron_prop),
                                          args=(['python3', NOTIF_PATH, str(self)],))
@@ -190,41 +264,54 @@ class Event:
         return time(hour=start.hour, minute=start.minute, second=start.second)
 
     def get_last_date(self):
-        """ Return the start date of the last occurence of the event """
+        """Return the start date of the last occurence of the event."""
         repeat = self['Repeat']
         if not repeat:
             return self['Start']
         else:
-            freq = repeat['Frequency']
-            date = self['Start']
-            if repeat['Limit'] == 'until':
-                end = repeat['EndDate']
-            elif repeat['Limit'] == 'after':
-                nb = repeat['NbTimes'] - 1  # date is the first time
-                if freq == 'year':
-                    end = date.replace(year=date.year + nb)
-                elif freq == 'month':
-                    m = date.month + nb
-                    month = m % 12
-                    year = date.year + m // 12
-                    end = date.replace(year=year, month=month)
-                else:
-                    start_day = date.isocalendar()[2] - 1
-                    week_days = [(x - start_day) % 7 for x in repeat['WeekDays']]
-
-                    nb_per_week = len(repeat['WeekDays'])
-                    nb_week = nb // nb_per_week
-                    rem = nb % nb_per_week
-                    end = date + self.timedelta(days=(7 * nb_week + week_days[rem] + 1))
-                return end
-            else:
+            if repeat["Limit"] == "always":
                 return None
+            return list(self.get_rrule())[-1]
 
     def keys(self):
         return self._properties.keys()
 
     def items(self):
         return self._properties.items()
+
+    def get_rrule(self):
+        """Return dateutil.rrule.rrule corresponding to the repeat properties."""
+        repeat = self['Repeat']
+        if not repeat:
+            return None
+
+        freq = DRRULE_FREQS[repeat['Frequency']]
+        rrule_kw = {"dtstart": self._properties['Start'],
+                    "interval": repeat.get("Every", 1),
+                    "wkst": relativedelta.MO}
+        # limit
+        if repeat['Limit'] == 'until':
+            rrule_kw["until"] = repeat['EndDate']
+
+        elif repeat['Limit'] == 'after':
+            rrule_kw["count"] = repeat['NbTimes']
+
+        # monthly / weekly
+        if repeat['Frequency'] == 'month':
+            mday = repeat.get("MonthDay", "abs")
+            if mday != "abs":
+                if mday.startswith("last"):
+                    day = int(mday[-1])
+                    pos = -1
+                else:
+                    wnb, day = mday.split("th ")
+                    day = int(day)
+                    pos = int(wnb)
+                rrule_kw["byweekday"] = relativedelta.weekday(day)
+                rrule_kw["bysetpos"] = pos
+        elif repeat['Frequency'] == 'week':
+            rrule_kw["byweekday"] = repeat["WeekDays"]
+        return Rrule(freq, **rrule_kw)
 
     def to_dict(self):
         ev = {"iid": self.iid}

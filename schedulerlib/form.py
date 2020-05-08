@@ -21,13 +21,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Task editor
 """
 from tkinter import Toplevel, Text, Spinbox, BooleanVar, StringVar
-from tkinter.ttk import Entry, Label, Button, Frame, Style, Combobox
-from tkinter.ttk import Radiobutton, Checkbutton, Notebook
+from tkinter.ttk import Entry, Label, Button, Frame, Style, Combobox,\
+    Radiobutton, Checkbutton, Notebook
 from datetime import timedelta, time, datetime
 
 from PIL.ImageTk import PhotoImage
-from babel.dates import get_day_names
+from babel.dates import get_day_names, format_date
 from tkcalendar import DateEntry
+from num2words import num2words
+from dateutil import relativedelta
 
 from schedulerlib.constants import IM_BELL, IM_DEL, CONFIG, \
     TASK_REV_TRANSLATION, FREQ_REV_TRANSLATION, only_nb
@@ -136,6 +138,7 @@ class Form(Toplevel):
         prop['font'] = "Liberation\ Sans 9"
         prop.update(selectforeground='white', selectbackground=active_bg)
         locale = CONFIG.get('General', 'locale')
+        lang = CONFIG.get('General', 'language')
 
         # --- *--- start date
         self.start_date = self.event['Start']
@@ -193,35 +196,69 @@ class Form(Toplevel):
         frame_rep = Frame(notebook)
         notebook.add(frame_rep, text=_('Repetition'), padding=4, sticky='eswn')
         frame_rep.columnconfigure(0, weight=1)
-        frame_rep.columnconfigure(1, weight=1)
         frame_rep.rowconfigure(1, weight=1)
         self._repeat = BooleanVar(self, bool(self.event['Repeat']))
         repeat = {'Frequency': 'year', 'Limit': 'always', 'NbTimes': 1,
                   'EndDate': (datetime.now() + timedelta(days=1)).date(),
-                  'WeekDays': [self.start_date.isocalendar()[2] - 1]}
+                  'WeekDays': [self.start_date.weekday()]}
         repeat.update(self.event['Repeat'])
 
         self._repeat_freq = StringVar(self, repeat['Frequency'])
         Checkbutton(frame_rep, text=_('Repeat event'), variable=self._repeat,
-                    command=self._toggle_rep).grid(row=0, column=0, columnspan=2,
+                    command=self._toggle_rep).grid(row=0, column=0,  # columnspan=2,
                                                    padx=4, pady=6, sticky='w')
         # --- *--- Frequency
-        frame_freq = LabelFrame(frame_rep, text=_('Frequency'))
-        frame_freq.grid(row=1, column=0, sticky='eswn', padx=(0, 3))
-        self._lfreq = Label(frame_freq, text=_('Every:'))
+        frame_freq = LabelFrame(frame_rep, text=_('Frequency'), labelanchor="nw")
+        frame_freq.grid(row=1, column=0, sticky='eswn', padx=0, pady=1)
+        self._lfreq = Label(frame_freq, text=_('Every'))
         self._lfreq.grid(row=0, column=0, padx=4, pady=2, sticky='e')
 
+        frame_sfreq = Frame(frame_freq, style='txt.TFrame', relief='sunken', border=1)
+        self.s_freq = Spinbox(frame_sfreq, from_=1, to=100, width=3, justify='center',
+                              relief='flat', highlightthickness=0, validate='key',
+                              validatecommand=(self._only_nb, '%P'),
+                              disabledbackground='white')
+        self.s_freq.pack()
+        self.s_freq.delete(0, 'end')
+        self.s_freq.insert(0, str(repeat.get("Every", 1)))
+        frame_sfreq.grid(row=0, column=1, padx=4, pady=2)
+
         self._freqs = []
-        for i, val in enumerate(['Year', 'Month', 'Week']):
-            r = Radiobutton(frame_freq, text=_(val), variable=self._repeat_freq,
-                            value=val.lower(), command=self._toggle_wd)
-            r.grid(row=i, column=1, padx=4, pady=2, sticky='nw')
+        for i, val in enumerate(['Year', 'Month', 'Week', 'Day']):
+            r = Radiobutton(frame_freq, text=_(val + "(s)"), variable=self._repeat_freq,
+                            value=val.lower(), command=self._toggle_freq)
+            r.grid(row=i, column=2, padx=4, pady=2, sticky='nw')
             self._freqs.append(r)
 
+        # days of the month
+        frame_month_days = Frame(frame_freq)
+        frame_month_days.grid(row=1, column=3, padx=4, pady=2, sticky='nw')
+        self._month_days = []
+        self._repeat_month = StringVar(self, "abs" if repeat.get('MonthDay', 'abs') == "abs" else "rel")
+        rb1 = Radiobutton(frame_month_days, value="abs", variable=self._repeat_month,
+                          text=_("The exact same day ({day_number})").format(day_number=self.start_date.day))
+        rb1.pack(anchor='w')
+        self._month_days.append(rb1)
+        wd = self.start_date.weekday()
+        wday = get_day_names("wide", locale=lang)[wd]  # week day name
+        last = self.start_date + relativedelta.relativedelta(day=31, weekday=relativedelta.weekday(wd)(-1))
+        if last == self.start_date:
+            rbtext = _("The last {week_day}").format(week_day=wday)
+        else:
+            mweek = int(format_date(self.start_date, "W"))  # week number in the month
+            mweek = num2words(mweek, ordinal=True, lang=lang)
+            rbtext = _("The {week_number_ordinal} {week_day}").format(week_number_ordinal=mweek,
+                                                                      week_day=wday)
+        rb2 = Radiobutton(frame_month_days, value="rel",
+                          variable=self._repeat_month, text=rbtext)
+        rb2.pack(anchor='w')
+        self._month_days.append(rb2)
+
+        # days of the week
         frame_days = Frame(frame_freq)
-        frame_days.grid(row=2, column=2, padx=4, pady=2, sticky='nw')
+        frame_days.grid(row=2, column=3, padx=4, pady=2, sticky='nw')
         self._week_days = []
-        days = get_day_names("wide", locale=locale)
+        days = get_day_names("abbreviated", locale=lang)
         days = [days[i] for i in range(7)]
         for day in days:
             ch = Checkbutton(frame_days, text=day)
@@ -232,9 +269,8 @@ class Form(Toplevel):
             self._week_days[int(d)].state(('selected',))
 
         # --- *--- Limit
-        frame_lim = LabelFrame(frame_rep, text=_('Limit'))
-        frame_lim.grid(row=1, column=1, sticky='eswn', padx=(3, 0))
-        frame_lim.grid(row=1, column=1, sticky='eswn', padx=(3, 0))
+        frame_lim = LabelFrame(frame_rep, text=_('Limit'), labelanchor="nw")
+        frame_lim.grid(row=2, column=0, sticky='eswn', padx=0, pady=1)
         self._repeat_lim = StringVar(self, repeat['Limit'])
 
         # always
@@ -260,7 +296,7 @@ class Form(Toplevel):
                          variable=self._repeat_lim, command=self._toggle_lim)
         r3.grid(row=2, column=0, sticky='w')
         frame_after = Frame(frame_lim, style='txt.TFrame', relief='sunken', border=1)
-        self.s_after = Spinbox(frame_after, from_=0, to=100, width=3, justify='center',
+        self.s_after = Spinbox(frame_after, from_=1, to=100, width=3, justify='center',
                                relief='flat', highlightthickness=0, validate='key',
                                validatecommand=(self._only_nb, '%P'),
                                disabledbackground='white')
@@ -291,6 +327,34 @@ class Form(Toplevel):
         # self.grab_set()
         self.summary.focus_set()
 
+    def _update_repeat(self):
+        lang = CONFIG.get('General', 'language')
+
+        # days of the month
+        rb1, rb2 = self._month_days
+        rb1.configure(text=_("The exact same day ({day_number})").format(day_number=self.start_date.day))
+        wd = self.start_date.weekday()
+        wday = get_day_names("wide", locale=lang)[wd]  # week day name
+        last = self.start_date + relativedelta.relativedelta(day=31, weekday=relativedelta.weekday(wd)(-1))
+        if last == self.start_date:
+            rbtext = _("The last {week_day}").format(week_day=wday)
+        else:
+            mweek = int(format_date(self.start_date, "W"))  # week number in the month
+            mweek = num2words(mweek, ordinal=True, lang=lang)
+            rbtext = _("The {week_number_ordinal} {week_day}").format(week_number_ordinal=mweek,
+                                                                      week_day=wday)
+        rb2.configure(text=rbtext)
+
+        # days of the week
+        if not self._repeat.get() or self._repeat_freq.get() != "week":
+            for ch in self._week_days:
+                ch.state(('!selected',))
+            self._week_days[wd].state(("selected",))
+
+        # until
+        if self.until_entry.get_date() < self.start_date:
+            self.until_entry.set_date(self.start_date + timedelta(days=1))
+
     def _toggle_lim(self, val=True):
         if val:
             val = self._repeat_lim.get()
@@ -310,21 +374,28 @@ class Form(Toplevel):
 
     def _toggle_rep(self):
         rep = self._repeat.get()
-        state = state = '!' * int(rep) + "disabled"
+        state = '!' * int(rep) + "disabled"
+        state_tk = "normal" if rep else "disabled"
         for r in self._freqs:
             r.state((state,))
         for r in self._rb_lim:
             r.state((state,))
         self._lfreq.state((state,))
-        self._toggle_wd(rep)
+        self.s_freq.configure(state=state_tk)
+        self._toggle_freq(rep)
         self._toggle_lim(rep)
 
-    def _toggle_wd(self, val=True):
+    def _toggle_freq(self, val=True):
         if val:
             val = self._repeat_freq.get()
+        # week options
         state = '!' * int(val == 'week') + "disabled"
         for ch in self._week_days:
             ch.state((state,))
+        # month options
+        state = '!' * int(val == 'month') + "disabled"
+        for rb in self._month_days:
+            rb.state((state,))
 
     def _toggle_whole_day(self):
         if self._whole_day.get():
@@ -375,6 +446,7 @@ class Form(Toplevel):
         self.end_date = self.end_date + dt
         self.end_entry.set_date(self.end_date)
         self.start_date = self.start_entry.get_date()
+        self._update_repeat()
 
     def _select_end(self, event=None):
         self.end_date = self.end_entry.get_date()
@@ -482,10 +554,22 @@ class Form(Toplevel):
             for i in range(7):
                 if "selected" in self._week_days[i].state():
                     days.append(i)
+            monthday = self._repeat_month.get()
+            if monthday == "rel":
+                wd = self.start_date.weekday()
+                last = self.start_date + relativedelta.relativedelta(day=31, weekday=relativedelta.weekday(wd)(-1))
+                if last == self.start_date:
+                    monthday = f"last {wd}"
+                else:
+                    mweek = int(format_date(self.start_date, "W"))  # week number in the month
+                    monthday = f"{mweek}th {wd}"
+
             repeat = {'Frequency': self._repeat_freq.get(),
+                      'Every': int(self.s_freq.get()),
                       'Limit': self._repeat_lim.get(),
                       'NbTimes': int(self.s_after.get()),
                       'EndDate': self.until_entry.get_date(),
+                      'MonthDay': monthday,
                       'WeekDays': days}
             self.event['Repeat'] = repeat
 
