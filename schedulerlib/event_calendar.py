@@ -57,7 +57,8 @@ class EventCalendar(Calendar):
         kw['selectmode'] = 'none'
 
         self._events = {}
-        self._weekly_events = {i: [] for i in range(7)}
+        self._repeated_events = {}
+        self._current_month_events = {}
         self._events_tooltips = [[None for i in range(7)] for j in range(6)]
 
         Calendar.__init__(self, master, class_='EventCalendar', **kw)
@@ -134,10 +135,10 @@ class EventCalendar(Calendar):
 
     def _display_calendar(self):
         Calendar._display_calendar(self)
-
         year, month = self._date.year, self._date.month
         cal = self._get_cal(year, month)
 
+        self._current_month_events.clear()
         # --- clear tooltips
         for i in range(6):
             for j in range(7):
@@ -150,6 +151,16 @@ class EventCalendar(Calendar):
         we_om_style = 'we_om.%s.TLabel' % self._style_prefixe
 
         # --- display events and holidays
+        # repeated event
+        start, end = cal[0][0], cal[-1][-1]
+        for iid, (desc, nbdays, drrule, cat) in self._repeated_events.items():
+            for ev_date in drrule.between(start, end):
+                for d in range(nbdays):
+                    date = ev_date + self.timedelta(days=d)
+                    date2 = date.strftime('%Y/%m/%d')
+                    if date2 not in self._current_month_events:
+                        self._current_month_events[date2] = []
+                    self._current_month_events[date2].append((desc, iid, cat))
         for w in range(6):
             for d in range(7):
                 day = cal[w][d]
@@ -163,31 +174,15 @@ class EventCalendar(Calendar):
                         label.configure(style=we_style)
                     else:
                         label.configure(style=we_om_style)
-                # --- one time event
-                if date in self._events:
-                    evts = self._events[date]
+                if date not in self._current_month_events:
+                    self._current_month_events[date] = []
+                self._current_month_events[date].extend(self._events.get(date, []))
+                evts = self._current_month_events[date]
+                if evts:
                     txt = '\n'.join([k[0] for k in evts])
                     cat = evts[-1][-1]
                     self._add_to_tooltip(w, d, txt, cat)
-                # --- yearly event
-                date = day.strftime('*/%m/%d')
-                if date in self._events:
-                    evts = self._events[date]
-                    for desc, iid, start, end, cat in evts:
-                        if day >= start and (end is None or day <= end):
-                            self._add_to_tooltip(w, d, desc, cat)
-                # --- monthly event
-                date = day.strftime('*/*/%d')
-                if date in self._events:
-                    evts = self._events[date]
-                    for desc, iid, start, end, cat in evts:
-                        if day >= start and (end is None or day <= end):
-                            self._add_to_tooltip(w, d, desc, cat)
-                # --- weekly events
-                evts = self._weekly_events[d]
-                for desc, iid, start, end, cat in evts:
-                    if day >= start and (end is None or day <= end):
-                        self._add_to_tooltip(w, d, desc, cat)
+
         self._display_selection()
 
     def _add_to_tooltip(self, week_nb, day, txt, cat):
@@ -256,213 +251,57 @@ class EventCalendar(Calendar):
             if w < 6:
                 self._add_to_tooltip(w, d - 1, txt, cat)
 
-    def _add_event(self, date, desc, iid, repeat, cat):
-        year, month, day = date.year, date.month, date.day
-        if not repeat:
-            date2 = date.strftime('%Y/%m/%d')
-            if date2 not in self._events:
-                self._events[date2] = []
-            self._events[date2].append((desc, iid, cat))
-            self._show_event(date, desc, cat)
+    def _add_event(self, start, nbdays, desc, iid, drrule, cat):
+        cal = self._get_cal(self._date.year, self._date.month)
+        mstart, mend = cal[0][0], cal[-1][-1]
+        if not drrule:
+            for d in range(nbdays):
+                date = start + self.timedelta(days=d)
+                date2 = date.strftime('%Y/%m/%d')
+                if date2 not in self._events:
+                    self._events[date2] = []
+                self._events[date2].append((desc, iid, cat))
+                if mstart <= date.date() <= mend:
+                    self._show_event(date, desc, cat)
+                    if date2 not in self._current_month_events:
+                        self._current_month_events[date2] = []
+                    self._current_month_events[date2].append((desc, iid, cat))
         else:
-            start = date.date()
-            freq = repeat['Frequency']
-            if repeat['Limit'] == 'until':
-                end = repeat['EndDate']
-            elif repeat['Limit'] == 'after':
-                nb = repeat['NbTimes'] - 1  # date is the first time
-                if freq == 'year':
-                    end = date.replace(year=date.year + nb)
-                elif freq == 'month':
-                    m = date.month + nb
-                    month = m % 12
-                    year = date.year + m // 12
-                    end = date.replace(year=year, month=month)
-                else:
-                    start_day = date.isocalendar()[2] - 1
-                    week_days = [(x - start_day) % 7 for x in repeat['WeekDays']]
+            self._repeated_events[iid] = (desc, nbdays, drrule, cat)
 
-                    nb_per_week = len(repeat['WeekDays'])
-                    nb_week = nb // nb_per_week
-                    rem = nb % nb_per_week
-                    end = date + self.timedelta(days=(7 * nb_week + week_days[rem] + 1))
-                end = end.date()
-            else:
-                end = None
-            if freq == 'year':
-                date2 = date.strftime('*/%m/%d')
-                if date2 not in self._events:
-                    self._events[date2] = []
-                self._events[date2].append((desc, iid, start, end, cat))
-                ev_date = self.date(self._date.year, month, day)
-                if (end is None or ev_date <= end) and (ev_date >= start):
-                    self._show_event(ev_date, desc, cat)
-
-            elif freq == 'month':
-                date2 = date.strftime('*/*/%d')
-                if date2 not in self._events:
-                    self._events[date2] = []
-                self._events[date2].append((desc, iid, start, end, cat))
-                # previous month
-                if day > 22:
-                    m = self._date.month - 1
-                    y = self._date.year
-                    if m == -1:
-                        m = 12
-                        y -= 1
-                    try:
-                        ev_date = self.date(y, m, day)
-                        if (end is None or ev_date <= end) and (ev_date >= start):
-                            self._show_event(ev_date, desc, cat)
-                    except ValueError:
-                        pass  # month has no day 'day'
-                # current month
-                try:
-                    ev_date = self.date(self._date.year, self._date.month, day)
-                    if (end is None or ev_date <= end) and (ev_date >= start):
-                        self._show_event(ev_date, desc, cat)
-                except ValueError:
-                    pass  # month has no day 'day'
-                # next month
-                if day < 15:
-                    try:
-                        m = self._date.month + 1
-                        y = self._date.year
-                        if m == 13:
-                            m = 1
-                            y += 1
-                        ev_date = self.date(y, m, day)
-                        if (end is None or ev_date <= end) and (ev_date >= start):
-                            self._show_event(ev_date, desc, cat)
-                    except ValueError:
-                        pass  # month has no day 'day'
-
-            elif freq == 'week':
-                cal = self._get_cal(self._date.year, self._date.month)
-                if start < cal[0][0]:
-                    w_min = 0
-                    d_min = 0
-                elif start > cal[-1][-1]:
-                    w_min = 6
-                    d_min = 7
-                else:
-                    _, w_min, d_min = start.isocalendar()
-                    w_min -= self._date.isocalendar()[1]
-                    w_min %= 52
-                    d_min -= 1
-
-                if end is None or end > cal[-1][-1]:
-                    w_max = 6
-                    d_max = 7
-                elif end < cal[0][0]:
-                    w_max = 0
-                    d_max = 0
-                else:
-                    _, w_max, d_max = end.isocalendar()
-                    w_max -= self._date.isocalendar()[1]
-                    w_max %= 52
-                for d in repeat['WeekDays']:
-                    self._weekly_events[d].append((desc, iid, start, end, cat))
-                    for w in range(w_min + 1, w_max):
-                        self._add_to_tooltip(w, d, desc, cat)
-                if w_min < w_max:
-                    for d in repeat['WeekDays']:
-                        if d >= d_min:
-                            self._add_to_tooltip(w_min, d, desc, cat)
-                if w_max < 6:
-                    for d in repeat['WeekDays']:
-                        if d < d_max:
-                            self._add_to_tooltip(w_max, d, desc, cat)
+            for ev_date in drrule.between(mstart, mend):
+                for d in range(nbdays):
+                    date = ev_date + self.timedelta(days=d)
+                    date2 = date.strftime('%Y/%m/%d')
+                    self._show_event(date, desc, cat)
+                    if date2 not in self._current_month_events:
+                        self._current_month_events[date2] = []
+                    self._current_month_events[date2].append((desc, iid, cat))
         self._display_selection()
 
-    def _remove_event(self, date, desc, iid, repeat, cat):
-        year, month, day = date.year, date.month, date.day
+    def _remove_event(self, start, nbdays, desc, iid, drrule, cat):
+        year, month = self._date.year, self._date.month
         try:
-            if not repeat:
-                date2 = date.strftime('%Y/%m/%d')
-                self._events[date2].remove((desc, iid, cat))
-                if not self._events[date2]:
-                    del(self._events[date2])
-                self._remove_from_tooltip(date, desc)
+            if not drrule:
+                for d in range(nbdays):
+                    date = start + self.timedelta(days=d)
+                    date2 = date.strftime('%Y/%m/%d')
+                    if date2 in self._current_month_events:
+                        self._current_month_events[date2].remove((desc, iid, cat))
+                    self._events[date2].remove((desc, iid, cat))
+                    if not self._events[date2]:
+                        del(self._events[date2])
+                    self._remove_from_tooltip(date, desc)
             else:
-                start = date.date()
-                freq = repeat['Frequency']
-                if repeat['Limit'] == 'until':
-                    end = repeat['EndDate']
-                elif repeat['Limit'] == 'after':
-                    nb = repeat['NbTimes'] - 1  # date is the first time
-                    if freq == 'year':
-                        end = date.replace(year=date.year + nb)
-                    elif freq == 'month':
-                        m = date.month + nb
-                        month = m % 12
-                        year = date.year + m // 12
-                        end = date.replace(year=year, month=month)
-                    else:
-                        start_day = date.isocalendar()[2] - 1
-                        week_days = [(x - start_day) % 7 for x in repeat['WeekDays']]
-
-                        nb_per_week = len(repeat['WeekDays'])
-                        nb_week = nb // nb_per_week
-                        rem = nb % nb_per_week
-                        end = date + self.timedelta(days=(7 * nb_week + week_days[rem] + 1))
-                    end = end.date()
-                else:
-                    end = None
-                if freq == 'year':
-                    date2 = date.strftime('*/%m/%d')
-                    self._events[date2].remove((desc, iid, start, end, cat))
-                    if not self._events[date2]:
-                        del(self._events[date2])
-                    ev_date = self.date(self._date.year, month, day)
-                    if (end is None or ev_date <= end) and (ev_date >= start):
-                        self._remove_from_tooltip(ev_date, desc)
-
-                elif freq == 'month':
-                    date2 = date.strftime('*/*/%d')
-                    self._events[date2].remove((desc, iid, start, end, cat))
-                    if not self._events[date2]:
-                        del(self._events[date2])
-                    # previous month
-                    if day > 22:
-                        m = self._date.month - 1
-                        y = self._date.year
-                        if m == -1:
-                            m = 12
-                            y -= 1
-                        try:
-                            ev_date = self.date(y, m, day)
-                            if (end is None or ev_date <= end) and (ev_date >= start):
-                                self._remove_from_tooltip(ev_date, desc)
-                        except ValueError:
-                            pass  # month has no day 'day'
-                    # current month
-                    try:
-                        ev_date = self.date(self._date.year, self._date.month, day)
-                        if (end is None or ev_date <= end) and (ev_date >= start):
-                            self._remove_from_tooltip(ev_date, desc)
-                    except ValueError:
-                        pass  # month has no day 'day'
-                    # next month
-                    if day < 15:
-                        try:
-                            m = self._date.month + 1
-                            y = self._date.year
-                            if m == 13:
-                                m = 1
-                                y += 1
-                            ev_date = self.date(y, m, day)
-                            if (end is None or ev_date <= end) and (ev_date >= start):
-                                self._remove_from_tooltip(ev_date, desc)
-                        except ValueError:
-                            pass  # month has no day 'day'
-
-                elif freq == 'week':
-                    cal = self._get_cal(self._date.year, self._date.month)
-                    for d in repeat['WeekDays']:
-                        self._weekly_events[d].remove((desc, iid, start, end, cat))
-                        for w in range(6):
-                            self._remove_from_tooltip(cal[w][d], desc)
+                del self._repeated_events[iid]
+                cal = self._get_cal(year, month)
+                for ev_date in drrule.between(cal[0][0], cal[-1][-1]):
+                    for d in range(nbdays):
+                        date = ev_date + self.timedelta(days=d)
+                        date2 = date.strftime('%Y/%m/%d')
+                        if date2 in self._current_month_events:
+                            self._current_month_events[date2].remove((desc, iid, cat))
+                        self._remove_from_tooltip(date, desc)
 
         except ValueError:
             raise ValueError('Event not in calendar.')
@@ -498,31 +337,7 @@ class EventCalendar(Calendar):
         self.menu.delete(0, 'end')
         day = int(event.widget.cget('text'))
         date = self._get_date(w, day)
-        date2 = date.date()
-
-        # --- one time events
-        date_str = date.strftime('%Y/%m/%d')
-        if date_str in self._events:
-            evts = self._events[date_str].copy()
-        else:
-            evts = []
-        # --- yearly events
-        date_str = date.strftime('*/%m/%d')
-        if date_str in self._events:
-            for desc, iid, start, end, cat in self._events[date_str]:
-                if start <= date2 and (end is None or end >= date2):
-                    evts.append((desc, iid))
-        # --- monthly events
-        date_str = date.strftime('*/*/%d')
-        if date_str in self._events:
-            for desc, iid, start, end, cat in self._events[date_str]:
-                if start <= date2 and (end is None or end >= date2):
-                    evts.append((desc, iid))
-        d = date.isocalendar()[2] - 1
-        # --- weekly events
-        for desc, iid, start, end, cat in self._weekly_events[d]:
-            if start <= date2 and (end is None or end >= date2):
-                evts.append((desc, iid))
+        evts = self._current_month_events[date.strftime('%Y/%m/%d')]
 
         self.menu.add_command(label=_('New Event'),
                               command=lambda: self.master.master.add(date))
@@ -530,8 +345,7 @@ class EventCalendar(Calendar):
             self.menu.add_separator()
             self.menu.add_separator()
             index_edit = 2
-            for vals in evts:
-                desc, iid = vals[0], vals[1]
+            for desc, iid, cat in evts:
                 self.menu.insert_command(index_edit,
                                          label=_("Edit") + " %s" % desc,
                                          command=lambda i=iid: self.master.master.edit(i))
@@ -555,16 +369,11 @@ class EventCalendar(Calendar):
         evts = []
         for desc, iid, cat in self._events.get(date.strftime('%Y/%m/%d'), []):
             evts.append(iid)
-        for desc, iid, start, end, cat in self._events.get(date.strftime('*/%m/%d'), []):
-            if start <= date and (end is None or end >= date):
+
+        for iid, (desc, nbdays, drrule, cat) in self._repeated_events.items():
+            if drrule.between(date + self.timedelta(days=-nbdays), date):
                 evts.append(iid)
-        for desc, iid, start, end, cat in self._events.get(date.strftime('*/*/%d'), []):
-            if start <= date and (end is None or end >= date):
-                evts.append(iid)
-        y, w, d = date.isocalendar()
-        for desc, iid, start, end, cat in self._weekly_events[d - 1]:
-            if start <= date and (end is None or end >= date):
-                evts.append(iid)
+
         return evts
 
     def add_holiday(self, date):
@@ -616,11 +425,9 @@ class EventCalendar(Calendar):
             desc = '➢ %s - %s %s' % (deb, fin, event['Summary'])
         else:
             desc = '➢ %s' % event['Summary']
-        repeat = event['Repeat']
         dt = end - start
-        for d in range(dt.days + 1):
-            self._add_event(start + self.timedelta(days=d),
-                            desc, event.iid, repeat, event['Category'])
+        drrule = event.get_rrule()
+        self._add_event(start, dt.days + 1, desc, event.iid, drrule, event['Category'])
 
     def remove_event(self, event):
         start = event['Start']
@@ -631,11 +438,9 @@ class EventCalendar(Calendar):
             desc = '➢ %s - %s %s' % (deb, fin, event['Summary'])
         else:
             desc = '➢ %s' % event['Summary']
-        repeat = event['Repeat']
+        drrule = event.get_rrule()
         dt = end - start
-        for d in range(dt.days + 1):
-            self._remove_event(start + self.timedelta(days=d),
-                               desc, event.iid, repeat, event['Category'])
+        self._remove_event(start, dt.days + 1, desc, event.iid, drrule, event['Category'])
 
     def bind(self, *args):
         Calendar.bind(self, *args)
