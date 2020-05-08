@@ -46,6 +46,8 @@ Source code
          - `Babel <https://pypi.python.org/pypi/babel>`_
          - `tkcalendar <https://pypi.python.org/pypi/tkcalendar>`_
          - `python-dateutil <https://pypi.python.org/pypi/python-dateutil>`_
+         - `icalendar <https://pypi.python.org/pypi/icalendar>`_
+         - `num2words <https://pypi.python.org/pypi/num2words>`_
 
     It is also necessary to have at least one of the following GUI toolkits for the system tray icon:
 
@@ -76,13 +78,13 @@ Current day highlighting in the calendar
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     The current day is highlighted in the calendar widget and updated every day at midnight if the computer is running.
-    However, if the computer is in standby, the current day will not be updated. 
+    However, if the computer is in standby, the current day will not be updated.
     You can either perform the update manually with
 
     ::
-        
+
         $ scheduler -U
-        
+
     or you can put the file `<scheduler@.service>`_ in */usr/lib/systemd/system* (already done for the Archlinux and Ubuntu packages) and enable the service:
 
     ::
@@ -99,8 +101,8 @@ System tray icon
 Widget disappearance
 ~~~~~~~~~~~~~~~~~~~~
 
-    If the widgets disappear when you click on them, open the setting dialog 
-    from the menu and check the box 'Check this box if the widgets disappear 
+    If the widgets disappear when you click on them, open the setting dialog
+    from the menu and check the box 'Check this box if the widgets disappear
     when you click'.
 
 
