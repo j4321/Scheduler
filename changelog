@@ -1,9 +1,14 @@
 Scheduler - Alarms and reminders
 ================================
-Copyright 2016-2019 Juliette Monsel <j_4321@protonmail.com>
+Copyright 2016-2020 Juliette Monsel <j_4321@protonmail.com>
 
 Changelog
 ---------
+- Version 1.3.0
+    * Add possibility to import iCalendar data from a file or an url
+    * Fix calendar interactions with events spanning over several days
+    * Add more options for repeated events
+
 - Version 1.2.0
     * Add command line argument -U to update highlighted date in the calendar widget
     * Add service file scheduler@.service to update the highlighted date on resume
@@ -12,7 +17,7 @@ Changelog
     * Fix row colors when filtering events by category
     * Fix crash when changing twice the date of an event
     * Fix update of today's date in the calendar
-    
+
 - Version 1.1.1
     * Fix widget disappearance in Plasma desktop
     * Improve dates and legend in pomodoro stat graph
