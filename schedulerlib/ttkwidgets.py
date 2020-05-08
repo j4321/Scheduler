@@ -333,14 +333,20 @@ class LabelFrame(ttk.Frame):
     LabelFrame with the text hiding part of the border
     (which is not the case for the ususal LabelFrame in clam theme.
     """
+    labelanchor = {
+        "n": {"relx": 0.5, "y": 0, "anchor": 'n'},
+        "ne": {"relx": 1, "x": -4, "y": 0, "anchor": 'ne'},
+        "nw": {"x": 4, "y": 0, "anchor": 'nw'}
+    }
+
     def __init__(self, master=None, **kw):
         kw['relief'] = 'groove'
         kw['borderwidth'] = 1
+        labelanchor = kw.pop("labelanchor", "n")
         text = kw.pop('text', '')
         ttk.Frame.__init__(self, master, **kw)
         self._label = ttk.Label(master, text=text)
-        self._label.place(in_=self, relx=0.5, y=0, anchor='n',
-                          bordermode='outside')
+        self._label.place(in_=self, bordermode='outside', **self.labelanchor[labelanchor])
         self._label.bind('<Map>', self._update)
         self._layout = None
 
