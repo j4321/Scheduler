@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Scheduler - Task scheduling and calendar
-Copyright 2017-2019 Juliette Monsel <j_4321@protonmail.com>
+Copyright 2017-2020 Juliette Monsel <j_4321@protonmail.com>
 
 Scheduler is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,10 +25,11 @@ import shutil
 import logging
 import traceback
 import signal
+import requests
 from pickle import Pickler, Unpickler
-from tkinter import Tk, Menu, StringVar, TclError, BooleanVar
+from tkinter import Tk, Menu, StringVar, TclError, BooleanVar, Toplevel
 from tkinter import PhotoImage as tkPhotoImage
-from tkinter.ttk import Button, Treeview, Style, Label, Combobox, Frame
+from tkinter.ttk import Button, Treeview, Style, Label, Combobox, Frame, Entry
 from datetime import datetime, timedelta
 
 from babel.dates import get_date_format
@@ -78,6 +79,7 @@ class EventScheduler(Tk):
         self.icon.menu.add_command(label=_('Settings'), command=self.settings)
         self.icon.menu.add_separator()
         self.icon.menu.add_command(label=_("Load .ics file"), command=self.load_ics_file)
+        self.icon.menu.add_command(label=_("Load .ics from url"), command=self.load_ics_url)
         self.icon.menu.add_separator()
         self.icon.menu.add_command(label=_('About'), command=lambda: About(self))
         self.icon.menu.add_command(label=_('Quit'), command=self.exit)
@@ -436,7 +438,7 @@ apply {name {
     def report_callback_exception(self, *args):
         err = ''.join(traceback.format_exception(*args))
         logging.error(err)
-        showerror('Exception', str(args[1]), err, parent=self)
+        showerror('Exception', str(args[1]), err)
 
     def save(self):
         logging.info('Save event database')
@@ -541,19 +543,14 @@ apply {name {
             event = Event(self.scheduler)
         Form(self, event, new=True)
 
-    def load_ics_file(self):
-        filetypes = [('iCal', '*.ics'), (_("All files"), "*")]
-        filename = askopenfilename(filetypes=filetypes,
-                                   initialdir=os.path.expanduser("~"))
-        if not filename:
-            return
-        with open(filename, 'rb') as icalfile:
-            cal = icalendar.Calendar.from_ical(icalfile.read())
-        category = cal.get('X-WR-CALNAME', CONFIG.options('Categories')[0]).lower()
+    def _load_ical(self, ical):
+        """Import events from icalendar data."""
+        # use iCalendar name as category
+        category = ical.get('X-WR-CALNAME', CONFIG.options('Categories')[0]).lower()
         if not CONFIG.has_option("Categories", category):
             CONFIG.set("Categories", category, "white, #186CBE")
             self.widgets['Calendar'].update_style()
-        for component in cal.walk():
+        for component in ical.walk():
             if component.name == "VEVENT":
                 event = Event.from_vevent(component, self.scheduler, category)
                 iid = event.iid
@@ -570,6 +567,54 @@ apply {name {
         self.widgets['Events'].display_evts()
         self.widgets['Tasks'].display_tasks()
         self.save()
+
+    def load_ics_file(self):
+        filetypes = [('iCal', '*.ics'), (_("All files"), "*")]
+        filename = askopenfilename(filetypes=filetypes,
+                                   initialdir=os.path.expanduser("~"))
+        if not filename:
+            return
+        try:
+            with open(filename, 'rb') as icalfile:
+                ical = icalendar.Calendar.from_ical(icalfile.read())
+        except Exception:
+            err = ''.join(traceback.format_exc())
+            logging.error(err)
+            showerror(_("Error"), _("The import of the .ics file failed."), err)
+        else:
+            self._load_ical(ical)
+
+    def load_ics_url(self):
+
+        def ok(ev=None):
+            url = url_entry.get()
+            if not url:
+                top.destroy()
+                return
+            try:
+                data = requests.get(url)
+                if data.ok:
+                    ical = icalendar.Calendar.from_ical(data.text)
+                else:
+                    data.raise_for_status()
+            except Exception as e:
+                err = ''.join(traceback.format_exc())
+                logging.error(err)
+                showerror(_("Error"),
+                          _("The import of the .ics data failed.") + f"\n\n{e}",
+                          err)
+            else:
+                self._load_ical(ical)
+            finally:
+                top.destroy()
+
+        top = Toplevel(self)
+        Label(top, text=_("Import .ics data from url:")).pack(padx=4, pady=4)
+        url_entry = Entry(top)
+        url_entry.pack(fill="x", expand=True, padx=4, pady=4)
+        Button(top, text=_("Import"), command=ok).pack(padx=4, pady=4)
+        url_entry.focus_set()
+        url_entry.bind("<Return>", ok)
 
     def delete(self, *iids):
         for iid in iids:
