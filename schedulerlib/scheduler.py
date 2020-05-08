@@ -127,6 +127,7 @@ class EventScheduler(Tk):
         self.style.configure("Treeview.Heading", font="TkDefaultFont")
         bgc = self.style.lookup("TButton", "background")
         fgc = self.style.lookup("TButton", "foreground")
+        fgd = self.style.lookup("TEntry", "foreground", ("disabled",))
         bga = self.style.lookup("TButton", "background", ("active",))
         self.style.map('TCombobox',
                        fieldbackground=[('readonly', 'white'),
@@ -135,8 +136,9 @@ class EventScheduler(Tk):
                                    ("!disabled", "active", "readonly", bga)],
                        foreground=[('readonly', '!disabled', fgc),
                                    ('readonly', '!disabled', 'focus', fgc),
-                                   ('readonly', 'disabled', 'gray40'),
-                                   ('readonly', 'disabled', 'focus', 'gray40')],
+                                   ('!readonly', 'disabled', fgd),
+                                   ('readonly', 'disabled', fgd),
+                                   ('readonly', 'disabled', 'focus', fgd)],
                        arrowcolor=[("disabled", "gray40")])
         self.style.configure('menu.TCombobox', foreground=fgc, background=bgc,
                              fieldbackground=bgc)
