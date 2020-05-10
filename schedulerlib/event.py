@@ -29,6 +29,7 @@ from apscheduler.jobstores.base import JobLookupError
 from babel.dates import get_day_names
 from dateutil import rrule as drrule
 from dateutil import relativedelta
+import icalendar
 
 from schedulerlib.constants import NOTIF_PATH, TASK_STATE, CONFIG,\
     format_date, format_datetime
@@ -36,6 +37,10 @@ from schedulerlib.constants import NOTIF_PATH, TASK_STATE, CONFIG,\
 DRRULE_FREQS = {"year": drrule.YEARLY, "month": drrule.MONTHLY,
                 "week": drrule.WEEKLY, "day": drrule.DAILY}
 FREQS = {"YEARLY": "year", "MONTHLY": "month", "WEEKLY": "week", "DAILY": "day"}
+FREQS_REV = {i: k for k, i in FREQS.items()}
+
+DAYS = {d.upper(): i for i, d in get_day_names("short", locale="en_US").items()}
+DAYS_REV = {i: k for k, i in DAYS.items()}
 
 
 class Rrule(drrule.rrule):
@@ -76,7 +81,7 @@ class Event:
 
     @classmethod
     def from_vevent(cls, vevent, scheduler, category):
-        """Create Event from icalendar VEVENT"""
+        """Create Event from icalendar vEvent."""
         props = {"Category": category}
         # info
         props['Summary'] = str(vevent.get('summary'))
@@ -86,8 +91,8 @@ class Event:
         start = vevent.get('dtstart').dt
         end = vevent.get('dtend').dt
         if isinstance(start, datetime):
-            props['Start'] = start.replace(tzinfo=timezone.utc).astimezone(tz=None).replace(tzinfo=None)
-            props['End'] = end.replace(tzinfo=timezone.utc).astimezone(tz=None).replace(tzinfo=None)
+            props['Start'] = start.astimezone(tz=None).replace(tzinfo=None)
+            props['End'] = end.astimezone(tz=None).replace(tzinfo=None)
             props['WholeDay'] = False
         else:
             props['Start'] = datetime(start.year, start.month, start.day)
@@ -112,9 +117,9 @@ class Event:
                     limit = "always"
                     until = datetime.now() + timedelta(days=1)
             mday = "abs"
-            days = {d.upper(): i for i, d in get_day_names("short", locale="en_US").items()}
+
             if freq == "week":
-                byday = [days[d] for d in rrule.get("byday")]
+                byday = [DAYS[d] for d in rrule.get("byday")]
             else:
                 byday = [props['Start'].weekday()]
                 if freq == "month":
@@ -123,9 +128,9 @@ class Event:
                         day = bmday[0][-2:]
                         wnb = int(bmday[0][:-2])
                         if wnb == -1:
-                            mday = f"last {days[day]}"
+                            mday = f"last {DAYS[day]}"
                         else:
-                            mday = f"{wnb % 5}th {days[day]}"
+                            mday = f"{wnb % 5}th {DAYS[day]}"
 
             props["Repeat"] = {'Frequency': freq,
                                'Every': rrule.get("interval", [1])[0],
@@ -137,7 +142,7 @@ class Event:
 
         # reminders
         ev = cls(scheduler, iid=str(vevent.get("uid")), **props)
-        for component in vevent.walk():
+        for component in vevent.subcomponents:
             if component.name == 'VALARM':
                 action = component.get("action")
                 if action and action != "NONE":
@@ -298,7 +303,9 @@ class Event:
         # monthly / weekly
         if repeat['Frequency'] == 'month':
             mday = repeat.get("MonthDay", "abs")
-            if mday != "abs":
+            if mday == "abs":
+                rrule_kw["bymonthday"] = self._properties['Start'].day
+            else:
                 if mday.startswith("last"):
                     day = int(mday[-1])
                     pos = -1
@@ -306,8 +313,7 @@ class Event:
                     wnb, day = mday.split("th ")
                     day = int(day)
                     pos = int(wnb)
-                rrule_kw["byweekday"] = relativedelta.weekday(day)
-                rrule_kw["bysetpos"] = pos
+                rrule_kw["byweekday"] = relativedelta.weekday(day)(pos)
         elif repeat['Frequency'] == 'week':
             rrule_kw["byweekday"] = repeat["WeekDays"]
         return Rrule(freq, **rrule_kw)
@@ -316,3 +322,49 @@ class Event:
         ev = {"iid": self.iid}
         ev.update(self._properties)
         return ev
+
+    def to_vevent(self):
+        """Convert event to icalendar VEVENT"""
+        ev = icalendar.Event()
+        ev.add("summary", self["Summary"])
+        ev.add("description", self["Description"])
+        ev.add("location", self["Place"])
+        ev.add("uid", self.iid)
+        if self['WholeDay']:
+            ev.add("dtstart", self['Start'].date())
+            ev.add("dtend", self['End'].date())
+        else:
+            ev.add("dtstart", self['Start'].astimezone(tz=None))
+            ev.add("dtend", self['End'].astimezone(tz=None))
+        # repeat
+        repeat = self["Repeat"]
+        if repeat:
+            recur_kw = {}
+            freq = repeat['Frequency']
+            recur_kw["freq"] = FREQS_REV[freq]
+            # limit
+            if repeat['Limit'] == 'until':
+                recur_kw["until"] = repeat['EndDate']
+            elif repeat['Limit'] == 'after':
+                recur_kw["count"] = repeat['NbTimes']
+            recur_kw["interval"] = repeat['Every']
+            # freq
+            if freq == "week":
+                recur_kw["byday"] = [DAYS_REV[d] for d in repeat["WeekDays"]]
+            elif freq == "month":
+                mday = repeat["MonthDay"]
+                if mday == "abs":
+                    recur_kw["bymonthday"] = self['Start'].day
+                else:
+                    if mday.startswith("last"):
+                        day = int(mday[-1])
+                        pos = -1
+                    else:
+                        wnb, day = mday.split("th ")
+                        day = int(day)
+                        pos = int(wnb)
+                    recur_kw["byday"] = [f"{pos}{DAYS_REV[day]}"]
+            ev.add("rrule", icalendar.vRecur(**recur_kw))
+
+        return ev
+

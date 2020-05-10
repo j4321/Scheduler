@@ -45,7 +45,8 @@ from schedulerlib.messagebox import showerror, askokcancel
 from schedulerlib.constants import ICON48, ICON, IM_ADD, CONFIG, IM_DOT, JOBSTORE, \
     DATA_PATH, BACKUP_PATH, IM_SCROLL_ALPHA, active_color, backup, add_trace, \
     IM_SOUND, IM_MUTE, IM_SOUND_DIS, IM_MUTE_DIS, IM_CLOSED, IM_OPENED, \
-    IM_CLOSED_SEL, IM_OPENED_SEL, ICON_FALLBACK, format_time, askopenfilename
+    IM_CLOSED_SEL, IM_OPENED_SEL, ICON_FALLBACK, format_time, \
+    askopenfilename, asksaveasfilename
 from schedulerlib.trayicon import TrayIcon, SubMenu
 from schedulerlib.form import Form
 from schedulerlib.event import Event
@@ -78,6 +79,7 @@ class EventScheduler(Tk):
         self.icon.menu.add_cascade(label=_("Eyes' rest"), menu=self.menu_eyes)
         self.icon.menu.add_command(label=_('Settings'), command=self.settings)
         self.icon.menu.add_separator()
+        self.icon.menu.add_command(label=_("Export to .ics"), command=self.export_ical)
         self.icon.menu.add_command(label=_("Load .ics file"), command=self.load_ics_file)
         self.icon.menu.add_command(label=_("Load .ics from url"), command=self.load_ics_url)
         self.icon.menu.add_separator()
@@ -543,79 +545,6 @@ apply {name {
             event = Event(self.scheduler)
         Form(self, event, new=True)
 
-    def _load_ical(self, ical):
-        """Import events from icalendar data."""
-        # use iCalendar name as category
-        category = ical.get('X-WR-CALNAME', CONFIG.options('Categories')[0]).lower()
-        if not CONFIG.has_option("Categories", category):
-            CONFIG.set("Categories", category, "white, #186CBE")
-            self.widgets['Calendar'].update_style()
-        for component in ical.walk():
-            if component.name == "VEVENT":
-                event = Event.from_vevent(component, self.scheduler, category)
-                iid = event.iid
-                if iid not in self.events:
-                    self.tree.insert('', 'end', iid, values=event.values())
-                    self.tree.item(iid, tags=str(self.tree.index(iid) % 2))
-                else:
-                    self.tree.item(iid, values=self.events[iid].values())
-                    self.widgets['Calendar'].remove_event(self.events[iid])
-                    self.events[iid].reminder_remove_all()
-                    del(self.events[iid])
-                self.events[iid] = event
-                self.widgets['Calendar'].add_event(event)
-        self.widgets['Events'].display_evts()
-        self.widgets['Tasks'].display_tasks()
-        self.save()
-
-    def load_ics_file(self):
-        filetypes = [('iCal', '*.ics'), (_("All files"), "*")]
-        filename = askopenfilename(filetypes=filetypes,
-                                   initialdir=os.path.expanduser("~"))
-        if not filename:
-            return
-        try:
-            with open(filename, 'rb') as icalfile:
-                ical = icalendar.Calendar.from_ical(icalfile.read())
-        except Exception:
-            err = ''.join(traceback.format_exc())
-            logging.error(err)
-            showerror(_("Error"), _("The import of the .ics file failed."), err)
-        else:
-            self._load_ical(ical)
-
-    def load_ics_url(self):
-
-        def ok(ev=None):
-            url = url_entry.get()
-            if not url:
-                top.destroy()
-                return
-            try:
-                data = requests.get(url)
-                if data.ok:
-                    ical = icalendar.Calendar.from_ical(data.text)
-                else:
-                    data.raise_for_status()
-            except Exception as e:
-                err = ''.join(traceback.format_exc())
-                logging.error(err)
-                showerror(_("Error"),
-                          _("The import of the .ics data failed.") + f"\n\n{e}",
-                          err)
-            else:
-                self._load_ical(ical)
-            finally:
-                top.destroy()
-
-        top = Toplevel(self)
-        Label(top, text=_("Import .ics data from url:")).pack(padx=4, pady=4)
-        url_entry = Entry(top)
-        url_entry.pack(fill="x", expand=True, padx=4, pady=4)
-        Button(top, text=_("Import"), command=ok).pack(padx=4, pady=4)
-        url_entry.focus_set()
-        url_entry.bind("<Return>", ok)
-
     def delete(self, *iids):
         for iid in iids:
             index = self.tree.index(iid)
@@ -676,6 +605,100 @@ apply {name {
             for date in reminders:
                 event.reminder_add(date)
         logging.info('Refreshed reminders')
+
+    # --- import export
+    def _export_ical(self, filename):
+        # TODO: timezone awareness, include VALARMs
+        ical = icalendar.Calendar()
+        ical.add('prodid', '-//j_4321//Scheduler Calendar//')
+        ical.add('version', '2.0')
+        ical.add('X-WR-CALNAME', 'My Scheduler Calendar')
+        for event in self.events.values():
+            ical.add_component(event.to_vevent())
+        with open(filename, "wb") as file:
+            file.write(ical.to_ical())
+
+    def export_ical(self):
+        filetypes = [('iCal', '*.ics'), (_("All files"), "*")]
+        filename = asksaveasfilename(filetypes=filetypes,
+                                     defaultextension=".ics",
+                                     initialdir=os.path.expanduser("~"))
+        if filename:
+            self._export_ical(filename)
+
+    def _load_ical(self, ical):
+        """Import events from icalendar data."""
+        # use iCalendar name as category
+        category = ical.get('X-WR-CALNAME', CONFIG.options('Categories')[0]).lower()
+        if not CONFIG.has_option("Categories", category):
+            CONFIG.set("Categories", category, "white, #186CBE")
+            self.widgets['Calendar'].update_style()
+        for component in ical.subcomponents:
+            if component.name == "VEVENT":
+                event = Event.from_vevent(component, self.scheduler, category)
+                iid = event.iid
+                if iid not in self.events:
+                    self.tree.insert('', 'end', iid, values=event.values())
+                    self.tree.item(iid, tags=str(self.tree.index(iid) % 2))
+                else:
+                    self.tree.item(iid, values=self.events[iid].values())
+                    self.widgets['Calendar'].remove_event(self.events[iid])
+                    self.events[iid].reminder_remove_all()
+                    del(self.events[iid])
+                self.events[iid] = event
+                self.widgets['Calendar'].add_event(event)
+        self.widgets['Events'].display_evts()
+        self.widgets['Tasks'].display_tasks()
+        self.save()
+
+    def load_ics_file(self):
+        filetypes = [('iCal', '*.ics'), (_("All files"), "*")]
+        filename = askopenfilename(filetypes=filetypes,
+                                   defaultextension=".ics",
+                                   initialdir=os.path.expanduser("~"))
+        if not filename:
+            return
+        try:
+            with open(filename, 'rb') as icalfile:
+                ical = icalendar.Calendar.from_ical(icalfile.read())
+        except Exception:
+            err = ''.join(traceback.format_exc())
+            logging.error(err)
+            showerror(_("Error"), _("The import of the .ics file failed."), err)
+        else:
+            self._load_ical(ical)
+
+    def load_ics_url(self):
+
+        def ok(ev=None):
+            url = url_entry.get()
+            if not url:
+                top.destroy()
+                return
+            try:
+                data = requests.get(url)
+                if data.ok:
+                    ical = icalendar.Calendar.from_ical(data.text)
+                else:
+                    data.raise_for_status()
+            except Exception as e:
+                err = ''.join(traceback.format_exc())
+                logging.error(err)
+                showerror(_("Error"),
+                          _("The import of the .ics data failed.") + f"\n\n{e}",
+                          err)
+            else:
+                self._load_ical(ical)
+            finally:
+                top.destroy()
+
+        top = Toplevel(self)
+        Label(top, text=_("Import .ics data from url:")).pack(padx=4, pady=4)
+        url_entry = Entry(top)
+        url_entry.pack(fill="x", expand=True, padx=4, pady=4)
+        Button(top, text=_("Import"), command=ok).pack(padx=4, pady=4)
+        url_entry.focus_set()
+        url_entry.bind("<Return>", ok)
 
     # --- sorting
     def _move_item(self, item, index):
