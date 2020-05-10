@@ -647,6 +647,58 @@ def askopenfilename(filetypes, initialdir, initialfile="", defaultextension="",
                                           **options)
 
 
+def asksaveasfilename(defaultextension, filetypes, initialdir=".", initialfile="",
+                      title=_('Save As'), **options):
+    """
+    Open filebrowser dialog to select file to save to.
+
+    Arguments:
+        - defaultextension: extension added if none is given
+        - initialdir: directory where the filebrowser is opened
+        - initialfile: initially selected file
+        - filetypes: [('NAME', '*.ext'), ...]
+    """
+    if tkfb:
+        return tkfb.asksaveasfilename(title=title,
+                                      defaultext=defaultextension,
+                                      filetypes=filetypes,
+                                      initialdir=initialdir,
+                                      initialfile=initialfile,
+                                      **options)
+    elif ZENITY:
+        try:
+            args = ["zenity", "--file-selection",
+                    "--filename", os.path.join(initialdir, initialfile),
+                    "--save", "--confirm-overwrite"]
+            for ext in filetypes:
+                args += ["--file-filter", "%s|%s" % ext]
+            args += ["--title", title]
+            file = check_output(args).decode("utf-8").strip()
+            if file:
+                filename, ext = os.path.splitext(file)
+                if not ext:
+                    ext = defaultextension
+                return filename + ext
+            else:
+                return ""
+        except CalledProcessError:
+            return ""
+        except Exception:
+            return filedialog.asksaveasfilename(title=title,
+                                                defaultextension=defaultextension,
+                                                initialdir=initialdir,
+                                                filetypes=filetypes,
+                                                initialfile=initialfile,
+                                                **options)
+    else:
+        return filedialog.asksaveasfilename(title=title,
+                                            defaultextension=defaultextension,
+                                            initialdir=initialdir,
+                                            filetypes=filetypes,
+                                            initialfile=initialfile,
+                                            **options)
+
+
 def askcolor(color=None, **options):
     """
     Plateform specific color chooser.
