@@ -129,8 +129,17 @@ class EventCalendar(Calendar):
         self._sel_date = self.date.today()
         if prev_sel == self._sel_date:
             return
-        self._date = self._sel_date.replace(day=1)
-        self._display_calendar()
+        if self._sel_date.month != self._date.month:
+            self._date = self._sel_date.replace(day=1)
+            self._display_calendar()
+        else:
+            evts = self._current_month_events[prev_sel.strftime('%Y/%m/%d')]
+            if not evts:
+                self._reset_day(prev_sel)
+            else:
+                cat = evts[-1][-1]
+                w, d = self._get_day_coords(prev_sel)
+                self._calendar[w][d].configure(style='ev_%s.%s.TLabel' % (cat, self._style_prefixe))
         self._display_selection()
 
     def _display_calendar(self):
