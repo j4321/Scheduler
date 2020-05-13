@@ -380,9 +380,8 @@ class EventCalendar(Calendar):
             evts.append(iid)
 
         for iid, (desc, nbdays, drrule, cat) in self._repeated_events.items():
-            if drrule.between(date + self.timedelta(days=-nbdays), date):
+            if drrule.between(date + self.timedelta(days=-nbdays + 1), date):
                 evts.append(iid)
-
         return evts
 
     def add_holiday(self, date):
