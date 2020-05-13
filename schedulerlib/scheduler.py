@@ -394,17 +394,17 @@ apply {name {
         """)
 
         # react to scheduler --update-date in command line
-        signal.signal(signal.SIGUSR1, lambda *args: self.widgets['Calendar'].update_date())
+        signal.signal(signal.SIGUSR1, self.update_date)
 
-        # update selected date in calendar every day
-        self.scheduler.add_job(self.widgets['Calendar'].update_date,
+        # update selected date in calendar and event list every day
+        self.scheduler.add_job(self.update_date,
                                CronTrigger(hour=0, minute=0, second=1),
                                jobstore='memo')
 
         self.scheduler.start()
 
     def _setup_style(self):
-        # --- scrollbars
+        # scrollbars
         for widget in ['Events', 'Tasks']:
             bg = CONFIG.get(widget, 'background', fallback='gray10')
             fg = CONFIG.get(widget, 'foreground', fallback='white')
@@ -440,6 +440,12 @@ apply {name {
         with open(DATA_PATH, 'wb') as file:
             pick = Pickler(file)
             pick.dump(data)
+
+    def update_date(self, *args):
+        """Update Calendar's selected day and Events' list."""
+        self.widgets['Calendar'].update_date()
+        self.widgets['Events'].display_evts()
+        self.update_idletasks()
 
     # --- bindings
     def _select(self, event):

@@ -22,7 +22,7 @@ Event desktop widget
 """
 from tkinter import Canvas
 from tkinter.ttk import Label, Separator, Sizegrip, Frame
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from schedulerlib.constants import CONFIG, active_color
 from schedulerlib.ttkwidgets import AutoScrollbar, ToggledFrame
@@ -65,12 +65,6 @@ class EventWidget(BaseWidget):
         self.bind('<4>', lambda e: self._scroll(-1))
         self.bind('<5>', lambda e: self._scroll(1))
 
-        # --- update tasks every day
-        d = datetime.now()
-        d2 = d.replace(hour=0, minute=0, second=1, microsecond=0) + timedelta(days=1)
-        dt = d2 - d
-        self.after(int(dt.total_seconds() * 1e3), self.update_evts)
-
         self.update_idletasks()
         self.canvas.configure(scrollregion=self.canvas.bbox('all'))
 
@@ -109,11 +103,6 @@ class EventWidget(BaseWidget):
         except AttributeError:
             pass  # triggered on start-up before canvas is created
         BaseWidget._on_configure(self, event)
-
-    def update_evts(self):
-        """ update event list every day"""
-        self.display_evts()
-        self.after(24 * 3600 * 1000, self.update_evts)
 
     def display_evts(self):
 
