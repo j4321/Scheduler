@@ -26,17 +26,13 @@ from .base_widget import BaseWidget
 
 
 class CalendarWidget(BaseWidget):
+    """Calendar desktop widget."""
+    def __init__(self, master=None):
+        BaseWidget.__init__(self, 'Calendar', master)
 
-    def __init__(self, master=None, **kw):
-        """
-        Create a CalendarWidget that sticks on the desktop.
-
-        kw: the same as EventCalendar
-        """
-        BaseWidget.__init__(self, 'Calendar', master, **kw)
-
-    def create_content(self, **kw):
-        self._calendar = EventCalendar(self, **kw)
+    def create_content(self):
+        """Create widget's GUI."""
+        self._calendar = EventCalendar(self)
         self._calendar.pack(padx=1, pady=1)
         for ev in self.master.events.values():
             self._calendar.add_event(ev)
@@ -47,18 +43,15 @@ class CalendarWidget(BaseWidget):
         self.bind('<B1-Motion>', self._move)
 
     def update_style(self):
+        """Update widget's style."""
+        BaseWidget.update_style(self)
         bg = CONFIG.get(self.name, 'background', fallback='grey10')
         fg = CONFIG.get(self.name, 'foreground', fallback='white')
         active_bg = active_color(*self.winfo_rgb(bg))
-        self.attributes('-alpha', CONFIG.get(self.name, 'alpha', fallback=0.85))
-        self.configure(bg=bg)
+
         self._calendar.menu.configure(bg=bg, fg=fg, selectcolor=fg,
                                       activeforeground=fg,
                                       activebackground=active_bg)
-        self.menu.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
-                            activebackground=active_bg)
-        self.menu_pos.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
-                                activebackground=active_bg)
         keys = self._calendar.keys()
         opts = {opt: CONFIG.get('Calendar', opt) for opt in CONFIG.options('Calendar') if opt in keys}
         self._calendar.configure(**opts)
@@ -81,3 +74,4 @@ class CalendarWidget(BaseWidget):
 
     def get_events(self, date):
         return self._calendar.get_events(date)
+
