@@ -153,6 +153,7 @@ if not CONFIG.read(CONFIG_PATH):
     CONFIG.set('Timer', 'geometry', '')
     CONFIG.set('Timer', 'visible', 'True')
     CONFIG.set('Timer', 'alpha', '0.85')
+    CONFIG.set('Timer', 'font', 'Liberation\ Sans 10')
     CONFIG.set('Timer', 'font_time', 'FreeMono 26')
     CONFIG.set('Timer', 'font_intervals', 'FreeMono 12')
     CONFIG.set('Timer', 'foreground', 'white')

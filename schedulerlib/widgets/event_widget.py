@@ -24,7 +24,7 @@ from tkinter import Canvas
 from tkinter.ttk import Label, Separator, Sizegrip, Frame
 from datetime import datetime
 
-from schedulerlib.constants import CONFIG, active_color
+from schedulerlib.constants import CONFIG
 from schedulerlib.ttkwidgets import AutoScrollbar, ToggledFrame
 from .base_widget import BaseWidget
 
@@ -33,7 +33,8 @@ class EventWidget(BaseWidget):
     def __init__(self, master):
         BaseWidget.__init__(self, 'Events', master)
 
-    def create_content(self, **kw):
+    def create_content(self):
+        """Create widget's GUI."""
         self.minsize(50, 50)
         self.rowconfigure(2, weight=1)
         self.columnconfigure(0, weight=1)
@@ -69,25 +70,12 @@ class EventWidget(BaseWidget):
         self.canvas.configure(scrollregion=self.canvas.bbox('all'))
 
     def update_style(self):
+        """Update widget's style."""
+        BaseWidget.update_style(self)
         bg = CONFIG.get('Events', 'background')
-        fg = CONFIG.get('Events', 'foreground')
-        active_bg = active_color(*self.winfo_rgb(bg))
-        self.attributes('-alpha', CONFIG.get(self.name, 'alpha', fallback=0.85))
-        self.style.configure('Events.TFrame', background=bg)
-        self.style.configure('Events.TSizegrip', background=bg)
-        self.style.configure('Events.TSeparator', background=bg)
-        self.style.configure('Events.TLabel', background=bg, foreground=fg,
-                             font=CONFIG.get('Events', 'font'))
-        self.style.configure('title.Events.TLabel',
-                             font=CONFIG.get('Events', 'font_title'))
         self.style.configure('day.Events.TLabel',
                              font=CONFIG.get('Events', 'font_day'))
         self.style.configure('Toggle', background=bg)
-        self.configure(bg=bg)
-        self.menu_pos.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
-                                activebackground=active_bg)
-        self.menu.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
-                            activebackground=active_bg)
         self.canvas.configure(bg=bg)
 
     def _scroll(self, delta):
@@ -140,3 +128,4 @@ class EventWidget(BaseWidget):
                               style='Events.TLabel')
                     l.bind('<Configure>', wrap)
                     l.grid(sticky='ew', pady=2, padx=(21, 10))
+

@@ -29,11 +29,9 @@ from schedulerlib.constants import CONFIG, save_config, active_color
 
 
 class BaseWidget(Toplevel):
-
-    def __init__(self, name, master=None, **kw):
-        """
-        Create a  desktop widget that sticks on the desktop.
-        """
+    """Base class for desktop widgets."""
+    def __init__(self, name, master=None):
+        """Create a  desktop widget that sticks on the desktop."""
         Toplevel.__init__(self, master)
         self.name = name
         if CONFIG.getboolean('General', 'splash_supported', fallback=True):
@@ -58,7 +56,7 @@ class BaseWidget(Toplevel):
         self.menu = Menu(self, relief='sunken', activeborderwidth=0)
         self._populate_menu()
 
-        self.create_content(**kw)
+        self.create_content()
 
         self.x = None
         self.y = None
@@ -77,10 +75,11 @@ class BaseWidget(Toplevel):
         self.bind('<Configure>', self._on_configure)
 
     def create_content(self):
+        """Create widget's GUI."""
         # to be overriden by subclass
-        pass
 
     def _populate_menu(self):
+        """Create menu."""
         self.menu_pos = Menu(self.menu, relief='sunken', activeborderwidth=0)
         self.menu_pos.add_radiobutton(label=_('Normal'), value='normal',
                                       variable=self._position, command=self.show)
@@ -92,6 +91,7 @@ class BaseWidget(Toplevel):
         self.menu.add_command(label=_('Hide'), command=self.hide)
 
     def update_style(self):
+        """Update widget's style."""
         bg = CONFIG.get(self.name, 'background', fallback='grey10')
         fg = CONFIG.get(self.name, 'foreground', fallback='white')
         active_bg = active_color(*self.winfo_rgb(bg))
@@ -101,8 +101,27 @@ class BaseWidget(Toplevel):
                             activebackground=active_bg)
         self.menu_pos.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
                                 activebackground=active_bg)
+        self.style.configure(f'{self.name}.TFrame', background=bg)
+        self.style.configure(f'{self.name}.TMenubutton', background=bg, relief='flat',
+                             foreground=fg, borderwidth=0, arrowcolor=fg)
+        self.style.configure(f'{self.name}.TButton', background=bg, relief='flat',
+                             foreground=fg, borderwidth=0)
+        self.style.map(f'{self.name}.TButton',
+                       background=[('disabled', bg), ('!disabled', 'active', active_bg)])
+        self.style.map(f'{self.name}.TMenubutton',
+                       background=[('disabled', bg), ('!disabled', 'active', active_bg)])
+        self.style.configure(f'{self.name}.TSizegrip', background=bg)
+        self.style.map(f'{self.name}.TSizegrip', background=[('active', active_bg)])
+        self.style.configure(f'{self.name}.TSeparator', background=bg)
+        self.style.configure(f'{self.name}.TLabel', background=bg, foreground=fg,
+                             font=CONFIG.get(self.name, 'font',
+                                             fallback='Liberation\ Sans 10'))
+        self.style.configure(f'title.{self.name}.TLabel',
+                             font=CONFIG.get(self.name, 'font_title',
+                                             fallback='Liberation\ Sans 12 bold'))
 
     def update_position(self):
+        """Update widget's position."""
         if self._position.get() == 'normal':
             if CONFIG.getboolean('General', 'splash_supported', fallback=True):
                 self.attributes('-type', 'splash')
@@ -113,17 +132,19 @@ class BaseWidget(Toplevel):
             self.deiconify()
 
     def _on_configure(self, event):
+        """Save widget's geometry."""
         CONFIG.set(self.name, 'geometry', self.geometry())
         save_config()
 
     def hide(self):
+        """Hide widget."""
         CONFIG.set(self.name, 'visible', 'False')
         self.variable.set(False)
         save_config()
         self.withdraw()
 
     def show(self):
-        ''' make widget sticky '''
+        """Show widget."""
         self.deiconify()
         self.update_idletasks()
         splash_supp = CONFIG.getboolean('General', 'splash_supported', fallback=True)
@@ -165,6 +186,7 @@ class BaseWidget(Toplevel):
         except TypeError:
             pass
 
+    # --- drag widget
     def _start_move(self, event):
         self.x = event.x
         self.y = event.y
@@ -182,3 +204,4 @@ class BaseWidget(Toplevel):
             x = self.winfo_x() + deltax
             y = self.winfo_y() + deltay
             self.geometry("+%s+%s" % (x, y))
+

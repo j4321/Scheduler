@@ -22,11 +22,12 @@ Timer desktop widget
 """
 
 from tkinter import Text
-from tkinter.ttk import Button, Label, Sizegrip
+from tkinter.ttk import Button, Label, Sizegrip, Frame
 
 from PIL.ImageTk import PhotoImage
 
-from schedulerlib.constants import IM_START, IM_PAUSE, IM_STOP, CONFIG, active_color
+from schedulerlib.constants import IM_START, IM_PAUSE, IM_STOP, CONFIG
+from schedulerlib.ttkwidgets import AutoScrollbar
 from .base_widget import BaseWidget
 
 
@@ -34,7 +35,8 @@ class Timer(BaseWidget):
     def __init__(self, master):
         BaseWidget.__init__(self, 'Timer', master)
 
-    def create_content(self, **kw):
+    def create_content(self):
+        """Create widget's GUI."""
         self.minsize(50, 120)
 
         self._time = [0, 0, 0]
@@ -51,32 +53,40 @@ class Timer(BaseWidget):
 
         # --- GUI elements
         self.display = Label(self, text='%i:%.2i:%.2i' % tuple(self._time),
-                             anchor='center',
-                             style='timer.TLabel')
-        self.intervals = Text(self, highlightthickness=0, relief='flat',
+                             anchor='center', style='Timer.TLabel')
+        interval_frame = Frame(self, style='Timer.TFrame')
+        interval_frame.columnconfigure(0, weight=1)
+        interval_frame.rowconfigure(0, weight=1)
+        self.intervals = Text(interval_frame, highlightthickness=0, relief='flat',
                               height=3, width=1,
                               inactiveselectbackground=self.style.lookup('TEntry', 'selectbackground'))
         self.intervals.tag_configure('center', justify='center')
         self.intervals.configure(state='disabled')
-        self.b_interv = Button(self, text=_('Interval'), style='timer.TButton',
+        scroll = AutoScrollbar(interval_frame, orient='vertical',
+                               style='Timer.Vertical.TScrollbar',
+                               command=self.intervals.yview)
+        self.intervals.configure(yscrollcommand=scroll.set)
+        self.intervals.grid(sticky='ewns')
+        scroll.grid(row=0, column=1, sticky='ns')
+        self.b_interv = Button(self, text=_('Interval'), style='Timer.TButton',
                                command=self.add_interval)
         self.b_interv.state(('disabled',))
 
         self.b_launch = Button(self, image=self.img_play, padding=2,
-                               command=self.launch, style='timer.TButton')
+                               command=self.launch, style='Timer.TButton')
         self.b_stop = Button(self, image=self.img_stop, padding=2,
-                             command=self.stop, style='timer.TButton')
+                             command=self.stop, style='Timer.TButton')
 
         # --- placement
         self.display.grid(row=0, columnspan=2, sticky='ew', padx=8, pady=(4, 0))
         Label(self, text=_('Intervals:'),
-              style='timer.TLabel').grid(row=1, columnspan=2, sticky='w', padx=4)
-        self.intervals.grid(row=2, columnspan=2, sticky='eswn')
+              style='Timer.TLabel').grid(row=1, columnspan=2, sticky='w', padx=4)
+        interval_frame.grid(row=2, columnspan=2, sticky='eswn')
         self.b_interv.grid(row=3, columnspan=2, sticky='ew')
         self.b_launch.grid(row=4, column=0, sticky='ew')
         self.b_stop.grid(row=4, column=1, sticky='ew')
 
-        self._corner = Sizegrip(self, style="timer.TSizegrip")
+        self._corner = Sizegrip(self, style="Timer.TSizegrip")
         self._corner.place(relx=1, rely=1, anchor='se')
 
         # --- bindings
@@ -89,26 +99,12 @@ class Timer(BaseWidget):
         self.b_stop.bind('<Leave>', self._on_leave)
 
     def update_style(self):
-        self.attributes('-alpha', CONFIG.get(self.name, 'alpha', fallback=0.85))
-        bg = CONFIG.get('Timer', 'background')
-        fg = CONFIG.get('Timer', 'foreground')
-        active_bg = active_color(*self.winfo_rgb(bg))
-        self.configure(bg=bg)
-        self.menu.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
-                            activebackground=active_bg)
-        self.menu_pos.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
-                                activebackground=active_bg)
+        """Update widget's style."""
+        BaseWidget.update_style(self)
         self.display.configure(font=CONFIG.get('Timer', 'font_time'))
-        self.intervals.configure(bg=bg, fg=fg,
+        self.intervals.configure(bg=CONFIG.get('Timer', 'background'),
+                                 fg=CONFIG.get('Timer', 'foreground'),
                                  font=CONFIG.get('Timer', 'font_intervals'))
-        self.style.configure('timer.TButton', background=bg, relief='flat',
-                             foreground=fg, borderwidth=0)
-        self.style.configure('timer.TLabel', background=bg,
-                             foreground=fg)
-        self.style.configure('timer.TSizegrip', background=bg)
-        self.style.map('timer.TSizegrip', background=[('active', active_bg)])
-        self.style.map('timer.TButton', background=[('disabled', bg),
-                                                    ('!disabled', 'active', active_bg)])
 
     def _on_enter(self, event=None):
         self._corner.state(('active',))
@@ -117,6 +113,7 @@ class Timer(BaseWidget):
         self._corner.state(('!active',))
 
     def show(self):
+        """Show widget."""
         self.deiconify()
         self.update_idletasks()
         self.withdraw()
@@ -130,6 +127,7 @@ class Timer(BaseWidget):
         self.deiconify()
 
     def _run(self):
+        """Count time."""
         if self._on:
             self._time[2] += 1
             if self._time[2] == 60:
@@ -142,6 +140,7 @@ class Timer(BaseWidget):
             self._after_id = self.after(1000, self._run)
 
     def launch(self):
+        """Start/Pause timer."""
         if self._on:
             self._on = False
             self.b_launch.configure(image=self.img_play)
@@ -153,6 +152,7 @@ class Timer(BaseWidget):
             self.after(1000, self._run)
 
     def add_interval(self):
+        """Add intreval time to the display."""
         tps = '\n%i:%.2i:%.2i' % tuple(self._time)
         if self.intervals.get('1.0', 'end') == '\n':
             tps = tps[1:]
@@ -161,6 +161,7 @@ class Timer(BaseWidget):
         self.intervals.configure(state='disabled')
 
     def stop(self):
+        """Stop timer."""
         self._on = False
         self.b_interv.state(('disabled',))
         self.b_launch.configure(image=self.img_play)
@@ -169,3 +170,4 @@ class Timer(BaseWidget):
         self.intervals.delete('1.0', 'end')
         self.intervals.configure(state='disabled')
         self.display.configure(text='%i:%.2i:%.2i' % tuple(self._time))
+
