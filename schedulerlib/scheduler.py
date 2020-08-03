@@ -74,6 +74,9 @@ class EventScheduler(Tk):
         # --- menu
         self.menu_widgets = SubMenu(parent=self.icon.menu)
         self.menu_eyes = Eyes(self.icon.menu, self)
+        self.icon.menu.add_checkbutton(label=_('Silent mode'), command=self.toggle_silent_mode)
+        self.icon.menu.set_item_value(_('Silent mode'), CONFIG.getboolean('General', 'silent_mode', fallback=False))
+        self.icon.menu.add_separator()
         self.icon.menu.add_checkbutton(label=_('Manager'), command=self.display_hide)
         self.icon.menu.add_cascade(label=_('Widgets'), menu=self.menu_widgets)
         self.icon.menu.add_cascade(label=_("Eyes' rest"), menu=self.menu_eyes)
@@ -360,10 +363,7 @@ class EventScheduler(Tk):
 
         # --- widgets
         self.widgets = {}
-        prop = {op: CONFIG.get('Calendar', op) for op in CONFIG.options('Calendar')}
-        self.widgets['Calendar'] = CalendarWidget(self,
-                                                  locale=CONFIG.get('General', 'locale'),
-                                                  **prop)
+        self.widgets['Calendar'] = CalendarWidget(self)
         self.widgets['Events'] = EventWidget(self)
         self.widgets['Tasks'] = TaskWidget(self)
         self.widgets['Timer'] = Timer(self)
@@ -454,6 +454,10 @@ apply {name {
         self.widgets['Calendar'].update_date()
         self.widgets['Events'].display_evts()
         self.update_idletasks()
+
+    def toggle_silent_mode(self):
+        CONFIG.set('General', 'silent_mode',
+                   str(self.icon.menu.get_item_value(_('Silent mode'))))
 
     # --- bindings
     def _select(self, event):
@@ -866,3 +870,4 @@ apply {name {
             if event['Task']:
                 tasks.append(event)
         return tasks
+

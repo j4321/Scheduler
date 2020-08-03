@@ -37,11 +37,12 @@ from .base_widget import BaseWidget
 
 
 class Pomodoro(BaseWidget):
-    """ Chronometre de temps de travail pour plus d'efficacité """
+    """Pomodoro Timer widget."""
     def __init__(self, master):
         BaseWidget.__init__(self, 'Pomodoro', master)
 
     def create_content(self, **kw):
+        """Create pomodoro timer's GUI."""
         self.minsize(190, 190)
 
         self.on = False  # is the timer on?
@@ -139,6 +140,7 @@ class Pomodoro(BaseWidget):
         self.b_stats.bind('<Leave>', self._on_leave)
 
     def update_style(self):
+        """Update widget's style."""
         self.menu_tasks.delete(0, 'end')
         tasks = [t.capitalize() for t in CONFIG.options('PomodoroTasks')]
         tasks.sort()
@@ -293,8 +295,9 @@ class Pomodoro(BaseWidget):
 
     @staticmethod
     def ting():
-        """ joue le son marquant le changement de période """
-        if not CONFIG.getboolean("Pomodoro", "mute", fallback=False):
+        """Play the sound notifying the end of a period."""
+        if (not CONFIG.getboolean("Pomodoro", "mute", fallback=False) and
+                not CONFIG.getboolean('General', 'silent_mode', fallback=False)):
             Popen([CONFIG.get("General", "soundplayer"),
                    CONFIG.get("Pomodoro", "beep")])
 
@@ -332,3 +335,4 @@ class Pomodoro(BaseWidget):
                 self.tps[1] = 59
             self.temps.configure(text="{0:02}:{1:02}".format(*self.tps))
             self.after(1000, self.affiche)
+
