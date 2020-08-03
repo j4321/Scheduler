@@ -112,6 +112,7 @@ if not CONFIG.read(CONFIG_PATH):
     CONFIG.set("General", "splash_supported",
                str(os.environ.get('DESKTOP_SESSION') != 'plasma'))
     CONFIG.set("General", "soundplayer", "mpg123")
+    CONFIG.set("General", "silent_mode", "False")
 
     CONFIG.add_section('Reminders')
     CONFIG.set('Reminders', 'window', 'True')
@@ -789,3 +790,4 @@ def only_nb(text):
 
 def scrub(table_name):
     return ''.join(ch for ch in table_name if ch.isalnum() or ch == '_')
+
