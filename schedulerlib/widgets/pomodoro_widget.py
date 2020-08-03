@@ -53,12 +53,11 @@ class Pomodoro(BaseWidget):
         self._stats = None
 
         # --- colors
-        self.background = {_("Work"): CONFIG.get("Pomodoro", "work_bg"),
-                           _("Break"): CONFIG.get("Pomodoro", "break_bg"),
-                           _("Rest"): CONFIG.get("Pomodoro", "rest_bg")}
-        self.foreground = {_("Work"): CONFIG.get("Pomodoro", "work_fg"),
-                           _("Break"): CONFIG.get("Pomodoro", "break_fg"),
-                           _("Rest"): CONFIG.get("Pomodoro", "rest_fg")}
+        activities = ['work', 'rest', 'break']
+        self.background = {_(act.capitalize()): CONFIG.get("Pomodoro", f"{act}_bg")
+                           for act in activities}
+        self.foreground = {_(act.capitalize()): CONFIG.get("Pomodoro", f"{act}_fg")
+                           for act in activities}
 
         self.rowconfigure(1, weight=1)
         self.columnconfigure(0, weight=1)
@@ -76,17 +75,17 @@ class Pomodoro(BaseWidget):
         self.im_graph = PhotoImage(master=self, file=IM_GRAPH)
 
         # --- tasks list
-        tasks_frame = Frame(self, style='pomodoro.TFrame')
+        tasks_frame = Frame(self, style='Pomodoro.TFrame')
         tasks_frame.grid(row=3, column=0, columnspan=3, sticky="wnse")
         tasks = [t.capitalize() for t in CONFIG.options("PomodoroTasks")]
         tasks.sort()
         self.task = StringVar(self, tasks[0])
         self.menu_tasks = Menu(tasks_frame, relief='sunken', activeborderwidth=0)
         self.choose_task = Menubutton(tasks_frame, textvariable=self.task,
-                                      menu=self.menu_tasks, style='pomodoro.TMenubutton')
+                                      menu=self.menu_tasks, style='Pomodoro.TMenubutton')
         Label(tasks_frame,
               text=_("Task: "),
-              style='pomodoro.TLabel',
+              style='Pomodoro.TLabel',
               font="TkDefaultFont 12",
               width=6,
               anchor="e").pack(side="left", padx=4)
@@ -98,31 +97,31 @@ class Pomodoro(BaseWidget):
         self.titre = Label(self,
                            textvariable=self.activite,
                            font='TkDefaultFont 14',
-                           style='timer.pomodoro.TLabel',
+                           style='timer.Pomodoro.TLabel',
                            anchor="center")
         self.titre.grid(row=0, column=0, columnspan=2, sticky="we", pady=(4, 0), padx=4)
         self.temps = Label(self,
                            text="{0:02}:{1:02}".format(self.tps[0], self.tps[1]),
-                           style='timer.pomodoro.TLabel',
+                           style='timer.Pomodoro.TLabel',
                            anchor="center")
         self.temps.grid(row=1, column=0, columnspan=2, sticky="nswe", padx=4)
         self.aff_pomodori = Label(self, textvariable=self.pomodori, anchor='e',
                                   padding=(20, 4, 20, 4),
                                   image=self.im_tomate, compound="left",
-                                  style='timer.pomodoro.TLabel',
+                                  style='timer.Pomodoro.TLabel',
                                   font='TkDefaultFont 14')
         self.aff_pomodori.grid(row=2, columnspan=2, sticky="ew", padx=4)
 
         # --- buttons
         self.b_go = Button(self, image=self.im_go, command=self.go,
-                           style='pomodoro.TButton')
+                           style='Pomodoro.TButton')
         self.b_go.grid(row=4, column=0, sticky="ew")
         self.b_stats = Button(self, image=self.im_graph,
                               command=self.display_stats,
-                              style='pomodoro.TButton')
+                              style='Pomodoro.TButton')
         self.b_stats.grid(row=4, column=1, sticky="ew")
 
-        self._corner = Sizegrip(self, style="pomodoro.TSizegrip")
+        self._corner = Sizegrip(self, style="Pomodoro.TSizegrip")
         self._corner.place(relx=1, rely=1, anchor='se')
 
         # --- bindings
@@ -141,6 +140,7 @@ class Pomodoro(BaseWidget):
 
     def update_style(self):
         """Update widget's style."""
+        BaseWidget.update_style(self)
         self.menu_tasks.delete(0, 'end')
         tasks = [t.capitalize() for t in CONFIG.options('PomodoroTasks')]
         tasks.sort()
@@ -151,71 +151,36 @@ class Pomodoro(BaseWidget):
             self.stop(False)
             self.task.set(tasks[0])
 
-        self.attributes('-alpha', CONFIG.get(self.name, 'alpha', fallback=0.85))
         bg = CONFIG.get('Pomodoro', 'background')
         fg = CONFIG.get('Pomodoro', 'foreground')
         active_bg = active_color(*self.winfo_rgb(bg))
-        self.style.configure('pomodoro.TMenubutton', background=bg, relief='flat',
-                             foreground=fg, borderwidth=0, arrowcolor=fg)
-        self.style.configure('pomodoro.TButton', background=bg, relief='flat',
-                             foreground=fg, borderwidth=0)
-        self.style.configure('pomodoro.TLabel', background=bg,
-                             foreground=fg)
-        self.style.configure('pomodoro.TFrame', background=bg)
-        self.style.configure('pomodoro.TSizegrip', background=bg)
-        self.style.map('pomodoro.TSizegrip', background=[('active', active_bg)])
-        self.style.map('pomodoro.TButton', background=[('disabled', bg),
-                                                       ('!disabled', 'active', active_bg)])
-        self.style.map('pomodoro.TMenubutton', background=[('disabled', bg),
-                                                           ('!disabled', 'active', active_bg)])
-        self.configure(bg=bg)
-        self.menu.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
-                            activebackground=active_bg)
-        self.menu_pos.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
-                                activebackground=active_bg)
+
         self.menu_tasks.configure(bg=bg, activebackground=active_bg, fg=fg,
                                   selectcolor=fg, activeforeground=fg)
-        self.background = {_("Work"): CONFIG.get("Pomodoro", "work_bg"),
-                           _("Break"): CONFIG.get("Pomodoro", "break_bg"),
-                           _("Rest"): CONFIG.get("Pomodoro", "rest_bg")}
-        self.foreground = {_("Work"): CONFIG.get("Pomodoro", "work_fg"),
-                           _("Break"): CONFIG.get("Pomodoro", "break_fg"),
-                           _("Rest"): CONFIG.get("Pomodoro", "rest_fg")}
+        activities = ['work', 'rest', 'break']
+        self.background = {_(act.capitalize()): CONFIG.get("Pomodoro", f"{act}_bg")
+                           for act in activities}
+        self.foreground = {_(act.capitalize()): CONFIG.get("Pomodoro", f"{act}_fg")
+                           for act in activities}
         act = self.activite.get()
-        self.style.configure('timer.pomodoro.TLabel',
+        self.style.configure('timer.Pomodoro.TLabel',
                              font=CONFIG.get("Pomodoro", "font"),
                              foreground=self.foreground[act],
                              background=self.background[act])
 
+    # --- widget resizing and visibility
     def _on_enter(self, event=None):
         self._corner.state(('active',))
 
     def _on_leave(self, event=None):
         self._corner.state(('!active',))
 
-    def _start_move(self, event):
-        self.x = event.x
-        self.y = event.y
-
-    def _stop_move(self, event):
-        self.x = None
-        self.y = None
-        self.configure(cursor='arrow')
-
-    def _move(self, event):
-        if self.x is not None and self.y is not None:
-            self.configure(cursor='fleur')
-            deltax = event.x - self.x
-            deltay = event.y - self.y
-            x = self.winfo_x() + deltax
-            y = self.winfo_y() + deltay
-            self.geometry("+%s+%s" % (x, y))
-
     def hide(self):
         if self._stats is not None:
             self._stats.destroy()
         BaseWidget.hide(self)
 
+    # --- widget specific methods
     def stats(self, time=None):
         """Save stats."""
         if time is None:
@@ -284,7 +249,7 @@ class Pomodoro(BaseWidget):
             self.temps.configure(text="{0:02}:{1:02}".format(self.tps[0], self.tps[1]))
             act = _("Work")
             self.activite.set(act)
-            self.style.configure('timer.pomodoro.TLabel',
+            self.style.configure('timer.Pomodoro.TLabel',
                                  background=self.background[act],
                                  foreground=self.foreground[act])
             logging.info('Pomodoro session interrupted.')
@@ -327,7 +292,7 @@ class Pomodoro(BaseWidget):
                         self.activite.set(_("Work"))
                         self.tps = [CONFIG.getint("Pomodoro", "work_time"), 0]
                     act = self.activite.get()
-                    self.style.configure('timer.pomodoro.TLabel',
+                    self.style.configure('timer.Pomodoro.TLabel',
                                          background=self.background[act],
                                          foreground=self.foreground[act])
             elif self.tps[1] == -1:

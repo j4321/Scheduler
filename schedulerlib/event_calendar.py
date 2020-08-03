@@ -32,25 +32,15 @@ from schedulerlib.tooltip import TooltipWrapper
 
 class EventCalendar(Calendar):
     """ Calendar widget that can display events. """
-    def __init__(self, master=None, **kw):
+    def __init__(self, master=None):
         """
         Create an EventCalendar.
 
-        KEYWORD OPTIONS COMMON WITH CALENDAR
-
-            cursor, font, year, month, day, locale,
-            background, foreground, bordercolor, othermonthforeground,
-            selectbackground, selectforeground,
-            normalbackground, normalforeground,
-            weekendbackground, weekendforeground,
-            headersbackground, headersforeground
-
-        WIDGET-SPECIFIC OPTIONS
-
-            tooltipforeground, tooltipbackground, tooltipalpha
-
-        selectmode is set to 'none' and cannot be changed
+        Options are loaded from app config and selectmode is set to 'none'.
         """
+        kw = {op: CONFIG.get('Calendar', op) for op in CONFIG.options('Calendar')}
+        kw['locale'] = CONFIG.get('General', 'locale')
+
         tp_fg = kw.pop('tooltipforeground', 'white')
         tp_bg = kw.pop('tooltipbackground', 'black')
         tp_alpha = kw.pop('tooltipalpha', 0.8)
@@ -458,3 +448,4 @@ class EventCalendar(Calendar):
             widget.bind(*args)
             for w in widget.children.values():
                 w.bind(*args)
+

@@ -241,7 +241,7 @@ class EventScheduler(Tk):
         self._im_slider_vert_prelight = {}
         self._im_slider_vert_active = {}
         self._slider_alpha = Image.open(IM_SCROLL_ALPHA)
-        for widget in ['Events', 'Tasks']:
+        for widget in ['Events', 'Tasks', 'Timer']:
             bg = CONFIG.get(widget, 'background', fallback='gray10')
             fg = CONFIG.get(widget, 'foreground')
 
@@ -413,7 +413,7 @@ apply {name {
 
     def _setup_style(self):
         # scrollbars
-        for widget in ['Events', 'Tasks']:
+        for widget in ['Events', 'Tasks', 'Timer']:
             bg = CONFIG.get(widget, 'background', fallback='gray10')
             fg = CONFIG.get(widget, 'foreground', fallback='white')
 

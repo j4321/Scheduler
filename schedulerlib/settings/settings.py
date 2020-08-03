@@ -721,3 +721,4 @@ class Settings(tk.Toplevel):
             self.master.widgets['Pomodoro'].stop(False)
         save_config()
         self.destroy()
+

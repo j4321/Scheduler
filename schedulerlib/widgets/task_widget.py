@@ -23,7 +23,7 @@ Task desktop widget
 from tkinter import Text
 from tkinter.ttk import Label, Separator, Sizegrip
 
-from schedulerlib.constants import CONFIG, TASK_STATE, active_color, format_date, format_datetime
+from schedulerlib.constants import CONFIG, TASK_STATE, format_date, format_datetime
 from schedulerlib.ttkwidgets import AutoScrollbar
 from .base_widget import BaseWidget
 
@@ -32,7 +32,8 @@ class TaskWidget(BaseWidget):
     def __init__(self, master):
         BaseWidget.__init__(self, 'Tasks', master)
 
-    def create_content(self, **kw):
+    def create_content(self):
+        """Create widget's GUI."""
         self.rowconfigure(2, weight=1)
         self.columnconfigure(0, weight=1)
         self.minsize(50, 50)
@@ -66,22 +67,10 @@ class TaskWidget(BaseWidget):
         label.bind('<B1-Motion>', self._move)
 
     def update_style(self):
-        self.attributes('-alpha', CONFIG.get(self.name, 'alpha', fallback=0.85))
+        """Update widget's style."""
+        BaseWidget.update_style(self)
         bg = CONFIG.get('Tasks', 'background')
         fg = CONFIG.get('Tasks', 'foreground')
-        active_bg = active_color(*self.winfo_rgb(bg))
-        self.style.configure('Tasks.TFrame', background=bg)
-        self.style.configure('Tasks.TSizegrip', background=bg)
-        self.style.configure('Tasks.TSeparator', background=bg)
-        self.style.configure('Tasks.TLabel', background=bg, foreground=fg,
-                             font=CONFIG.get('Tasks', 'font'))
-        self.style.configure('title.Tasks.TLabel',
-                             font=CONFIG.get('Tasks', 'font_title'))
-        self.configure(bg=bg)
-        self.menu.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
-                            activebackground=active_bg)
-        self.menu_pos.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
-                                activebackground=active_bg)
         self.display.configure(selectbackground=bg,
                                inactiveselectbackground=bg,
                                selectforeground=fg,
@@ -103,3 +92,4 @@ class TaskWidget(BaseWidget):
                 txt = "\t%s\t%s [%s]\n" % (picto, ev['Summary'], end)
                 self.display.insert('end', txt)
         self.display.configure(state='disabled')
+
