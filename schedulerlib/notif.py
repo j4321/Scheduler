@@ -64,7 +64,8 @@ class Notification(Tk):
         self.timeout_id = ''
         if CONFIG.getboolean('Reminders', 'blink'):
             self.blink_id = self.after(500, self.blink)
-        if not CONFIG.getboolean("Reminders", "mute", fallback=False):
+        if (not CONFIG.getboolean("Reminders", "mute", fallback=False) and
+                not CONFIG.getboolean('General', 'silent_mode', fallback=False)):
             self.alarm()
         timeout = CONFIG.getint('Reminders', 'timeout') * 60 * 1000
         if timeout > 0:
@@ -117,8 +118,9 @@ if __name__ == '__main__':
             except Exception:
                 pass  # notifications not supported
         if CONFIG.getboolean('Reminders', 'window', fallback=True):
-            n = Notification(text)
-            n.mainloop()
+            notif = Notification(text)
+            notif.mainloop()
     else:
-        n = Notification('test')
-        n.mainloop()
+        notif = Notification('test')
+        notif.mainloop()
+
