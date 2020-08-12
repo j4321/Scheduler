@@ -60,27 +60,32 @@ class Settings(tk.Toplevel):
         frame.grid(row=0, column=0, sticky='ns', padx=4, pady=4)
 
         # --- tabs
-        cats = ['General', 'Reminders', 'Calendar', 'Events', 'Pomodoro', 'Tasks', 'Timer']
+        cats = ['General', "Eyes' rest", 'Reminders', 'Calendar', 'Events', 'Pomodoro', 'Tasks', 'Timer']
         self.frames = {}
-        self.frames[_('General')] = ttk.Frame(self, relief='raised', border=1, padding=10)
-        self.frames[_('Reminders')] = ttk.Frame(self, relief='raised', border=1, padding=10)
-        self.frames[_('Events')] = ttk.Frame(self, relief='raised', border=1, padding=10)
-        self.frames[_('Tasks')] = ttk.Frame(self, relief='raised', border=1, padding=10)
-        self.frames[_('Timer')] = ttk.Frame(self, relief='raised', border=1, padding=10)
-        self.frames[_('Calendar')] = ttk.Notebook(self)
-        self.frames[_('Pomodoro')] = PomodoroParams(self)
+        self.frames['General'] = ttk.Frame(self, relief='raised', border=1, padding=10)
+        self.frames['Reminders'] = ttk.Frame(self, relief='raised', border=1, padding=10)
+        self.frames["Eyes' rest"] = ttk.Frame(self, relief='raised', border=1, padding=10)
+        self.frames['Events'] = ttk.Frame(self, relief='raised', border=1, padding=10)
+        self.frames['Tasks'] = ttk.Frame(self, relief='raised', border=1, padding=10)
+        self.frames['Timer'] = ttk.Frame(self, relief='raised', border=1, padding=10)
+        self.frames['Calendar'] = ttk.Notebook(self)
+        self.frames['Pomodoro'] = PomodoroParams(self)
 
         w = 0
         for cat in cats:
             c = _(cat) + ' '
             self.listbox.insert('end', c)
             w = max(len(c), w)
-            self.frames[_(cat)].grid(row=0, column=1, sticky='ewns', padx=4, pady=4)
-            self.frames[_(cat)].grid_remove()
-            self.__getattribute__('_init_{}'.format(cat.lower()))()
+            self.frames[cat].grid(row=0, column=1, sticky='ewns', padx=4, pady=4)
+            self.frames[cat].grid_remove()
+            #~self.__getattribute__('_init_{}'.format(cat.lower()))()
+        for attr in dir(self):
+            if attr.startswith('_init_'):
+                self.__getattribute__(attr)()
+
         self.listbox.configure(width=w)
 
-        self._current_frame = self.frames[_('General')]
+        self._current_frame = self.frames['General']
         self._current_frame.grid()
         self.listbox.bind('<<ListboxSelect>>', self._on_listbox_select)
         self.listbox.selection_set(0)
@@ -92,13 +97,13 @@ class Settings(tk.Toplevel):
         frame_btns.grid(row=1, columnspan=2)
 
     def _init_general(self):
-        self.frames[_('General')].columnconfigure(0, weight=1)
+        self.frames['General'].columnconfigure(0, weight=1)
         # --- variables
         self.gui = tk.StringVar(self, CONFIG.get("General", "trayicon").capitalize())
         self.lang = tk.StringVar(self, LANGUAGES[CONFIG.get("General", "language")])
 
         # --- Langue
-        lang_frame = ttk.Frame(self.frames[_('General')])
+        lang_frame = ttk.Frame(self.frames['General'])
 
         ttk.Label(lang_frame, text=_("Language")).pack(side="left")
         languages = list(REV_LANGUAGES)
@@ -110,7 +115,7 @@ class Settings(tk.Toplevel):
         self.cb_lang.pack(side="left", padx=4)
         self.cb_lang.bind('<<ComboboxSelected>>', self.change_langue)
         # --- gui toolkit
-        frame_gui = ttk.Frame(self.frames[_('General')])
+        frame_gui = ttk.Frame(self.frames['General'])
         ttk.Label(frame_gui,
                   text=_("GUI Toolkit for the system tray icon")).pack(side="left")
         self.cb_gui = ttk.Combobox(frame_gui, textvariable=self.gui,
@@ -120,27 +125,15 @@ class Settings(tk.Toplevel):
         self.cb_gui.pack(side="left", padx=4)
         self.cb_gui.bind('<<ComboboxSelected>>', self.change_gui)
         # --- Update checks
-        # self.confirm_update = ttk.Checkbutton(self.frames[_('General')],
+        # self.confirm_update = ttk.Checkbutton(self.frames['General'],
                                               # text=_("Check for updates on start-up"))
         # if CONFIG.getboolean('General', 'check_update', fallback=True):
             # self.confirm_update.state(('selected', '!alternate'))
         # else:
             # self.confirm_update.state(('!selected', '!alternate'))
 
-        # --- eyes
-        frame_eyes = ttk.Frame(self.frames[_('General')])
-        ttk.Label(frame_eyes, text=_("Eyes' rest"),
-                  style='title.TLabel').grid(sticky='w', padx=4, pady=4)
-        ttk.Label(frame_eyes,
-                  text=_("Interval between two eyes' rest (min)")).grid(row=1, column=0, sticky='w', padx=4, pady=4)
-        self.eyes_interval = ttk.Entry(frame_eyes, width=4, justify='center',
-                                       validate='key',
-                                       validatecommand=(self._only_nb, '%P'))
-        self.eyes_interval.insert(0, CONFIG.get("General", "eyes_interval", fallback='20'))
-        self.eyes_interval.grid(row=1, column=1, sticky='w', padx=4, pady=4)
-
         # --- Splash supported
-        self.splash_support = ttk.Checkbutton(self.frames[_('General')],
+        self.splash_support = ttk.Checkbutton(self.frames['General'],
                                               text=_("Check this box if the widgets disappear when you click"))
         if not CONFIG.getboolean('General', 'splash_supported', fallback=True):
             self.splash_support.state(('selected', '!alternate'))
@@ -148,7 +141,7 @@ class Settings(tk.Toplevel):
             self.splash_support.state(('!selected', '!alternate'))
 
         # --- Maintenance
-        frame_maintenance = ttk.Frame(self.frames[_('General')])
+        frame_maintenance = ttk.Frame(self.frames['General'])
         ttk.Label(frame_maintenance, text=_("Maintenance"),
                   style='title.TLabel').grid(sticky='w', padx=4, pady=4)
         ttk.Label(frame_maintenance,
@@ -160,28 +153,40 @@ class Settings(tk.Toplevel):
                                               sticky='w', padx=4, pady=4)
         ttk.Label(frame_maintenance,
                   text=_("Refresh scheduled reminders\n(needed after APScheduler's updates)")).grid(row=2,
-                                                                                                   column=0,
-                                                                                                   sticky='w',
-                                                                                                   padx=4,
-                                                                                                   pady=4)
+                                                                                                    column=0,
+                                                                                                    sticky='w',
+                                                                                                    padx=4,
+                                                                                                    pady=4)
         ttk.Button(frame_maintenance, image=self._im_refresh, padding=1,
                    command=self.refresh).grid(row=2, column=1,
                                               sticky='w', padx=4, pady=4)
 
         # --- placement
-        ttk.Label(self.frames[_('General')], text=_("Interface"),
+        ttk.Label(self.frames['General'], text=_("Interface"),
                   style='title.TLabel').grid(sticky='w', pady=4)
         lang_frame.grid(pady=4, sticky="ew")
         frame_gui.grid(pady=4, sticky="ew")
         # self.confirm_update.grid(pady=4, sticky='w')
         self.splash_support.grid(pady=4, sticky='w')
-        ttk.Separator(self.frames[_('General')], orient='horizontal').grid(sticky='ew', pady=10)
-        frame_eyes.grid(pady=4, sticky="ew")
-        ttk.Separator(self.frames[_('General')], orient='horizontal').grid(sticky='ew', pady=10)
+        ttk.Separator(self.frames['General'], orient='horizontal').grid(sticky='ew', pady=10)
         frame_maintenance.grid(pady=4, sticky="ew")
 
-    def _init_pomodoro(self):
-        pass  # already done in custom class
+    def _init_eyes(self):
+        self.frames["Eyes' rest"].columnconfigure(1, weight=1)
+        ttk.Label(self.frames["Eyes' rest"], style='title.TLabel',
+                  text=_("Interval between two eyes' rest (min)")).grid(row=0, column=0, sticky='w', pady=4)
+        self.eyes_interval = ttk.Entry(self.frames["Eyes' rest"], width=4, justify='center',
+                                       validate='key',
+                                       validatecommand=(self._only_nb, '%P'))
+        self.eyes_interval.insert(0, CONFIG.get("Eyes", "interval", fallback='20'))
+        self.eyes_interval.grid(row=0, column=1, sticky='w', pady=4, padx=4)
+
+        self.eyes_sound = SoundFrame(self.frames["Eyes' rest"],
+                                     CONFIG.get("Eyes", "sound"),
+                                     mute=CONFIG.getboolean("Eyes", "mute"),
+                                     label=_("Sound"), style='title.TLabel')
+
+        self.eyes_sound.grid(sticky='ew', columnspan=2, pady=4)
 
     def _init_reminders(self):
         # --- window
@@ -194,7 +199,7 @@ class Settings(tk.Toplevel):
             self.reminders_blink.state(state)
             self.reminders_sound.state(state)
 
-        frame_window = ttk.Frame(self.frames[_('Reminders')])
+        frame_window = ttk.Frame(self.frames['Reminders'])
         frame_window.columnconfigure(0, weight=1)
         self.reminders_window = ttk.Checkbutton(frame_window, text=_('Banner'),
                                                 style='title.TCheckbutton',
@@ -270,7 +275,7 @@ class Settings(tk.Toplevel):
         self.reminders_sound.grid(sticky='ew', padx=(16, 10), pady=4)
 
         # --- notif
-        frame_notif = ttk.Frame(self.frames[_('Reminders')])
+        frame_notif = ttk.Frame(self.frames['Reminders'])
         self.reminders_notif = ttk.Checkbutton(frame_notif, text=_('Notification'),
                                                style='title.TCheckbutton')
         self.reminders_notif.grid(sticky='w', pady=4)
@@ -279,30 +284,32 @@ class Settings(tk.Toplevel):
 
         # --- placement
         frame_window.pack(anchor='nw', fill='x')
-        ttk.Separator(self.frames[_('Reminders')], orient='horizontal').pack(fill='x', pady=10)
+        ttk.Separator(self.frames['Reminders'], orient='horizontal').pack(fill='x', pady=10)
         frame_notif.pack(anchor='nw')
 
     def _init_calendar(self):
         # --- general config
-        general = ttk.Frame(self.frames[_('Calendar')], padding=4)
+        general = ttk.Frame(self.frames['Calendar'], padding=4)
         general.columnconfigure(1, weight=1)
-        self.frames[_('Calendar')].add(general, text=_('General'))
-        # --- --- opacity
-        self.cal_opacity = OpacityFrame(general, CONFIG.getfloat('Calendar', 'alpha', fallback=0.85))
-        self.cal_opacity.grid(row=0, columnspan=2, sticky='w', padx=4)
+        self.frames['Calendar'].add(general, text=_('General'))
+
+        # --- --- font
+        ttk.Label(general, text=_('Font'),
+                  style='title.TLabel').grid(row=0, sticky='nw', padx=4, pady=4)
+        self.cal_font = FontFrame(general, CONFIG.get('Calendar', 'font'))
+        self.cal_font.grid(row=0, column=1, sticky='w', padx=4, pady=4)
 
         ttk.Separator(general, orient='horizontal').grid(row=1, columnspan=2,
                                                          pady=10, sticky='ew')
-        # --- --- font
-        ttk.Label(general, text=_('Font'),
-                  style='title.TLabel').grid(row=2, sticky='nw', padx=4, pady=4)
-        self.cal_font = FontFrame(general, CONFIG.get('Calendar', 'font'))
-        self.cal_font.grid(row=2, column=1, sticky='w', padx=4, pady=4)
+
+        # --- --- opacity
+        self.cal_opacity = OpacityFrame(general, CONFIG.getfloat('Calendar', 'alpha', fallback=0.85))
+        self.cal_opacity.grid(row=2, columnspan=2, sticky='w', padx=4)
 
         # --- Colors
-        frame_color = ttk.Frame(self.frames[_('Calendar')], padding=4)
+        frame_color = ttk.Frame(self.frames['Calendar'], padding=4)
         frame_color.columnconfigure(3, weight=1)
-        self.frames[_('Calendar')].add(frame_color, text=_('Colors'))
+        self.frames['Calendar'].add(frame_color, text=_('Colors'))
         self.cal_colors = {}
 
         ttk.Label(frame_color, style='subtitle.TLabel',
@@ -348,10 +355,10 @@ class Settings(tk.Toplevel):
             fg.grid(row=3 + 2 * i, column=2, sticky='e', padx=8, pady=4)
 
         # --- Categories
-        categories = ttk.Frame(self.frames[_('Calendar')], padding=4)
+        categories = ttk.Frame(self.frames['Calendar'], padding=4)
         categories.columnconfigure(0, weight=1)
         categories.rowconfigure(0, weight=1)
-        self.frames[_('Calendar')].add(categories, text=_('Event categories'))
+        self.frames['Calendar'].add(categories, text=_('Event categories'))
 
         can = tk.Canvas(categories, bg=self['bg'],
                         highlightthickness=0, width=1,
@@ -392,9 +399,9 @@ class Settings(tk.Toplevel):
             event.widget.yview_scroll(delta, 'units')
 
     def _init_events(self):
-        self.frames[_('Events')].columnconfigure(0, weight=1)
+        self.frames['Events'].columnconfigure(0, weight=1)
         # --- Fonts
-        frame_font = ttk.Frame(self.frames[_('Events')])
+        frame_font = ttk.Frame(self.frames['Events'])
         frame_font.columnconfigure(2, weight=1)
         ttk.Label(frame_font, text=_('Font'),
                   style='title.TLabel').grid(row=0, column=0, sticky='w', padx=4, pady=4)
@@ -423,10 +430,10 @@ class Settings(tk.Toplevel):
         self.events_font.grid(row=5, column=1, padx=4, pady=4)
 
         # --- opacity
-        self.events_opacity = OpacityFrame(self.frames[_('Events')], CONFIG.getfloat("Events", "alpha", fallback=0.85))
+        self.events_opacity = OpacityFrame(self.frames['Events'], CONFIG.getfloat("Events", "alpha", fallback=0.85))
 
         # --- colors
-        frame_color = ttk.Frame(self.frames[_('Events')])
+        frame_color = ttk.Frame(self.frames['Events'])
         ttk.Label(frame_color, text=_('Colors'),
                   style='title.TLabel').grid(row=0, column=0, sticky='w',
                                              padx=8, pady=4)
@@ -441,16 +448,16 @@ class Settings(tk.Toplevel):
 
         # --- placement
         frame_font.grid(sticky='ew')
-        ttk.Separator(self.frames[_('Events')], orient='horizontal').grid(sticky='ew', pady=8)
+        ttk.Separator(self.frames['Events'], orient='horizontal').grid(sticky='ew', pady=8)
         self.events_opacity.grid(sticky='w', padx=4)
-        ttk.Separator(self.frames[_('Events')], orient='horizontal').grid(sticky='ew', pady=8)
+        ttk.Separator(self.frames['Events'], orient='horizontal').grid(sticky='ew', pady=8)
         frame_color.grid(sticky='w')
 
     def _init_tasks(self):
-        self.frames[_('Tasks')].columnconfigure(0, weight=1)
+        self.frames['Tasks'].columnconfigure(0, weight=1)
         self.tasks_hide_comp = tk.BooleanVar(self, CONFIG.getboolean('Tasks', 'hide_completed'))
         # --- Fonts
-        frame_font = ttk.Frame(self.frames[_('Tasks')])
+        frame_font = ttk.Frame(self.frames['Tasks'])
         frame_font.columnconfigure(2, weight=1)
         ttk.Label(frame_font, text=_('Font'),
                   style='title.TLabel').grid(row=0, column=0, sticky='w', padx=4, pady=4)
@@ -471,10 +478,10 @@ class Settings(tk.Toplevel):
         self.tasks_font.grid(row=5, column=1, padx=4, pady=4)
 
         # --- opacity
-        self.tasks_opacity = OpacityFrame(self.frames[_('Tasks')], CONFIG.getfloat("Tasks", "alpha", fallback=0.85))
+        self.tasks_opacity = OpacityFrame(self.frames['Tasks'], CONFIG.getfloat("Tasks", "alpha", fallback=0.85))
 
         # --- colors
-        frame_color = ttk.Frame(self.frames[_('Tasks')])
+        frame_color = ttk.Frame(self.frames['Tasks'])
         ttk.Label(frame_color, text=_('Colors'),
                   style='title.TLabel').grid(row=0, column=0, sticky='w',
                                              padx=8, pady=4)
@@ -489,18 +496,18 @@ class Settings(tk.Toplevel):
 
         # --- placement
         frame_font.grid(sticky='ew')
-        ttk.Separator(self.frames[_('Tasks')], orient='horizontal').grid(sticky='ew', pady=8)
+        ttk.Separator(self.frames['Tasks'], orient='horizontal').grid(sticky='ew', pady=8)
         self.tasks_opacity.grid(sticky='w', padx=4)
-        ttk.Separator(self.frames[_('Tasks')], orient='horizontal').grid(sticky='ew', pady=8)
+        ttk.Separator(self.frames['Tasks'], orient='horizontal').grid(sticky='ew', pady=8)
         frame_color.grid(sticky='w')
-        ttk.Separator(self.frames[_('Tasks')], orient='horizontal').grid(sticky='ew', pady=8)
-        ttk.Checkbutton(self.frames[_('Tasks')], text=_('Hide completed tasks'),
+        ttk.Separator(self.frames['Tasks'], orient='horizontal').grid(sticky='ew', pady=8)
+        ttk.Checkbutton(self.frames['Tasks'], text=_('Hide completed tasks'),
                         variable=self.tasks_hide_comp).grid(sticky='w', padx=4, pady=4)
 
     def _init_timer(self):
-        self.frames[_('Timer')].columnconfigure(0, weight=1)
+        self.frames['Timer'].columnconfigure(0, weight=1)
         # --- Fonts
-        frame_font = ttk.Frame(self.frames[_('Timer')])
+        frame_font = ttk.Frame(self.frames['Timer'])
         frame_font.columnconfigure(2, weight=1)
         ttk.Label(frame_font, text=_('Font'),
                   style='title.TLabel').grid(row=0, column=0, sticky='w', padx=4, pady=4)
@@ -521,10 +528,10 @@ class Settings(tk.Toplevel):
         self.timer_font_intervals.grid(row=5, column=1, padx=4, pady=4)
 
         # --- opacity
-        self.timer_opacity = OpacityFrame(self.frames[_('Timer')], CONFIG.getfloat("Timer", "alpha", fallback=0.85))
+        self.timer_opacity = OpacityFrame(self.frames['Timer'], CONFIG.getfloat("Timer", "alpha", fallback=0.85))
 
         # --- colors
-        frame_color = ttk.Frame(self.frames[_('Timer')])
+        frame_color = ttk.Frame(self.frames['Timer'])
         ttk.Label(frame_color, text=_('Colors'),
                   style='title.TLabel').grid(row=0, column=0, sticky='w',
                                              padx=8, pady=4)
@@ -539,9 +546,9 @@ class Settings(tk.Toplevel):
 
         # --- placement
         frame_font.grid(sticky='ew')
-        ttk.Separator(self.frames[_('Timer')], orient='horizontal').grid(sticky='ew', pady=8)
+        ttk.Separator(self.frames['Timer'], orient='horizontal').grid(sticky='ew', pady=8)
         self.timer_opacity.grid(sticky='w', padx=4)
-        ttk.Separator(self.frames[_('Timer')], orient='horizontal').grid(sticky='ew', pady=8)
+        ttk.Separator(self.frames['Timer'], orient='horizontal').grid(sticky='ew', pady=8)
         frame_color.grid(sticky='w')
 
     def _on_listbox_select(self, event):
@@ -627,10 +634,15 @@ class Settings(tk.Toplevel):
         # CONFIG.set("General", "check_update", str('selected' in self.confirm_update.state()))
         CONFIG.set('General', 'splash_supported', str(not self.splash_support.instate(('selected',))))
 
+        # --- eyes
         eyes = self.eyes_interval.get()
         if eyes == '':
             eyes = '20'
-        CONFIG.set("General", "eyes_interval", eyes)
+        CONFIG.set("Eyes", "interval", eyes)
+        sound, mute = self.eyes_sound.get()
+        CONFIG.set("Eyes", "sound", sound)
+        CONFIG.set("Eyes", "mute", str(mute))
+
         # --- Reminders
         CONFIG.set("Reminders", 'window', str("selected" in self.reminders_window.state()))
         CONFIG.set("Reminders", 'window_bg', self.reminders_window_bg.get_color())
@@ -716,9 +728,14 @@ class Settings(tk.Toplevel):
         CONFIG.set("Timer", "foreground", self.timer_fg.get_color())
 
         # --- Pomodoro
-        stop_pomodoro = self.frames[_('Pomodoro')].valide()
+        stop_pomodoro = self.frames['Pomodoro'].valide()
         if stop_pomodoro:
             self.master.widgets['Pomodoro'].stop(False)
         save_config()
         self.destroy()
+
+
+
+
+
 
