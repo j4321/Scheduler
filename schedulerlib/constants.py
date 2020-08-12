@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Scheduler - Task scheduling and calendar
@@ -102,17 +101,24 @@ logging.getLogger().addHandler(logging.StreamHandler())
 # --- config
 CONFIG = ConfigParser()
 
-if not CONFIG.read(CONFIG_PATH):
+sections = ['General', 'Eyes', 'Reminders', 'Events', 'Tasks', 'Timer',
+            'Calendar', 'Pomodoro', 'Categories', 'PomodoroTasks']
+
+def create_config():
     CONFIG.add_section('General')
     CONFIG.set('General', 'locale', locale.getdefaultlocale()[0])
     CONFIG.set('General', 'backups', '10')
     CONFIG.set('General', 'trayicon', '')
     CONFIG.set("General", "language", "")
-    CONFIG.set("General", "eyes_interval", "20")
     CONFIG.set("General", "splash_supported",
                str(os.environ.get('DESKTOP_SESSION') != 'plasma'))
     CONFIG.set("General", "soundplayer", "mpg123")
     CONFIG.set("General", "silent_mode", "False")
+
+    CONFIG.add_section('Eyes')
+    CONFIG.set("Eyes", "interval", "20")
+    CONFIG.set("Eyes", "sound", os.path.join(PATH_SOUNDS, 'ting.mp3'))
+    CONFIG.set("Eyes", "mute", 'False')
 
     CONFIG.add_section('Reminders')
     CONFIG.set('Reminders', 'window', 'True')
@@ -188,6 +194,38 @@ if not CONFIG.read(CONFIG_PATH):
     CONFIG.add_section('Categories')
     CONFIG.set('Categories', 'default', 'white, #186CBE')
 
+    CONFIG.add_section('Pomodoro')
+    CONFIG.set('Pomodoro', 'geometry', '')
+    CONFIG.set('Pomodoro', 'visible', 'True')
+    CONFIG.set('Pomodoro', 'alpha', '0.85')
+    CONFIG.set('Pomodoro', 'foreground', 'white')
+    CONFIG.set('Pomodoro', 'background', 'gray10')
+    CONFIG.set('Pomodoro', 'position', 'normal')
+    CONFIG.set("Pomodoro", "font", "FreeMono 48")
+    CONFIG.set("Pomodoro", "work_time", "25")
+    CONFIG.set("Pomodoro", "work_bg", "#ffffff")
+    CONFIG.set("Pomodoro", "work_fg", "#000000")
+    CONFIG.set("Pomodoro", "break_time", "5")
+    CONFIG.set("Pomodoro", "break_bg", "#77ABE2")
+    CONFIG.set("Pomodoro", "break_fg", "#000000")
+    CONFIG.set("Pomodoro", "rest_time", "20")
+    CONFIG.set("Pomodoro", "rest_bg", "#FF7A40")
+    CONFIG.set("Pomodoro", "rest_fg", "#000000")
+    CONFIG.set("Pomodoro", "beep", os.path.join(PATH_SOUNDS, 'ting.mp3'))
+    CONFIG.set("Pomodoro", "mute", "False")
+    CONFIG.set("Pomodoro", "legend_max_height", "6")
+
+    CONFIG.add_section("PomodoroTasks")
+
+
+def save_config():
+    CONFIG.set('Calendar', 'holidays', ', '.join(HOLIDAYS))
+    with open(CONFIG_PATH, 'w') as file:
+        CONFIG.write(file)
+
+
+# restore config
+CONFIG.read(PATH_CONFIG)
 if not CONFIG.has_section('Pomodoro'):
     CONFIG.add_section('Pomodoro')
     CONFIG.set('Pomodoro', 'geometry', '')
@@ -212,6 +250,12 @@ if not CONFIG.has_section('Pomodoro'):
 
     CONFIG.add_section("PomodoroTasks")
 
+if not CONFIG.has_section('Eyes'):
+    CONFIG.add_section('Eyes')
+    CONFIG.set("Eyes", "interval", "20")
+    CONFIG.set("Eyes", "sound", os.path.join(PATH_SOUNDS, 'ting.mp3'))
+    CONFIG.set("Eyes", "mute", 'False')
+
 if not CONFIG.has_section('Reminders'):
     CONFIG.add_section('Reminders')
     CONFIG.set('Reminders', 'window', 'True')
@@ -226,11 +270,15 @@ if not CONFIG.has_section('Reminders'):
     CONFIG.set('Reminders', 'blink', 'True')
     CONFIG.set('Reminders', 'timeout', '5')
 
-
-def save_config():
-    CONFIG.set('Calendar', 'holidays', ', '.join(HOLIDAYS))
-    with open(CONFIG_PATH, 'w') as file:
-        CONFIG.write(file)
+if set(CONFIG.sections()) != set(sections):
+    if os.path.exists(PATH_CONFIG):
+        os.rename(PATH_CONFIG, PATH_CONFIG + '.bak.error')
+    CONFIG.clear()
+    if not (CONFIG.read(PATH_CONFIG + '.bak') and set(CONFIG.sections()) == set(sections)):
+        CONFIG.clear()
+        create_config()
+else:
+    os.rename(PATH_CONFIG, PATH_CONFIG + '.bak')
 
 
 # --- language
@@ -260,6 +308,18 @@ gettext.translation(APP_NAME, PATH_LOCALE,
 
 FREQ_REV_TRANSLATION = {_("hours"): "hours", _("minutes"): "minutes", _("days"): "days"}
 
+# --- retrieve holidays
+HOLIDAYS = set(CONFIG.get('Calendar', 'holidays').split(', '))
+if '' in HOLIDAYS:
+    HOLIDAYS.remove('')
+
+# --- default pomodoro task
+if not CONFIG.options("PomodoroTasks"):
+    # task = color
+    CONFIG.set("PomodoroTasks", _("Work"), CMAP[0])
+
+save_config()
+
 
 # change babel formatting default arguments
 def format_date(date=None, format="short", locale=CONFIG.get("General", "locale")):
@@ -282,18 +342,6 @@ try:
 except Exception:
     # on some platforms there are issues with the default locale format
     pass
-
-
-# --- retrieve holidays
-HOLIDAYS = set(CONFIG.get('Calendar', 'holidays').split(', '))
-if '' in HOLIDAYS:
-    HOLIDAYS.remove('')
-
-# --- default pomodoro task
-if not CONFIG.options("PomodoroTasks"):
-    # task = color
-    CONFIG.set("PomodoroTasks", _("Work"), CMAP[0])
-
 
 # --- images
 ICON_NAME = "scheduler-tray"  # gtk / qt tray icon
@@ -791,4 +839,7 @@ def only_nb(text):
 
 def scrub(table_name):
     return ''.join(ch for ch in table_name if ch.isalnum() or ch == '_')
+
+
+
 
