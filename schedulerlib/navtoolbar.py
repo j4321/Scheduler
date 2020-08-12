@@ -36,6 +36,8 @@ try:
     from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 except ImportError:
     from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg as NavigationToolbar2Tk
+from matplotlib.backends._backend_tk import ToolTip
+from matplotlib.backend_bases import NavigationToolbar2
 from matplotlib import rcParams
 
 from .messagebox import showerror
@@ -57,10 +59,40 @@ class NavigationToolbar(NavigationToolbar2Tk):
         ('Save', _('Save the figure'), os.path.join(rcParams['datapath'], 'images', 'filesave.gif'), 'save_figure'),
     )
 
-    def __init__(self, canvas, window, tight_layout_cmd, toggle_grid_cmd):
+    def __init__(self, canvas, window, tight_layout_cmd, toggle_grid_cmd, pack_toolbar=True):
         self.tight_layout = tight_layout_cmd
         self.toggle_grid = toggle_grid_cmd
-        NavigationToolbar2Tk.__init__(self, canvas, window)
+
+        # Avoid using self.window (prefer self.canvas.get_tk_widget().master),
+        # so that Tool implementations can reuse the methods.
+        self.window = window
+
+        tk.Frame.__init__(self, master=window, borderwidth=2,
+                          width=int(canvas.figure.bbox.width), height=50)
+
+        self._buttons = {}
+        for text, tooltip_text, image_file, callback in self.toolitems:
+            if text is None:
+                # Add a spacer; return value is unused.
+                self._Spacer()
+            else:
+                self._buttons[text] = button = self._Button(
+                    text,
+                    image_file,
+                    toggle=callback in ["zoom", "pan"],
+                    command=getattr(self, callback),
+                )
+                if tooltip_text is not None:
+                    ToolTip.createToolTip(button, tooltip_text)
+
+        self.message = tk.StringVar(master=self)
+        self._message_label = tk.Label(master=self, textvariable=self.message)
+        self._message_label.pack(side=tk.RIGHT)
+
+        NavigationToolbar2.__init__(self, canvas)
+        if pack_toolbar:
+            self.pack(side=tk.BOTTOM, fill=tk.X)
+
 
     def save_figure(self, *args):
         filetypes = self.canvas.get_supported_filetypes().copy()
@@ -102,9 +134,10 @@ class NavigationToolbar(NavigationToolbar2Tk):
         except Exception as e:
             showerror(_("Error"), str(e))
 
-    def _Button(self, text, file, command, **kwargs):
-        im = PhotoImage(master=self, file=file)
+    def _Button(self, text, image_file, toggle, command):
+        im = PhotoImage(master=self, file=image_file)
         b = ttk.Button(master=self, text=text, padding=1, image=im, command=command)
         b._ntimage = im
         b.pack(side=tk.LEFT)
         return b
+
