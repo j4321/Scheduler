@@ -27,6 +27,7 @@ from .trayicon import SubMenu
 
 
 class Eyes(SubMenu):
+    """Eyes' rest submenu."""
     def __init__(self, parent, tkwindow):
         SubMenu.__init__(self, parent=parent)
         self.time = [0, 0]
@@ -47,7 +48,7 @@ class Eyes(SubMenu):
         if self.is_on:
             self.is_on = False
             self.time = [0, 0]
-            self.set_item_image(0, _('Start'))
+            self.set_item_label(0, _('Start'))
             self.set_item_image(0, IM_START_M)
         else:
             self.is_on = True
@@ -63,9 +64,14 @@ class Eyes(SubMenu):
             if self.time[1] == 60:
                 self.time[1] = 0
                 self.time[0] += 1
-                if self.time[0] == CONFIG.getint("General", "eyes_interval", fallback=20):
+                if self.time[0] >= CONFIG.getint("Eyes", "interval", fallback=20):
                     Popen(["notify-send", "-i", IM_EYE, _("Eyes' rest"),
                            _("Look away from your screen for 20 s")])
+                    if (not CONFIG.getboolean("Eyes", "mute", fallback=False) and
+                            not CONFIG.getboolean('General', 'silent_mode', fallback=False)):
+                        Popen([CONFIG.get("General", "soundplayer"),
+                               CONFIG.get("Eyes", "sound")])
+
                     self.time[0] = 0
 
             self._after_id = self.tkwindow.after(1000, self.timer)
