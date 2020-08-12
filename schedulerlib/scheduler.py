@@ -196,6 +196,7 @@ class EventScheduler(Tk):
                        arrowcolor=[('disabled', self.style.lookup('TMenubutton', 'foreground', ['disabled']))])
         bg = self.style.lookup('TFrame', 'background', default='#ececec')
         self.configure(bg=bg)
+        self.option_add('*Scheduler.background', bg)
         self.option_add('*Toplevel.background', bg)
         self.option_add('*Menu.background', bg)
         self.option_add('*Menu.tearOff', False)
@@ -440,7 +441,10 @@ apply {name {
     def report_callback_exception(self, *args):
         err = ''.join(traceback.format_exception(*args))
         logging.error(err)
-        showerror('Exception', str(args[1]), err)
+        if args[0] is not KeyboardInterrupt:
+            showerror('Exception', str(args[1]), err)
+        else:
+            self.exit()
 
     def save(self):
         logging.info('Save event database')
@@ -870,4 +874,6 @@ apply {name {
             if event['Task']:
                 tasks.append(event)
         return tasks
+
+
 
