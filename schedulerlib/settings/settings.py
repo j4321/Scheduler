@@ -26,7 +26,7 @@ from tkinter import ttk
 from PIL.ImageTk import PhotoImage
 
 from schedulerlib.constants import save_config, CONFIG, LANGUAGES, REV_LANGUAGES, \
-    TOOLKITS, IM_ADD, IM_DEL, only_nb, IM_CLEANUP, IM_REFRESH
+    TOOLKITS, IM_ADD, IM_DEL, only_nb, IM_CLEANUP, IM_REFRESH, IM_UP, IM_DOWN
 from schedulerlib.messagebox import showerror, showinfo, askyesno
 from schedulerlib.ttkwidgets import AutoScrollbar
 from .font import FontFrame
@@ -46,6 +46,8 @@ class Settings(tk.Toplevel):
 
         self._only_nb = self.register(only_nb)
 
+        self._im_up = PhotoImage(master=self, file=IM_UP)
+        self._im_down = PhotoImage(master=self, file=IM_DOWN)
         self._im_plus = PhotoImage(master=self, file=IM_ADD)
         self._im_moins = PhotoImage(master=self, file=IM_DEL)
         self._im_cleanup = PhotoImage(master=self, file=IM_CLEANUP)
@@ -400,18 +402,18 @@ class Settings(tk.Toplevel):
         self.cat_frame = ttk.Frame(can)
         can.create_window(0, 0, anchor='nw', window=self.cat_frame)
 
-        for i, cat in enumerate(sorted(CONFIG.options("Categories"))):
-            l = ttk.Label(self.cat_frame, text=cat, style='subtitle.TLabel')
-            col = CONFIG.get('Categories', cat).split(', ')
-            bg = ColorFrame(self.cat_frame, col[1].strip(), _('Background'))
-            fg = ColorFrame(self.cat_frame, col[0].strip(), _('Foreground'))
-            b = ttk.Button(self.cat_frame, image=self._im_moins, padding=2,
-                           command=lambda c=cat: self.del_cat(c))
-            self.cats[cat] = [l, bg, fg, b]
-            l.grid(row=i, column=0, sticky='e', padx=4, pady=4)
-            bg.grid(row=i, column=1, sticky='e', padx=4, pady=4)
-            fg.grid(row=i, column=2, sticky='e', padx=4, pady=4)
-            b.grid(row=i, column=3, sticky='e', padx=4, pady=4)
+        cats = []
+        try:
+            for cat, val in CONFIG.items('Categories'):
+                fg, bg, order = val.split(', ')
+                cats.append((int(order), cat, fg, bg))
+        except ValueError:
+            for cat, val in CONFIG.items('Categories'):
+                fg, bg = val.split(', ')
+                cats.append((0, cat, fg, bg))
+
+        for i, (order, cat, fg, bg) in enumerate(sorted(cats)):
+            self._add_cat(cat, bg, fg, i)
         self.update_idletasks()
         can.configure(width=self.cat_frame.winfo_reqwidth())
         can.configure(scrollregion=can.bbox('all'))
@@ -600,6 +602,28 @@ class Settings(tk.Toplevel):
                  _("The GUI Toolkit setting will take effect after restarting the application"),
                  parent=self)
 
+    def up_cat(self, cat):
+        widgets = self.cats[cat]
+        row = widgets[0].grid_info()['row']
+        if not row:  # already 0, cannot move higher
+            return
+        widgets_above = self.cat_frame.grid_slaves(row - 1)
+        for widget in widgets_above:
+            widget.grid_configure(row=row)
+        for widget in widgets:
+            widget.grid_configure(row=row - 1)
+
+    def down_cat(self, cat):
+        widgets = self.cats[cat]
+        row = widgets[0].grid_info()['row']
+        if row == self.cat_frame.grid_size()[1] - 1:  # already last row, cannot move lower
+            return
+        widgets_below = self.cat_frame.grid_slaves(row + 1)
+        for widget in widgets_below:
+            widget.grid_configure(row=row)
+        for widget in widgets:
+            widget.grid_configure(row=row + 1)
+
     def del_cat(self, cat):
         if len(self.cats) == 1:
             showerror(_('Error'),
@@ -613,10 +637,32 @@ class Settings(tk.Toplevel):
                          "This action cannot be undone.").format(category=cat))
         if rep:
             CONFIG.remove_option("Categories", cat)
+            row = self.cats[cat][0].grid_info()['row']
             for w in self.cats[cat]:
                 w.destroy()
             del self.cats[cat]
+            for r in range(row + 1, self.cat_frame.grid_size()[1]):
+                for widget in self.cat_frame.grid_slaves(r):
+                    widget.grid_configure(row=r - 1)
             save_config()
+
+    def _add_cat(self, cat, bg, fg, row):
+        l = ttk.Label(self.cat_frame, text=cat, style='subtitle.TLabel')
+        bg = ColorFrame(self.cat_frame, bg.strip(), _('Background'))
+        fg = ColorFrame(self.cat_frame, fg.strip(), _('Foreground'))
+        b = ttk.Button(self.cat_frame, image=self._im_moins, padding=2,
+                       command=lambda c=cat: self.del_cat(c))
+        b_up = ttk.Button(self.cat_frame, image=self._im_up, padding=2,
+                          command=lambda c=cat: self.up_cat(c))
+        b_down = ttk.Button(self.cat_frame, image=self._im_down, padding=2,
+                            command=lambda c=cat: self.down_cat(c))
+        self.cats[cat] = [l, bg, fg, b, b_up, b_down]
+        l.grid(row=row, column=0, sticky='e', padx=4, pady=4)
+        bg.grid(row=row, column=1, sticky='e', padx=4, pady=4)
+        fg.grid(row=row, column=2, sticky='e', padx=4, pady=4)
+        b_up.grid(row=row, column=3, sticky='e', padx=(8, 0), pady=4)
+        b_down.grid(row=row, column=4, sticky='e', padx=4, pady=4)
+        b.grid(row=row, column=5, sticky='e', padx=(0, 4), pady=4)
 
     def add_cat(self):
 
@@ -627,18 +673,8 @@ class Settings(tk.Toplevel):
                           _("The category {category} already exists.").format(category=cat),
                           parent=self)
             elif cat:
-                i = self.cat_frame.grid_size()[1] + 1
-                col = 'white', '#186CBE'
-                l = ttk.Label(self.cat_frame, text=cat, style='subtitle.TLabel')
-                bg = ColorFrame(self.cat_frame, col[1].strip(), _('Background'))
-                fg = ColorFrame(self.cat_frame, col[0].strip(), _('Foreground'))
-                b = ttk.Button(self.cat_frame, image=self._im_moins, padding=2,
-                               command=lambda c=cat: self.del_cat(c))
-                self.cats[cat] = [l, bg, fg, b]
-                l.grid(row=i, column=0, sticky='e', padx=4, pady=4)
-                bg.grid(row=i, column=1, sticky='e', padx=4, pady=4)
-                fg.grid(row=i, column=2, sticky='e', padx=4, pady=4)
-                b.grid(row=i, column=3, sticky='e', padx=4, pady=4)
+                row = self.cat_frame.grid_size()[1] + 1
+                self._add_cat(cat, '#186CBE', 'white', row)
             top.destroy()
 
         top = tk.Toplevel(self)
@@ -711,8 +747,11 @@ class Settings(tk.Toplevel):
         for name, widget in self.cal_colors.items():
             CONFIG.set("Calendar", name, widget.get_color())
 
-        for cat, (l, bg, fg, b) in self.cats.items():
-            CONFIG.set("Categories", cat, "{}, {}".format(fg.get_color(), bg.get_color()))
+        for row in range(self.cat_frame.grid_size()[1]):
+            cat = self.cat_frame.grid_slaves(row, 0)[0].cget('text')
+            CONFIG.set("Categories", cat,
+                       "{}, {}, {}".format(self.cats[cat][2].get_color(),
+                                           self.cats[cat][1].get_color(), row))
 
         # --- Events
         CONFIG.set("Events", "alpha", "%.2f" % (self.events_opacity.get_opacity()))
@@ -773,6 +812,7 @@ class Settings(tk.Toplevel):
             self.master.widgets['Pomodoro'].stop(False)
         save_config()
         self.destroy()
+
 
 
 
