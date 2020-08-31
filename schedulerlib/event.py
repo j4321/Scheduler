@@ -71,12 +71,15 @@ class Event:
         d = d.replace(minute=(d.minute // 5) * 5)
         d = kw.pop('Start', d)
         self.scheduler = scheduler
+        default_cat = CONFIG.get('Calendar', 'default_category',
+                                 fallback=CONFIG.options('Categories')[0])
         defaults = {'Summary': '', 'Place': '', 'Description': '',
                     'Start': d, 'End': d + timedelta(hours=1), 'Task': False,
                     'Repeat': {}, 'WholeDay': False, 'Reminders': {},
-                    'Category': CONFIG.get('Calendar', 'default_category',
-                                           fallback=CONFIG.options('Categories')[0])}
+                    'Category': default_cat}
         defaults.update(kw)
+        if not CONFIG.has_option('Categories', defaults['Category']):
+            defaults['Category'] = default_cat
         self._properties = defaults
         self.iid = iid
 

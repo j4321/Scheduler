@@ -194,7 +194,8 @@ class EventScheduler(Tk):
                        arrowcolor=[("disabled", "gray40")])
 
         self.style.map('TMenubutton',
-                       arrowcolor=[('disabled', self.style.lookup('TMenubutton', 'foreground', ['disabled']))])
+                       arrowcolor=[('disabled',
+                                    self.style.lookup('TMenubutton', 'foreground', ['disabled']))])
         bg = self.style.lookup('TFrame', 'background', default='#ececec')
         self.configure(bg=bg)
         self.option_add('*Scheduler.background', bg)
@@ -203,10 +204,14 @@ class EventScheduler(Tk):
         self.option_add('*Menu.tearOff', False)
         self.option_add('*Text.relief', 'flat')
         self.option_add('*Text.highlightThickness', 0)
-        self.option_add('*Text.selectBackground', self.style.lookup('TEntry', 'selectbackground', ('focus',)))
-        self.option_add('*Text.inactiveSelectBackground', self.style.lookup('TEntry', 'selectforeground'))
-        self.option_add('*Text.selectForeground', self.style.lookup('TEntry', 'selectforeground', ('focus',)))
-        self.option_add('*Text.inactiveSelectForeground', self.style.lookup('TEntry', 'selectforeground'))
+        self.option_add('*Text.selectBackground',
+                        self.style.lookup('TEntry', 'selectbackground', ('focus',)))
+        self.option_add('*Text.inactiveSelectBackground',
+                        self.style.lookup('TEntry', 'selectforeground'))
+        self.option_add('*Text.selectForeground',
+                        self.style.lookup('TEntry', 'selectforeground', ('focus',)))
+        self.option_add('*Text.inactiveSelectForeground',
+                        self.style.lookup('TEntry', 'selectforeground'))
         # toggle text
         self._open_image = PhotoImage(name='img_opened', file=IM_OPENED, master=self)
         self._closed_image = PhotoImage(name='img_closed', file=IM_CLOSED, master=self)
@@ -285,11 +290,16 @@ class EventScheduler(Tk):
                                                {'expand': '1'})],
                                  'sticky': 'ns'})])
         # --- tree
-        columns = {_('Summary'): ({'stretch': True, 'width': 300}, lambda: self._sort_by_desc(_('Summary'), False)),
-                   _('Place'): ({'stretch': True, 'width': 200}, lambda: self._sort_by_desc(_('Place'), False)),
-                   _('Start'): ({'stretch': False, 'width': 150}, lambda: self._sort_by_date(_('Start'), False)),
-                   _('End'): ({'stretch': False, 'width': 150}, lambda: self._sort_by_date(_("End"), False)),
-                   _('Category'): ({'stretch': False, 'width': 100}, lambda: self._sort_by_desc(_('Category'), False))}
+        columns = {_('Summary'): ({'stretch': True, 'width': 300},
+                                  lambda: self._sort_by_desc(_('Summary'), False)),
+                   _('Place'): ({'stretch': True, 'width': 200},
+                                lambda: self._sort_by_desc(_('Place'), False)),
+                   _('Start'): ({'stretch': False, 'width': 150},
+                                lambda: self._sort_by_date(_('Start'), False)),
+                   _('End'): ({'stretch': False, 'width': 150},
+                              lambda: self._sort_by_date(_("End"), False)),
+                   _('Category'): ({'stretch': False, 'width': 100},
+                                   lambda: self._sort_by_desc(_('Category'), False))}
         self.tree = Treeview(self, show="headings", columns=list(columns))
         for label, (col_prop, cmd) in columns.items():
             self.tree.column(label, **col_prop)
@@ -845,6 +855,17 @@ apply {name {
         if splash_supp != CONFIG.get('General', 'splash_supported'):
             for widget in self.widgets.values():
                 widget.update_position()
+        # refresh categories
+        cats = CONFIG.options('Categories')
+        default_cat = CONFIG.get('Calendar', 'default_category', fallback=cats[0])
+        for iid in self.tree.get_children():
+            cat = self.tree.set(iid, 'Category')
+            if cat not in cats:
+                self.tree.set(iid, 'Category', default_cat)
+                self.widgets['Calendar'].remove_event(self.events[iid])
+                self.events[iid]['Category'] = default_cat
+                self.widgets['Calendar'].add_event(self.events[iid])
+        self.save()
 
     # --- week schedule
     def get_next_week_events(self):
