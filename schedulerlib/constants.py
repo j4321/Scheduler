@@ -190,6 +190,7 @@ def create_config():
     CONFIG.set('Calendar', 'tooltipforeground', 'white')
     CONFIG.set('Calendar', 'tooltipbackground', 'black')
     CONFIG.set('Calendar', 'position', 'normal')
+    CONFIG.set('Calendar', 'default_category', 'default')
 
     CONFIG.add_section('Categories')
     CONFIG.set('Categories', 'default', 'white, #186CBE')
@@ -839,6 +840,7 @@ def only_nb(text):
 
 def scrub(table_name):
     return ''.join(ch for ch in table_name if ch.isalnum() or ch == '_')
+
 
 
 

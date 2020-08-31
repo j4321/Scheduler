@@ -306,6 +306,29 @@ class Settings(tk.Toplevel):
         self.cal_opacity = OpacityFrame(general, CONFIG.getfloat('Calendar', 'alpha', fallback=0.85))
         self.cal_opacity.grid(row=2, columnspan=2, sticky='w', padx=4)
 
+        ttk.Separator(general, orient='horizontal').grid(row=3, columnspan=2,
+                                                         pady=10, sticky='ew')
+
+        # --- --- default category
+        ttk.Label(general, text=_('Default category'),
+                  style='title.TLabel').grid(row=4, sticky='nw', padx=4, pady=4)
+
+        self.cats = {}  # categories
+
+        def postcmd():
+            cats = sorted(self.cats)
+            self.default_category['values'] = cats
+            if not self.default_category.get() in cats:
+                self.default_category.set(cats[0])
+
+        self.default_category = ttk.Combobox(general, postcommand=postcmd,
+                                             state='readonly')
+        self.default_category.set(CONFIG.get('Calendar', 'default_category',
+                                             fallback=CONFIG.options('Categories')[0]))
+        self.default_category.grid(row=4, column=1, sticky='w', padx=4)
+
+
+
         # --- Colors
         frame_color = ttk.Frame(self.frames['Calendar'], padding=4)
         frame_color.columnconfigure(3, weight=1)
@@ -374,8 +397,7 @@ class Settings(tk.Toplevel):
         self.cat_frame = ttk.Frame(can)
         can.create_window(0, 0, anchor='nw', window=self.cat_frame)
 
-        self.cats = {}
-        for i, cat in enumerate(CONFIG.options("Categories")):
+        for i, cat in enumerate(sorted(CONFIG.options("Categories"))):
             l = ttk.Label(self.cat_frame, text=cat, style='subtitle.TLabel')
             col = CONFIG.get('Categories', cat).split(', ')
             bg = ColorFrame(self.cat_frame, col[1].strip(), _('Background'))
@@ -665,6 +687,10 @@ class Settings(tk.Toplevel):
         font = self.cal_font.get_font()
         CONFIG.set("Calendar", "font", "{} {}".format(font['family'].replace(' ', '\ '),
                                                       font['size']))
+        default_cat = self.default_category.get()
+        if default_cat not in self.cats:
+            default_cat = list(self.cats)[0]
+        CONFIG.set("Calendar", "default_category", default_cat)
         CONFIG.set("Calendar", "bordercolor", self.cal_bd.get_color())
         CONFIG.set("Calendar", "background", self.cal_bg.get_color())
         CONFIG.set("Calendar", "foreground", self.cal_fg.get_color())
@@ -733,6 +759,7 @@ class Settings(tk.Toplevel):
             self.master.widgets['Pomodoro'].stop(False)
         save_config()
         self.destroy()
+
 
 
 
