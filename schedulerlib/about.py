@@ -78,11 +78,18 @@ class About(Toplevel):
         texte = Text(fen, width=50, height=18)
         texte.pack()
         texte.insert("end",
-                     _("Scheduler is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\n\n"))
+                     _("Scheduler is free software: you can redistribute it and/or "
+                       "modify it under the terms of the GNU General Public License "
+                       "as published by the Free Software Foundation, either version 3 "
+                       "of the License, or (at your option) any later version.\n\n"))
         texte.insert("end",
-                     _("Scheduler is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.\n\n"))
+                     _("Scheduler is distributed in the hope that it will be useful, "
+                       "but WITHOUT ANY WARRANTY; without even the implied warranty of "
+                       "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU "
+                       "General Public License for more details.\n\n"))
         texte.insert("end",
-                     _("You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/."))
+                     _("You should have received a copy of the GNU General Public License "
+                       "along with this program. If not, see http://www.gnu.org/licenses/."))
 
         i = int(texte.index("5.end").split(".")[1])
         texte.tag_add("link", "5.%i" % (i - 29), "5.%i" % (i - 1))
@@ -99,3 +106,4 @@ class About(Toplevel):
         b_close.pack(side="bottom")
         b_close.focus_set()
         fen.wait_window(fen)
+

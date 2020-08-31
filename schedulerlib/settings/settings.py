@@ -60,7 +60,8 @@ class Settings(tk.Toplevel):
         frame.grid(row=0, column=0, sticky='ns', padx=4, pady=4)
 
         # --- tabs
-        cats = ['General', "Eyes' rest", 'Reminders', 'Calendar', 'Events', 'Pomodoro', 'Tasks', 'Timer']
+        cats = ['General', "Eyes' rest", 'Reminders', 'Calendar', 'Events',
+                'Pomodoro', 'Tasks', 'Timer']
         self.frames = {}
         self.frames['General'] = ttk.Frame(self, relief='raised', border=1, padding=10)
         self.frames['Reminders'] = ttk.Frame(self, relief='raised', border=1, padding=10)
@@ -125,12 +126,12 @@ class Settings(tk.Toplevel):
         self.cb_gui.pack(side="left", padx=4)
         self.cb_gui.bind('<<ComboboxSelected>>', self.change_gui)
         # --- Update checks
-        # self.confirm_update = ttk.Checkbutton(self.frames['General'],
-                                              # text=_("Check for updates on start-up"))
-        # if CONFIG.getboolean('General', 'check_update', fallback=True):
-            # self.confirm_update.state(('selected', '!alternate'))
-        # else:
-            # self.confirm_update.state(('!selected', '!alternate'))
+        #~self.confirm_update = ttk.Checkbutton(self.frames['General'],
+        #~                                      text=_("Check for updates on start-up"))
+        #~if CONFIG.getboolean('General', 'check_update', fallback=True):
+        #~    self.confirm_update.state(('selected', '!alternate'))
+        #~else:
+        #~    self.confirm_update.state(('!selected', '!alternate'))
 
         # --- Splash supported
         self.splash_support = ttk.Checkbutton(self.frames['General'],
@@ -152,11 +153,12 @@ class Settings(tk.Toplevel):
                    command=self.cleanup).grid(row=1, column=1,
                                               sticky='w', padx=4, pady=4)
         ttk.Label(frame_maintenance,
-                  text=_("Refresh scheduled reminders\n(needed after APScheduler's updates)")).grid(row=2,
-                                                                                                    column=0,
-                                                                                                    sticky='w',
-                                                                                                    padx=4,
-                                                                                                    pady=4)
+                  text=_("Refresh scheduled reminders\n"
+                         "(needed after APScheduler's updates)")).grid(row=2,
+                                                                       column=0,
+                                                                       sticky='w',
+                                                                       padx=4,
+                                                                       pady=4)
         ttk.Button(frame_maintenance, image=self._im_refresh, padding=1,
                    command=self.refresh).grid(row=2, column=1,
                                               sticky='w', padx=4, pady=4)
@@ -303,7 +305,8 @@ class Settings(tk.Toplevel):
                                                          pady=10, sticky='ew')
 
         # --- --- opacity
-        self.cal_opacity = OpacityFrame(general, CONFIG.getfloat('Calendar', 'alpha', fallback=0.85))
+        self.cal_opacity = OpacityFrame(general,
+                                        CONFIG.getfloat('Calendar', 'alpha', fallback=0.85))
         self.cal_opacity.grid(row=2, columnspan=2, sticky='w', padx=4)
 
         ttk.Separator(general, orient='horizontal').grid(row=3, columnspan=2,
@@ -452,7 +455,8 @@ class Settings(tk.Toplevel):
         self.events_font.grid(row=5, column=1, padx=4, pady=4)
 
         # --- opacity
-        self.events_opacity = OpacityFrame(self.frames['Events'], CONFIG.getfloat("Events", "alpha", fallback=0.85))
+        self.events_opacity = OpacityFrame(self.frames['Events'],
+                                           CONFIG.getfloat("Events", "alpha", fallback=0.85))
 
         # --- colors
         frame_color = ttk.Frame(self.frames['Events'])
@@ -500,7 +504,8 @@ class Settings(tk.Toplevel):
         self.tasks_font.grid(row=5, column=1, padx=4, pady=4)
 
         # --- opacity
-        self.tasks_opacity = OpacityFrame(self.frames['Tasks'], CONFIG.getfloat("Tasks", "alpha", fallback=0.85))
+        self.tasks_opacity = OpacityFrame(self.frames['Tasks'],
+                                          CONFIG.getfloat("Tasks", "alpha", fallback=0.85))
 
         # --- colors
         frame_color = ttk.Frame(self.frames['Tasks'])
@@ -550,7 +555,8 @@ class Settings(tk.Toplevel):
         self.timer_font_intervals.grid(row=5, column=1, padx=4, pady=4)
 
         # --- opacity
-        self.timer_opacity = OpacityFrame(self.frames['Timer'], CONFIG.getfloat("Timer", "alpha", fallback=0.85))
+        self.timer_opacity = OpacityFrame(self.frames['Timer'],
+                                          CONFIG.getfloat("Timer", "alpha", fallback=0.85))
 
         # --- colors
         frame_color = ttk.Frame(self.frames['Timer'])
@@ -595,8 +601,16 @@ class Settings(tk.Toplevel):
                  parent=self)
 
     def del_cat(self, cat):
+        if len(self.cats) == 1:
+            showerror(_('Error'),
+                      _('Impossible to delete the category "{category}": '
+                        'At least one category has to exist.').format(category=cat),
+                      parent=self)
+            return
+
         rep = askyesno(_("Confirmation"),
-                       _("Are you sure you want to delete the category {category}? This action cannot be undone.").format(category=cat))
+                       _("Are you sure you want to delete the category \"{category}\"? "
+                         "This action cannot be undone.").format(category=cat))
         if rep:
             CONFIG.remove_option("Categories", cat)
             for w in self.cats[cat]:
