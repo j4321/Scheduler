@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 EventCalendar: Calendar with the possibility to display events.
 """
 from tkinter import Menu
-from datetime import datetime
+from datetime import datetime, time
 import logging
 
 from tkcalendar import Calendar
@@ -152,14 +152,14 @@ class EventCalendar(Calendar):
         # --- display events and holidays
         # repeated event
         start, end = cal[0][0], cal[-1][-1]
-        for iid, (desc, nbdays, drrule, cat) in self._repeated_events.items():
+        for iid, (desc, nbdays, drrule, cat, start_time) in self._repeated_events.items():
             for ev_date in drrule.between(start, end):
                 for d in range(nbdays):
                     date = ev_date + self.timedelta(days=d)
                     date2 = date.strftime('%Y/%m/%d')
                     if date2 not in self._current_month_events:
                         self._current_month_events[date2] = []
-                    self._current_month_events[date2].append((desc, iid, cat))
+                    self._current_month_events[date2].append((start_time, desc, iid, cat))
         for w in range(6):
             for d in range(7):
                 day = cal[w][d]
@@ -177,14 +177,14 @@ class EventCalendar(Calendar):
                     self._current_month_events[date] = []
                 self._current_month_events[date].extend(self._events.get(date, []))
                 evts = self._current_month_events[date]
+                evts.sort()
                 if evts:
-                    txt = '\n'.join([k[0] for k in evts])
+                    txt = '\n'.join([evt[1] for evt in evts])
                     cat = evts[-1][-1]
-                    self._add_to_tooltip(w, d, txt, cat)
-
+                    self._set_tooltip(w, d, txt, cat)
         self._display_selection()
 
-    def _add_to_tooltip(self, week_nb, day, txt, cat):
+    def _set_tooltip(self, week_nb, day, txt, cat):
         tp = self._events_tooltips[week_nb][day]
         label = self._calendar[week_nb][day]
         label.configure(style='ev_%s.%s.TLabel' % (cat, self._style_prefixe))
@@ -195,7 +195,7 @@ class EventCalendar(Calendar):
                     'text': txt, 'font': self._font}
             self._events_tooltips[week_nb][day] = TooltipWrapper(label, **prop)
         else:
-            tp.configure(text='\n'.join([tp.cget('text'), txt]))
+            tp.configure(text=txt)
 
     def _remove_from_tooltip(self, date, txt):
         y1, y2 = date.year, self._date.year
@@ -248,46 +248,51 @@ class EventCalendar(Calendar):
             w -= self._date.isocalendar()[1]
             w %= 52
             if w < 6:
-                self._add_to_tooltip(w, d - 1, txt, cat)
+                txt = '\n'.join([ev[1] for ev in self._current_month_events[date.strftime('%Y/%m/%d')]])
+                self._set_tooltip(w, d - 1, txt, cat)
 
     def _add_event(self, start, nbdays, desc, iid, drrule, cat):
         cal = self._get_cal(self._date.year, self._date.month)
         mstart, mend = cal[0][0], cal[-1][-1]
+        start_time = start.time()
         if not drrule:
             for d in range(nbdays):
                 date = start + self.timedelta(days=d)
                 date2 = date.strftime('%Y/%m/%d')
                 if date2 not in self._events:
                     self._events[date2] = []
-                self._events[date2].append((desc, iid, cat))
+                self._events[date2].append((start_time, desc, iid, cat))
                 if mstart <= date.date() <= mend:
-                    self._show_event(date, desc, cat)
                     if date2 not in self._current_month_events:
                         self._current_month_events[date2] = []
-                    self._current_month_events[date2].append((desc, iid, cat))
+                    self._current_month_events[date2].append((start_time, desc, iid, cat))
+                    self._current_month_events[date2].sort()
+                    self._show_event(date, desc, cat)
         else:
-            self._repeated_events[iid] = (desc, nbdays, drrule, cat)
+            self._repeated_events[iid] = (desc, nbdays, drrule, cat, start.time())
 
             for ev_date in drrule.between(mstart, mend):
                 for d in range(nbdays):
                     date = ev_date + self.timedelta(days=d)
                     date2 = date.strftime('%Y/%m/%d')
-                    self._show_event(date, desc, cat)
                     if date2 not in self._current_month_events:
                         self._current_month_events[date2] = []
-                    self._current_month_events[date2].append((desc, iid, cat))
+                    self._current_month_events[date2].append((start_time, desc, iid, cat))
+                    self._current_month_events[date2].sort()
+                    self._show_event(date, desc, cat)
         self._display_selection()
 
     def _remove_event(self, start, nbdays, desc, iid, drrule, cat):
         year, month = self._date.year, self._date.month
+        start_time = start.time()
         try:
             if not drrule:
                 for d in range(nbdays):
                     date = start + self.timedelta(days=d)
                     date2 = date.strftime('%Y/%m/%d')
                     if date2 in self._current_month_events:
-                        self._current_month_events[date2].remove((desc, iid, cat))
-                    self._events[date2].remove((desc, iid, cat))
+                        self._current_month_events[date2].remove((start_time, desc, iid, cat))
+                    self._events[date2].remove((start_time, desc, iid, cat))
                     if not self._events[date2]:
                         del(self._events[date2])
                     self._remove_from_tooltip(date, desc)
@@ -299,7 +304,7 @@ class EventCalendar(Calendar):
                         date = ev_date + self.timedelta(days=d)
                         date2 = date.strftime('%Y/%m/%d')
                         if date2 in self._current_month_events:
-                            self._current_month_events[date2].remove((desc, iid, cat))
+                            self._current_month_events[date2].remove((start_time, desc, iid, cat))
                         self._remove_from_tooltip(date, desc)
 
         except ValueError:
@@ -344,7 +349,7 @@ class EventCalendar(Calendar):
             self.menu.add_separator()
             self.menu.add_separator()
             index_edit = 2
-            for desc, iid, cat in evts:
+            for start_time, desc, iid, cat in evts:
                 self.menu.insert_command(index_edit,
                                          label=_("Edit") + " %s" % desc,
                                          command=lambda i=iid: self.master.master.edit(i))
@@ -366,10 +371,10 @@ class EventCalendar(Calendar):
     def get_events(self, date):
         """ Return the iid of all events occuring on date. """
         evts = []
-        for desc, iid, cat in self._events.get(date.strftime('%Y/%m/%d'), []):
+        for start_time, desc, iid, cat in self._events.get(date.strftime('%Y/%m/%d'), []):
             evts.append(iid)
 
-        for iid, (desc, nbdays, drrule, cat) in self._repeated_events.items():
+        for iid, (desc, nbdays, drrule, cat, start_time) in self._repeated_events.items():
             if drrule.between(date + self.timedelta(days=-nbdays + 1), date):
                 evts.append(iid)
         return evts
@@ -448,4 +453,5 @@ class EventCalendar(Calendar):
             widget.bind(*args)
             for w in widget.children.values():
                 w.bind(*args)
+
 
