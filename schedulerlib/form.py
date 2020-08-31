@@ -97,9 +97,7 @@ class Form(Toplevel):
         frame_end = Frame(frame_event)
         frame_end.grid(row=3, column=1, padx=4, pady=6, sticky='w')
         txt_frame = Frame(frame_event, style='txt.TFrame', border=1, relief='sunken')
-        self.desc = Text(txt_frame, width=35, height=4, highlightthickness=0,
-                         relief='flat',
-                         selectbackground=active_bg)
+        self.desc = Text(txt_frame, width=35, height=4)
         self.desc.insert('1.0', self.event['Description'])
         self.desc.pack(fill='both', expand=True)
         txt_frame.grid(row=5, column=1, padx=4, pady=6, sticky='ewsn')
@@ -590,3 +588,4 @@ class Form(Toplevel):
         if not self._new:
             self.master.widgets['Calendar'].add_event(self.event)
         self.destroy()
+

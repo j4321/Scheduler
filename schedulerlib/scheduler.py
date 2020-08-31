@@ -123,6 +123,7 @@ class EventScheduler(Tk):
         self.scheduler.add_jobstore('sqlalchemy',
                                     url='sqlite:///%s' % JOBSTORE)
         self.scheduler.add_jobstore('memory', alias='memo')
+
         # --- style
         self.style = Style(self)
         self.style.theme_use("clam")
@@ -200,6 +201,12 @@ class EventScheduler(Tk):
         self.option_add('*Toplevel.background', bg)
         self.option_add('*Menu.background', bg)
         self.option_add('*Menu.tearOff', False)
+        self.option_add('*Text.relief', 'flat')
+        self.option_add('*Text.highlightThickness', 0)
+        self.option_add('*Text.selectBackground', self.style.lookup('TEntry', 'selectbackground', ('focus',)))
+        self.option_add('*Text.inactiveSelectBackground', self.style.lookup('TEntry', 'selectforeground'))
+        self.option_add('*Text.selectForeground', self.style.lookup('TEntry', 'selectforeground', ('focus',)))
+        self.option_add('*Text.inactiveSelectForeground', self.style.lookup('TEntry', 'selectforeground'))
         # toggle text
         self._open_image = PhotoImage(name='img_opened', file=IM_OPENED, master=self)
         self._closed_image = PhotoImage(name='img_closed', file=IM_CLOSED, master=self)
@@ -874,6 +881,7 @@ apply {name {
             if event['Task']:
                 tasks.append(event)
         return tasks
+
 
 
 

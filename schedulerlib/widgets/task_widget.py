@@ -44,10 +44,9 @@ class TaskWidget(BaseWidget):
                       anchor='center')
         label.grid(row=0, columnspan=2, pady=4, sticky='ew')
         Separator(self, style='Tasks.TSeparator').grid(row=1, columnspan=2, sticky='we')
-        self.display = Text(self, width=20, height=10, relief='flat',
+        self.display = Text(self, width=20, height=10,
                             cursor='arrow', wrap='word',
-                            highlightthickness=0, state='disabled',
-                            spacing1=5,
+                            state='disabled', spacing1=5,
                             tabs=('35', 'right', '45', 'left'))
         self.display.grid(sticky='nsew', row=2, column=0, padx=2, pady=2)
         scroll = AutoScrollbar(self, orient='vertical',
@@ -92,4 +91,5 @@ class TaskWidget(BaseWidget):
                 txt = "\t%s\t%s [%s]\n" % (picto, ev['Summary'], end)
                 self.display.insert('end', txt)
         self.display.configure(state='disabled')
+
 

@@ -57,9 +57,10 @@ class Timer(BaseWidget):
         interval_frame = Frame(self, style='Timer.TFrame')
         interval_frame.columnconfigure(0, weight=1)
         interval_frame.rowconfigure(0, weight=1)
-        self.intervals = Text(interval_frame, highlightthickness=0, relief='flat',
-                              height=3, width=1,
-                              inactiveselectbackground=self.style.lookup('TEntry', 'selectbackground'))
+        sel_bg = self.style.lookup('TEntry', 'selectbackground')
+        self.intervals = Text(interval_frame,
+                              height=3, width=1, selectbackground=sel_bg,
+                              inactiveselectbackground=sel_bg)
         self.intervals.tag_configure('center', justify='center')
         self.intervals.configure(state='disabled')
         scroll = AutoScrollbar(interval_frame, orient='vertical',
@@ -170,4 +171,5 @@ class Timer(BaseWidget):
         self.intervals.delete('1.0', 'end')
         self.intervals.configure(state='disabled')
         self.display.configure(text='%i:%.2i:%.2i' % tuple(self._time))
+
 
