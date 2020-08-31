@@ -66,8 +66,7 @@ class OneButtonBox(Toplevel):
             h = 0
             for line in message.splitlines():
                 h += 1 + len(line) // w
-        display = Text(frame, relief='flat', highlightthickness=0,
-                       font="TkDefaultFont 10 bold", bg=self.cget('bg'),
+        display = Text(frame, font="TkDefaultFont 10 bold", bg=self.cget('bg'),
                        height=h, width=w, wrap="word")
         display.configure(inactiveselectbackground=display.cget("selectbackground"))
         display.insert("1.0", message)
@@ -146,8 +145,7 @@ class ShowError(Toplevel):
             for line in traceback.splitlines():
                 h2 += 1 + len(line) // w
 
-        display = Text(frame, relief='flat', highlightthickness=0,
-                       font="TkDefaultFont 10 bold", bg=self.cget('bg'),
+        display = Text(frame, font="TkDefaultFont 10 bold", bg=self.cget('bg'),
                        height=h, width=w, wrap="word")
         display.configure(inactiveselectbackground=display.cget("selectbackground"))
         display.insert("1.0", message)
@@ -165,7 +163,7 @@ class ShowError(Toplevel):
             txt_frame = Frame(frame2, style='txt.TFrame', relief='sunken',
                               borderwidth=1)
             error_msg = Text(txt_frame, width=w, wrap='word', font="TkDefaultFont 10",
-                             bg='white', height=8, highlightthickness=0)
+                             bg='white')
             error_msg.bind("<Button-1>", lambda event: error_msg.focus_set())
             error_msg.insert('1.0', traceback)
             error_msg.configure(state="disabled")
@@ -431,3 +429,4 @@ def askyesnocancel(title="", message="", parent=None, icon="question"):
     box = AskYesNoCancel(parent, title, message, image=icon)
     box.wait_window(box)
     return box.get_result()
+
