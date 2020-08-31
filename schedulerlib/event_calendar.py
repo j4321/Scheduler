@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 EventCalendar: Calendar with the possibility to display events.
 """
 from tkinter import Menu
-from datetime import datetime, time
+from datetime import datetime
 import logging
 
 from tkcalendar import Calendar
@@ -53,6 +53,8 @@ class EventCalendar(Calendar):
 
         Calendar.__init__(self, master, class_='EventCalendar', **kw)
 
+        self._cats = {cat: CONFIG.get('Categories', cat).split(', ') for cat in CONFIG.options('Categories')}
+
         self._properties['tooltipbackground'] = tp_bg
         self._properties['tooltipforeground'] = tp_fg
         self._properties['tooltipalpha'] = tp_alpha
@@ -65,10 +67,27 @@ class EventCalendar(Calendar):
                 day.bind('<3>', lambda e, w=i: self._post_menu(e, w))
 
     def update_style(self):
-        cats = {cat: CONFIG.get('Categories', cat).split(', ') for cat in CONFIG.options('Categories')}
-        for cat, (fg, bg) in cats.items():
-            style = 'ev_%s.%s.TLabel' % (cat, self._style_prefixe)
-            self.style.configure(style, background=bg, foreground=fg)
+        self._cats.clear()
+        try:
+            for cat, val in CONFIG.items('Categories'):
+                fg, bg, order = val.split(', ')
+                self._cats[cat] = [fg, bg, int(order)]
+                style = 'ev_%s.%s.TLabel' % (cat, self._style_prefixe)
+                self.style.configure(style, background=bg, foreground=fg)
+        except ValueError:  # old config file
+            for cat, val in CONFIG.items('Categories'):
+                fg, bg = val.split(', ')
+                self._cats[cat] = [fg, bg, 0]
+                style = 'ev_%s.%s.TLabel' % (cat, self._style_prefixe)
+                self.style.configure(style, background=bg, foreground=fg)
+        cal = self._get_cal(self._date.year, self._date.month)
+        for week_nb in range(6):
+            for d in range(7):
+                day = cal[week_nb][d]
+                evts = self._current_month_events.get(day.strftime('%Y/%m/%d'), [])
+                if evts:
+                    self._calendar[week_nb][d].configure(style='ev_%s.%s.TLabel' % (self._get_cat(evts),
+                                                                                    self._style_prefixe))
 
     def __setitem__(self, item, value):
         if item == 'tooltipbackground':
@@ -127,7 +146,7 @@ class EventCalendar(Calendar):
             if not evts:
                 self._reset_day(prev_sel)
             else:
-                cat = evts[-1][-1]
+                cat = self._get_cat(evts)
                 w, d = self._get_day_coords(prev_sel)
                 self._calendar[w][d].configure(style='ev_%s.%s.TLabel' % (cat, self._style_prefixe))
         self._display_selection()
@@ -180,8 +199,7 @@ class EventCalendar(Calendar):
                 evts.sort()
                 if evts:
                     txt = '\n'.join([evt[1] for evt in evts])
-                    cat = evts[-1][-1]
-                    self._set_tooltip(w, d, txt, cat)
+                    self._set_tooltip(w, d, txt, self._get_cat(evts))
         self._display_selection()
 
     def _set_tooltip(self, week_nb, day, txt, cat):
@@ -196,6 +214,10 @@ class EventCalendar(Calendar):
             self._events_tooltips[week_nb][day] = TooltipWrapper(label, **prop)
         else:
             tp.configure(text=txt)
+
+    def _get_cat(self, evts):
+        cats = [(self._cats.get(cat, [10000])[-1], start_time, desc, cat) for start_time, desc, iid, cat in evts]
+        return sorted(cats)[0][-1]
 
     def _remove_from_tooltip(self, date, txt):
         y1, y2 = date.year, self._date.year
@@ -215,6 +237,8 @@ class EventCalendar(Calendar):
                         return
                     if text:
                         tp.configure(text='\n'.join(text))
+                        cat = self._get_cat(self._current_month_events[date.strftime('%Y/%m/%d')])
+                        self._calendar[week_nb][d].configure(style='ev_%s.%s.TLabel' % (cat, self._style_prefixe))
                     else:
                         tp.destroy()
                         self._events_tooltips[week_nb][d] = None
@@ -240,7 +264,7 @@ class EventCalendar(Calendar):
                                 else:
                                     label.configure(style='we_om.%s.TLabel' % self._style_prefixe)
 
-    def _show_event(self, date, txt, cat):
+    def _show_event(self, date, txt):
         y1, y2 = date.year, self._date.year
         m1, m2 = date.month, self._date.month
         if y1 == y2 or (y1 - y2 == 1 and m1 == 1 and m2 == 12) or (y2 - y1 == 1 and m2 == 1 and m1 == 12):
@@ -248,8 +272,9 @@ class EventCalendar(Calendar):
             w -= self._date.isocalendar()[1]
             w %= 52
             if w < 6:
-                txt = '\n'.join([ev[1] for ev in self._current_month_events[date.strftime('%Y/%m/%d')]])
-                self._set_tooltip(w, d - 1, txt, cat)
+                evts = self._current_month_events[date.strftime('%Y/%m/%d')]
+                txt = '\n'.join([evt[1] for evt in evts])
+                self._set_tooltip(w, d - 1, txt, self._get_cat(evts))
 
     def _add_event(self, start, nbdays, desc, iid, drrule, cat):
         cal = self._get_cal(self._date.year, self._date.month)
@@ -267,7 +292,7 @@ class EventCalendar(Calendar):
                         self._current_month_events[date2] = []
                     self._current_month_events[date2].append((start_time, desc, iid, cat))
                     self._current_month_events[date2].sort()
-                    self._show_event(date, desc, cat)
+                    self._show_event(date, desc)
         else:
             self._repeated_events[iid] = (desc, nbdays, drrule, cat, start.time())
 
@@ -279,7 +304,7 @@ class EventCalendar(Calendar):
                         self._current_month_events[date2] = []
                     self._current_month_events[date2].append((start_time, desc, iid, cat))
                     self._current_month_events[date2].sort()
-                    self._show_event(date, desc, cat)
+                    self._show_event(date, desc)
         self._display_selection()
 
     def _remove_event(self, start, nbdays, desc, iid, drrule, cat):
@@ -453,5 +478,6 @@ class EventCalendar(Calendar):
             widget.bind(*args)
             for w in widget.children.values():
                 w.bind(*args)
+
 
 
