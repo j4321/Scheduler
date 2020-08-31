@@ -37,7 +37,7 @@ class ColorFrame(ttk.Frame):
         self.preview.pack()
         self.label = ttk.Label(self, text=label)
         self.label.pack(side='left', pady=4)
-        frame.pack(side='left', padx=8, pady=4)
+        frame.pack(side='left', padx=6, pady=4)
         self.button = ttk.Button(self, image=self._im_color, padding=2,
                                  command=self.askcolor)
         self.button.pack(side='left', pady=4)
@@ -57,3 +57,4 @@ class ColorFrame(ttk.Frame):
 
     def get_color(self):
         return self.preview.cget('bg')
+

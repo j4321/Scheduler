@@ -193,7 +193,7 @@ def create_config():
     CONFIG.set('Calendar', 'default_category', 'default')
 
     CONFIG.add_section('Categories')
-    CONFIG.set('Categories', 'default', 'white, #186CBE')
+    CONFIG.set('Categories', 'default', 'white, #186CBE, 0')
 
     CONFIG.add_section('Pomodoro')
     CONFIG.set('Pomodoro', 'geometry', '')
@@ -352,6 +352,8 @@ TKTRAY_ICON = os.path.join(PATH_IMAGES, 'scheduler.png')
 IM_BELL = os.path.join(PATH_IMAGES, 'bell.png')
 IM_DEL = os.path.join(PATH_IMAGES, 'del.png')
 IM_ADD = os.path.join(PATH_IMAGES, 'add.png')
+IM_UP = os.path.join(PATH_IMAGES, 'up.png')
+IM_DOWN = os.path.join(PATH_IMAGES, 'down.png')
 IM_DOT = os.path.join(PATH_IMAGES, 'dot.png')
 IM_START = os.path.join(PATH_IMAGES, 'start.png')
 IM_PAUSE = os.path.join(PATH_IMAGES, 'pause.png')

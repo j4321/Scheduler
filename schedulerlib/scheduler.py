@@ -656,7 +656,7 @@ apply {name {
         # use iCalendar name as category
         category = ical.get('X-WR-CALNAME', CONFIG.options('Categories')[0]).lower()
         if not CONFIG.has_option("Categories", category):
-            CONFIG.set("Categories", category, "white, #186CBE")
+            CONFIG.set("Categories", category, "white, #186CBE, 0")
             self.widgets['Calendar'].update_style()
         for component in ical.subcomponents:
             if component.name == "VEVENT":
@@ -783,8 +783,8 @@ apply {name {
         val = self.filter_val.get()
         items = list(self.events.keys())
         if not col:
-            for item in items:
-                self._move_item(item, int(item))
+            for i, item in enumerate(items):
+                self._move_item(item, i)
         else:
             i = 0
             for item in items:
@@ -902,7 +902,4 @@ apply {name {
             if event['Task']:
                 tasks.append(event)
         return tasks
-
-
-
 
