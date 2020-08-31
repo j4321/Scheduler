@@ -102,6 +102,7 @@ class Form(Toplevel):
         self.desc.pack(fill='both', expand=True)
         txt_frame.grid(row=5, column=1, padx=4, pady=6, sticky='ewsn')
         cats = list(CONFIG.options('Categories'))
+        cats.sort()
         width = max([len(cat) for cat in cats])
         self.category = Combobox(frame_event, width=width + 2, values=cats,
                                  state='readonly')

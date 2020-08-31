@@ -74,7 +74,8 @@ class Event:
         defaults = {'Summary': '', 'Place': '', 'Description': '',
                     'Start': d, 'End': d + timedelta(hours=1), 'Task': False,
                     'Repeat': {}, 'WholeDay': False, 'Reminders': {},
-                    'Category': CONFIG.options('Categories')[0]}
+                    'Category': CONFIG.get('Calendar', 'default_category',
+                                           fallback=CONFIG.options('Categories')[0])}
         defaults.update(kw)
         self._properties = defaults
         self.iid = iid
@@ -367,4 +368,5 @@ class Event:
             ev.add("rrule", icalendar.vRecur(**recur_kw))
 
         return ev
+
 
