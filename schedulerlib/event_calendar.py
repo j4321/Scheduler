@@ -53,7 +53,8 @@ class EventCalendar(Calendar):
 
         Calendar.__init__(self, master, class_='EventCalendar', **kw)
 
-        self._cats = {cat: CONFIG.get('Categories', cat).split(', ') for cat in CONFIG.options('Categories')}
+        self._cats = {cat: CONFIG.get('Categories', cat).split(', ')
+                      for cat in CONFIG.options('Categories')}
 
         self._properties['tooltipbackground'] = tp_bg
         self._properties['tooltipforeground'] = tp_fg
@@ -88,6 +89,7 @@ class EventCalendar(Calendar):
                 if evts:
                     self._calendar[week_nb][d].configure(style='ev_%s.%s.TLabel' % (self._get_cat(evts),
                                                                                     self._style_prefixe))
+        self._display_selection()
 
     def __setitem__(self, item, value):
         if item == 'tooltipbackground':
@@ -478,6 +480,3 @@ class EventCalendar(Calendar):
             widget.bind(*args)
             for w in widget.children.values():
                 w.bind(*args)
-
-
-
