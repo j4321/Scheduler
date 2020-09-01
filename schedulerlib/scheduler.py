@@ -588,7 +588,10 @@ apply {name {
         self.save()
 
     def edit(self, iid):
-        self.widgets['Calendar'].remove_event(self.events[iid])
+        try:
+            self.widgets['Calendar'].remove_event(self.events[iid])
+        except ValueError:
+            return  # multiple clicks issue
         Form(self, self.events[iid])
 
     def check_outdated(self):
