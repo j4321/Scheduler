@@ -52,8 +52,8 @@ class CalendarWidget(BaseWidget):
     def update_style(self):
         """Update widget's style."""
         BaseWidget.update_style(self)
-        bg = CONFIG.get(self.name, 'background', fallback='grey10')
-        fg = CONFIG.get(self.name, 'foreground', fallback='white')
+        bg = CONFIG.get(self.name, 'background')
+        fg = CONFIG.get(self.name, 'foreground')
         active_bg = active_color(*self.winfo_rgb(bg))
 
         self._calendar.menu.configure(bg=bg, fg=fg, selectcolor=fg,

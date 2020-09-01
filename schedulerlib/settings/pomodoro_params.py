@@ -182,7 +182,7 @@ class PomodoroParams(Frame):
         self.legend_row_nb = Entry(legend_frame, width=4, justify='center',
                                    validatecommand=(self.okfct, '%P'),
                                    validate='key')
-        self.legend_row_nb.insert(0, CONFIG.get('Pomodoro', 'legend_max_height', fallback='6'))
+        self.legend_row_nb.insert(0, CONFIG.get('Pomodoro', 'legend_max_height'))
         self.legend_row_nb.pack(side='left', padx=4)
 
         # task colors

@@ -64,11 +64,11 @@ class Eyes(SubMenu):
             if self.time[1] == 60:
                 self.time[1] = 0
                 self.time[0] += 1
-                if self.time[0] >= CONFIG.getint("Eyes", "interval", fallback=20):
+                if self.time[0] >= CONFIG.getint("Eyes", "interval"):
                     Popen(["notify-send", "-i", IM_EYE, _("Eyes' rest"),
                            _("Look away from your screen for 20 s")])
-                    if (not CONFIG.getboolean("Eyes", "mute", fallback=False) and
-                            not CONFIG.getboolean('General', 'silent_mode', fallback=False)):
+                    if (not CONFIG.getboolean("Eyes", "mute") and
+                            not CONFIG.getboolean('General', 'silent_mode')):
                         Popen([CONFIG.get("General", "soundplayer"),
                                CONFIG.get("Eyes", "sound")])
 

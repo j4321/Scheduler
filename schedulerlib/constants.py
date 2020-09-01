@@ -101,123 +101,6 @@ logging.getLogger().addHandler(logging.StreamHandler())
 # --- config
 CONFIG = ConfigParser()
 
-sections = ['General', 'Eyes', 'Reminders', 'Events', 'Tasks', 'Timer',
-            'Calendar', 'Pomodoro', 'Categories', 'PomodoroTasks']
-
-def create_config():
-    CONFIG.add_section('General')
-    CONFIG.set('General', 'locale', locale.getdefaultlocale()[0])
-    CONFIG.set('General', 'backups', '10')
-    CONFIG.set('General', 'trayicon', '')
-    CONFIG.set("General", "language", "")
-    CONFIG.set("General", "splash_supported",
-               str(os.environ.get('DESKTOP_SESSION') != 'plasma'))
-    CONFIG.set("General", "soundplayer", "mpg123")
-    CONFIG.set("General", "silent_mode", "False")
-
-    CONFIG.add_section('Eyes')
-    CONFIG.set("Eyes", "interval", "20")
-    CONFIG.set("Eyes", "sound", os.path.join(PATH_SOUNDS, 'ting.mp3'))
-    CONFIG.set("Eyes", "mute", 'False')
-
-    CONFIG.add_section('Reminders')
-    CONFIG.set('Reminders', 'window', 'True')
-    CONFIG.set('Reminders', 'window_alpha', '0.75')
-    CONFIG.set('Reminders', 'window_bg', 'gray10')
-    CONFIG.set('Reminders', 'window_fg', 'white')
-    CONFIG.set('Reminders', 'window_bg_alternate', 'gray30')
-    CONFIG.set('Reminders', 'window_fg_alternate', 'red')
-    CONFIG.set('Reminders', 'notification', 'True')
-    CONFIG.set('Reminders', 'mute', 'True')
-    CONFIG.set('Reminders', 'alarm', os.path.join(PATH_SOUNDS, 'alarm.mp3'))
-    CONFIG.set('Reminders', 'blink', 'True')
-    CONFIG.set('Reminders', 'timeout', '5')
-
-    CONFIG.add_section('Events')
-    CONFIG.set('Events', 'geometry', '')
-    CONFIG.set('Events', 'visible', 'True')
-    CONFIG.set('Events', 'alpha', '0.85')
-    CONFIG.set('Events', 'font', 'Liberation\ Sans 10')
-    CONFIG.set('Events', 'font_title', 'Liberation\ Sans 12 bold')
-    CONFIG.set('Events', 'font_day', 'Liberation\ Sans 11 bold')
-    CONFIG.set('Events', 'foreground', 'white')
-    CONFIG.set('Events', 'background', 'gray10')
-    CONFIG.set('Events', 'position', 'normal')
-
-    CONFIG.add_section('Tasks')
-    CONFIG.set('Tasks', 'geometry', '')
-    CONFIG.set('Tasks', 'visible', 'True')
-    CONFIG.set('Tasks', 'alpha', '0.85')
-    CONFIG.set('Tasks', 'font', 'Liberation\ Sans 10')
-    CONFIG.set('Tasks', 'font_title', 'Liberation\ Sans 12 bold')
-    CONFIG.set('Tasks', 'foreground', 'white')
-    CONFIG.set('Tasks', 'background', 'gray10')
-    CONFIG.set('Tasks', 'position', 'normal')
-    CONFIG.set('Tasks', 'hide_completed', 'False')
-
-    CONFIG.add_section('Timer')
-    CONFIG.set('Timer', 'geometry', '')
-    CONFIG.set('Timer', 'visible', 'True')
-    CONFIG.set('Timer', 'alpha', '0.85')
-    CONFIG.set('Timer', 'font', 'Liberation\ Sans 10')
-    CONFIG.set('Timer', 'font_time', 'FreeMono 26')
-    CONFIG.set('Timer', 'font_intervals', 'FreeMono 12')
-    CONFIG.set('Timer', 'foreground', 'white')
-    CONFIG.set('Timer', 'background', 'gray10')
-    CONFIG.set('Timer', 'position', 'normal')
-
-    CONFIG.add_section('Calendar')
-    CONFIG.set('Calendar', 'holidays', '')
-    CONFIG.set('Calendar', 'geometry', '')
-    CONFIG.set('Calendar', 'visible', 'True')
-    CONFIG.set('Calendar', 'alpha', '0.85')
-    CONFIG.set('Calendar', 'font', 'TkDefaultFont 8')
-    CONFIG.set('Calendar', 'background', '#424242')
-    CONFIG.set('Calendar', 'foreground', '#ECECEC')
-    CONFIG.set('Calendar', 'bordercolor', 'gray70')
-    CONFIG.set('Calendar', 'othermonthforeground', 'gray30')
-    CONFIG.set('Calendar', 'othermonthbackground', 'gray93')
-    CONFIG.set('Calendar', 'othermonthweforeground', 'gray30')
-    CONFIG.set('Calendar', 'othermonthwebackground', 'gray75')
-    CONFIG.set('Calendar', 'normalforeground', 'black')
-    CONFIG.set('Calendar', 'normalbackground', 'white')
-    CONFIG.set('Calendar', 'selectforeground', 'white')
-    CONFIG.set('Calendar', 'selectbackground', '#424242')
-    CONFIG.set('Calendar', 'weekendforeground', '#424242')
-    CONFIG.set('Calendar', 'weekendbackground', 'lightgrey')
-    CONFIG.set('Calendar', 'headersforeground', 'black')
-    CONFIG.set('Calendar', 'headersbackground', 'gray70')
-    CONFIG.set('Calendar', 'tooltipforeground', 'white')
-    CONFIG.set('Calendar', 'tooltipbackground', 'black')
-    CONFIG.set('Calendar', 'position', 'normal')
-    CONFIG.set('Calendar', 'default_category', 'default')
-
-    CONFIG.add_section('Categories')
-    CONFIG.set('Categories', 'default', 'white, #186CBE, 0')
-
-    CONFIG.add_section('Pomodoro')
-    CONFIG.set('Pomodoro', 'geometry', '')
-    CONFIG.set('Pomodoro', 'visible', 'True')
-    CONFIG.set('Pomodoro', 'alpha', '0.85')
-    CONFIG.set('Pomodoro', 'foreground', 'white')
-    CONFIG.set('Pomodoro', 'background', 'gray10')
-    CONFIG.set('Pomodoro', 'position', 'normal')
-    CONFIG.set("Pomodoro", "font", "FreeMono 48")
-    CONFIG.set("Pomodoro", "work_time", "25")
-    CONFIG.set("Pomodoro", "work_bg", "#ffffff")
-    CONFIG.set("Pomodoro", "work_fg", "#000000")
-    CONFIG.set("Pomodoro", "break_time", "5")
-    CONFIG.set("Pomodoro", "break_bg", "#77ABE2")
-    CONFIG.set("Pomodoro", "break_fg", "#000000")
-    CONFIG.set("Pomodoro", "rest_time", "20")
-    CONFIG.set("Pomodoro", "rest_bg", "#FF7A40")
-    CONFIG.set("Pomodoro", "rest_fg", "#000000")
-    CONFIG.set("Pomodoro", "beep", os.path.join(PATH_SOUNDS, 'ting.mp3'))
-    CONFIG.set("Pomodoro", "mute", "False")
-    CONFIG.set("Pomodoro", "legend_max_height", "6")
-
-    CONFIG.add_section("PomodoroTasks")
-
 
 def save_config():
     CONFIG.set('Calendar', 'holidays', ', '.join(HOLIDAYS))
@@ -225,65 +108,132 @@ def save_config():
         CONFIG.write(file)
 
 
+default_config = {
+    'General': {
+        'locale': locale.getdefaultlocale()[0],
+        'backups': '10',
+        'trayicon': '',
+        'language': "",
+        'splash_supported': str(os.environ.get('DESKTOP_SESSION') != 'plasma'),
+        'soundplayer': "mpg123",
+        'silent_mode': "False"
+    },
+    'Eyes': {
+        'interval': "20",
+        'sound': os.path.join(PATH_SOUNDS, 'ting.mp3'),
+        'mute': 'False',
+    },
+    'Reminders': {
+        'window': 'True',
+        'window_alpha': '0.75',
+        'window_bg': 'gray10',
+        'window_fg': 'white',
+        'window_bg_alternate': 'gray30',
+        'window_fg_alternate': 'red',
+        'notification': 'True',
+        'mute': 'True',
+        'alarm': os.path.join(PATH_SOUNDS, 'alarm.mp3'),
+        'blink': 'True',
+        'timeout': '5',
+    },
+    'Events': {
+        'geometry': '',
+        'visible': 'True',
+        'alpha': '0.85',
+        'font': 'Liberation\ Sans 10',
+        'font_title': 'Liberation\ Sans 12 bold',
+        'font_day': 'Liberation\ Sans 11 bold',
+        'foreground': 'white',
+        'background': 'gray10',
+        'position': 'normal',
+    },
+    'Tasks': {
+        'geometry': '',
+        'visible': 'True',
+        'alpha': '0.85',
+        'font': 'Liberation\ Sans 10',
+        'font_title': 'Liberation\ Sans 12 bold',
+        'foreground': 'white',
+        'background': 'gray10',
+        'position': 'normal',
+        'hide_completed': 'False',
+    },
+    'Timer': {
+        'geometry': '',
+        'visible': 'True',
+        'alpha': '0.85',
+        'font': 'Liberation\ Sans 10',
+        'font_time': 'FreeMono 26',
+        'font_intervals': 'FreeMono 12',
+        'foreground': 'white',
+        'background': 'gray10',
+        'position': 'normal',
+    },
+    'Calendar': {
+        'holidays': '',
+        'geometry': '',
+        'visible': 'True',
+        'alpha': '0.85',
+        'font': 'TkDefaultFont 8',
+        'background': '#424242',
+        'foreground': '#ECECEC',
+        'bordercolor': 'gray70',
+        'othermonthforeground': 'gray30',
+        'othermonthbackground': 'gray93',
+        'othermonthweforeground': 'gray30',
+        'othermonthwebackground': 'gray75',
+        'normalforeground': 'black',
+        'normalbackground': 'white',
+        'selectforeground': 'white',
+        'selectbackground': '#424242',
+        'weekendforeground': '#424242',
+        'weekendbackground': 'lightgrey',
+        'headersforeground': 'black',
+        'headersbackground': 'gray70',
+        'tooltipforeground': 'white',
+        'tooltipbackground': 'black',
+        'position': 'normal',
+        'default_category': '',
+    },
+    'Categories': {},
+    'Pomodoro': {
+        'geometry': '',
+        'visible': 'True',
+        'alpha': '0.85',
+        'foreground': 'white',
+        'background': 'gray10',
+        'position': 'normal',
+        'font': "FreeMono 48",
+        'work_time': "25",
+        'work_bg': "#ffffff",
+        'work_fg': "#000000",
+        'break_time': "5",
+        'break_bg': "#77ABE2",
+        'break_fg': "#000000",
+        'rest_time': "20",
+        'rest_bg': "#FF7A40",
+        'rest_fg': "#000000",
+        'beep': os.path.join(PATH_SOUNDS, 'ting.mp3'),
+        'mute': "False",
+        'legend_max_height': "6",
+    },
+    'PomodoroTasks': {}
+}
+
+for section, opts in default_config.items():
+    CONFIG.setdefault(section, opts)
+
 # restore config
-CONFIG.read(PATH_CONFIG)
-if not CONFIG.has_section('Pomodoro'):
-    CONFIG.add_section('Pomodoro')
-    CONFIG.set('Pomodoro', 'geometry', '')
-    CONFIG.set('Pomodoro', 'visible', 'True')
-    CONFIG.set('Pomodoro', 'alpha', '0.85')
-    CONFIG.set('Pomodoro', 'foreground', 'white')
-    CONFIG.set('Pomodoro', 'background', 'gray10')
-    CONFIG.set('Pomodoro', 'position', 'normal')
-    CONFIG.set("Pomodoro", "font", "FreeMono 48")
-    CONFIG.set("Pomodoro", "work_time", "25")
-    CONFIG.set("Pomodoro", "work_bg", "#ffffff")
-    CONFIG.set("Pomodoro", "work_fg", "#000000")
-    CONFIG.set("Pomodoro", "break_time", "5")
-    CONFIG.set("Pomodoro", "break_bg", "#77ABE2")
-    CONFIG.set("Pomodoro", "break_fg", "#000000")
-    CONFIG.set("Pomodoro", "rest_time", "20")
-    CONFIG.set("Pomodoro", "rest_bg", "#FF7A40")
-    CONFIG.set("Pomodoro", "rest_fg", "#000000")
-    CONFIG.set("Pomodoro", "beep", os.path.join(PATH_SOUNDS, 'ting.mp3'))
-    CONFIG.set("Pomodoro", "mute", "False")
-    CONFIG.set("Pomodoro", "legend_max_height", "6")
-
-    CONFIG.add_section("PomodoroTasks")
-
-if not CONFIG.has_section('Eyes'):
-    CONFIG.add_section('Eyes')
-    CONFIG.set("Eyes", "interval", "20")
-    CONFIG.set("Eyes", "sound", os.path.join(PATH_SOUNDS, 'ting.mp3'))
-    CONFIG.set("Eyes", "mute", 'False')
-
-if not CONFIG.has_section('Reminders'):
-    CONFIG.add_section('Reminders')
-    CONFIG.set('Reminders', 'window', 'True')
-    CONFIG.set('Reminders', 'window_alpha', '0.75')
-    CONFIG.set('Reminders', 'window_bg', 'gray10')
-    CONFIG.set('Reminders', 'window_fg', 'white')
-    CONFIG.set('Reminders', 'window_bg_alternate', 'gray30')
-    CONFIG.set('Reminders', 'window_fg_alternate', 'red')
-    CONFIG.set('Reminders', 'notification', 'True')
-    CONFIG.set('Reminders', 'mute', 'True')
-    CONFIG.set('Reminders', 'alarm', os.path.join(PATH_SOUNDS, 'alarm.mp3'))
-    CONFIG.set('Reminders', 'blink', 'True')
-    CONFIG.set('Reminders', 'timeout', '5')
-
-if set(CONFIG.sections()) != set(sections):
-    if os.path.exists(PATH_CONFIG):
-        os.rename(PATH_CONFIG, PATH_CONFIG + '.bak.error')
-    CONFIG.clear()
-    if not (CONFIG.read(PATH_CONFIG + '.bak') and set(CONFIG.sections()) == set(sections)):
-        CONFIG.clear()
-        create_config()
-else:
+if CONFIG.read(PATH_CONFIG):
     os.rename(PATH_CONFIG, PATH_CONFIG + '.bak')
 
+if not CONFIG.options('Categories'):
+    CONFIG.set('Categories', 'default', 'white, #186CBE, 0')
 
+if not CONFIG.get('Calendar', 'default_category'):
+    CONFIG.set('Calendar', 'default_category', CONFIG.options('Categories')[0])
 # --- language
-LANGUAGE = CONFIG.get('General', 'language', fallback='')
+LANGUAGE = CONFIG.get('General', 'language')
 
 LANGUAGES = {"fr": "Français", "en": "English"}
 REV_LANGUAGES = {val: key for key, val in LANGUAGES.items()}
@@ -563,7 +513,7 @@ def get_available_gui_toolkits():
 
 
 TOOLKITS = get_available_gui_toolkits()
-GUI = CONFIG.get("General", "trayicon", fallback='').lower()
+GUI = CONFIG.get("General", "trayicon").lower()
 
 if not TOOLKITS.get(GUI):
     DESKTOP = os.environ.get('XDG_CURRENT_DESKTOP')
