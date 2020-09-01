@@ -30,6 +30,13 @@ class CalendarWidget(BaseWidget):
     def __init__(self, master=None):
         BaseWidget.__init__(self, 'Calendar', master)
 
+    def _populate_menu(self):
+        """Create menu."""
+        BaseWidget._populate_menu(self)
+        self.menu.add_separator()
+        self.menu.add_command(label=_('Display current month'),
+                              command=lambda: self._calendar.see(self._calendar.date.today()))
+
     def create_content(self):
         """Create widget's GUI."""
         self._calendar = EventCalendar(self)
