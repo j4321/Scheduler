@@ -298,11 +298,11 @@ class ToggledFrame(ttk.Frame):
     A frame that can be toggled to open and close
     """
 
-    def __init__(self, master=None, text="", **kwargs):
+    def __init__(self, master, text, category, **kwargs):
         ttk.Frame.__init__(self, master, **kwargs)
         style_name = self.cget('style')
         toggle_style_name = '%s.Toggle' % ('.'.join(style_name.split('.')[:-1]))
-        self.columnconfigure(1, weight=1)
+        self.columnconfigure(2, weight=1)
         self.rowconfigure(1, weight=1)
         self.__checkbutton = ttk.Checkbutton(self,
                                              style=toggle_style_name,
@@ -312,20 +312,20 @@ class ToggledFrame(ttk.Frame):
                                style=style_name.replace('TFrame', 'TLabel'))
         self.interior = ttk.Frame(self, style=style_name)
         self.label.bind('<Configure>', self._wrap)
-        self._grid_widgets()
+
+        self.__checkbutton.grid(row=0, column=0)
+        ttk.Frame(self, width=10, height=10,
+                  style=f'ev_{category}.Events.TFrame').grid(row=0, column=1, padx=(0, 2))
+        self.label.grid(row=0, column=2, sticky="we")
 
     def _wrap(self, event):
-        self.label.configure(wraplength=self.label.winfo_width())
-
-    def _grid_widgets(self):
-        self.__checkbutton.grid(row=0, column=0)
-        self.label.grid(row=0, column=1, sticky="we")
+        self.label.configure(wraplength=self.label.winfo_width() - 4)
 
     def toggle(self):
         if 'selected' not in self.__checkbutton.state():
             self.interior.grid_forget()
         else:
-            self.interior.grid(row=1, column=1, sticky="nswe", padx=(4, 0))
+            self.interior.grid(row=1, column=1, columnspan=2, sticky="nswe", padx=(8, 0))
 
 
 class LabelFrame(ttk.Frame):
