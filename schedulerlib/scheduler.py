@@ -889,7 +889,7 @@ apply {name {
                     place = "(%s)" % ev['Place']
                     if place == "()":
                         place = ""
-                    desc.append(("%s%s %s\n" % (date, ev['Summary'], place), ev['Description']))
+                    desc.append(("%s%s %s\n" % (date, ev['Summary'], place), ev['Description'], ev['Category']))
                 next_ev[day.strftime('%A')] = desc
         return next_ev
 

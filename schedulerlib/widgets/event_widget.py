@@ -52,6 +52,7 @@ class EventWidget(BaseWidget):
         self.canvas.configure(yscrollcommand=scroll.set)
 
         self.display = Frame(self.canvas, style='Events.TFrame')
+        self.display.columnconfigure(0, weight=1)
         self.canvas.create_window(0, 0, anchor='nw', window=self.display, tags=('display',))
         self.display_evts()
 
@@ -78,6 +79,12 @@ class EventWidget(BaseWidget):
         self.style.configure('Toggle', background=bg)
         self.canvas.configure(bg=bg)
 
+        for cat, val in CONFIG.items('Categories'):
+            props = val.split(', ')
+            self.style.configure(f'ev_{cat}.Events.TFrame',
+                                 background=props[1], foreground=props[0])
+        self.display_evts()
+
     def _scroll(self, delta):
         top, bottom = self.canvas.yview()
         top += delta * 0.05
@@ -97,7 +104,7 @@ class EventWidget(BaseWidget):
         def wrap(event):
             l = event.widget
             if l.master.winfo_ismapped():
-                l.configure(wraplength=l.winfo_width())
+                l.configure(wraplength=l.winfo_width() - 4)
 
         week = self.master.get_next_week_events()
         date_today = datetime.now().date()
@@ -113,9 +120,10 @@ class EventWidget(BaseWidget):
                 text = day.capitalize()
             Label(self.display, text=text,
                   style='day.Events.TLabel').grid(sticky='w', pady=(4, 0), padx=4)
-            for ev, desc in evts:
+            for ev, desc, cat in evts:
                 if desc.strip():
-                    tf = ToggledFrame(self.display, text=ev.strip(), style='Events.TFrame')
+                    tf = ToggledFrame(self.display, text=ev.strip(), category=cat,
+                                      style='Events.TFrame')
                     l = Label(tf.interior,
                               text=desc.strip(),
                               style='Events.TLabel')
@@ -124,8 +132,11 @@ class EventWidget(BaseWidget):
                     l.bind('<Configure>', wrap)
                     tf.grid(sticky='we', pady=2, padx=(8, 4))
                 else:
-                    l = Label(self.display, text=ev.strip(),
+                    frame = Frame(self.display, style='Events.TFrame')
+                    Frame(frame, style=f'ev_{cat}.Events.TFrame', width=10,
+                          height=10).pack(side='left', padx=(0, 2))
+                    l = Label(frame, text=ev.strip(),
                               style='Events.TLabel')
                     l.bind('<Configure>', wrap)
-                    l.grid(sticky='ew', pady=2, padx=(21, 10))
-
+                    l.pack(side='left', fill='x', expand=True)
+                    frame.grid(sticky='ew', pady=2, padx=(21, 10))
