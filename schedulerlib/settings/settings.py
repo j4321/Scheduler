@@ -130,7 +130,7 @@ class Settings(tk.Toplevel):
         # --- Update checks
         #~self.confirm_update = ttk.Checkbutton(self.frames['General'],
         #~                                      text=_("Check for updates on start-up"))
-        #~if CONFIG.getboolean('General', 'check_update', fallback=True):
+        #~if CONFIG.getboolean('General', 'check_update'):
         #~    self.confirm_update.state(('selected', '!alternate'))
         #~else:
         #~    self.confirm_update.state(('!selected', '!alternate'))
@@ -138,7 +138,7 @@ class Settings(tk.Toplevel):
         # --- Splash supported
         self.splash_support = ttk.Checkbutton(self.frames['General'],
                                               text=_("Check this box if the widgets disappear when you click"))
-        if not CONFIG.getboolean('General', 'splash_supported', fallback=True):
+        if not CONFIG.getboolean('General', 'splash_supported'):
             self.splash_support.state(('selected', '!alternate'))
         else:
             self.splash_support.state(('!selected', '!alternate'))
@@ -182,7 +182,7 @@ class Settings(tk.Toplevel):
         self.eyes_interval = ttk.Entry(self.frames["Eyes' rest"], width=4, justify='center',
                                        validate='key',
                                        validatecommand=(self._only_nb, '%P'))
-        self.eyes_interval.insert(0, CONFIG.get("Eyes", "interval", fallback='20'))
+        self.eyes_interval.insert(0, CONFIG.get("Eyes", "interval"))
         self.eyes_interval.grid(row=0, column=1, sticky='w', pady=4, padx=4)
 
         self.eyes_sound = SoundFrame(self.frames["Eyes' rest"],
@@ -308,7 +308,7 @@ class Settings(tk.Toplevel):
 
         # --- --- opacity
         self.cal_opacity = OpacityFrame(general,
-                                        CONFIG.getfloat('Calendar', 'alpha', fallback=0.85))
+                                        CONFIG.getfloat('Calendar', 'alpha'))
         self.cal_opacity.grid(row=2, columnspan=2, sticky='w', padx=4)
 
         ttk.Separator(general, orient='horizontal').grid(row=3, columnspan=2,
@@ -458,7 +458,7 @@ class Settings(tk.Toplevel):
 
         # --- opacity
         self.events_opacity = OpacityFrame(self.frames['Events'],
-                                           CONFIG.getfloat("Events", "alpha", fallback=0.85))
+                                           CONFIG.getfloat("Events", "alpha"))
 
         # --- colors
         frame_color = ttk.Frame(self.frames['Events'])
@@ -507,7 +507,7 @@ class Settings(tk.Toplevel):
 
         # --- opacity
         self.tasks_opacity = OpacityFrame(self.frames['Tasks'],
-                                          CONFIG.getfloat("Tasks", "alpha", fallback=0.85))
+                                          CONFIG.getfloat("Tasks", "alpha"))
 
         # --- colors
         frame_color = ttk.Frame(self.frames['Tasks'])
@@ -558,7 +558,7 @@ class Settings(tk.Toplevel):
 
         # --- opacity
         self.timer_opacity = OpacityFrame(self.frames['Timer'],
-                                          CONFIG.getfloat("Timer", "alpha", fallback=0.85))
+                                          CONFIG.getfloat("Timer", "alpha"))
 
         # --- colors
         frame_color = ttk.Frame(self.frames['Timer'])

@@ -34,7 +34,7 @@ class BaseWidget(Toplevel):
         """Create a  desktop widget that sticks on the desktop."""
         Toplevel.__init__(self, master)
         self.name = name
-        if CONFIG.getboolean('General', 'splash_supported', fallback=True):
+        if CONFIG.getboolean('General', 'splash_supported'):
             self.attributes('-type', 'splash')
         else:
             self.attributes('-type', 'toolbar')
@@ -68,7 +68,7 @@ class BaseWidget(Toplevel):
             self.geometry(geometry)
         self.update_idletasks()
 
-        if CONFIG.getboolean(self.name, 'visible', fallback=True):
+        if CONFIG.getboolean(self.name, 'visible'):
             self.show()
 
         # --- bindings
@@ -92,10 +92,10 @@ class BaseWidget(Toplevel):
 
     def update_style(self):
         """Update widget's style."""
-        bg = CONFIG.get(self.name, 'background', fallback='grey10')
-        fg = CONFIG.get(self.name, 'foreground', fallback='white')
+        bg = CONFIG.get(self.name, 'background')
+        fg = CONFIG.get(self.name, 'foreground')
         active_bg = active_color(*self.winfo_rgb(bg))
-        self.attributes('-alpha', CONFIG.get(self.name, 'alpha', fallback=0.85))
+        self.attributes('-alpha', CONFIG.get(self.name, 'alpha'))
         self.configure(bg=bg)
         self.menu.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
                             activebackground=active_bg)
@@ -123,7 +123,7 @@ class BaseWidget(Toplevel):
     def update_position(self):
         """Update widget's position."""
         if self._position.get() == 'normal':
-            if CONFIG.getboolean('General', 'splash_supported', fallback=True):
+            if CONFIG.getboolean('General', 'splash_supported'):
                 self.attributes('-type', 'splash')
             else:
                 self.attributes('-type', 'toolbar')
@@ -147,7 +147,7 @@ class BaseWidget(Toplevel):
         """Show widget."""
         self.deiconify()
         self.update_idletasks()
-        splash_supp = CONFIG.getboolean('General', 'splash_supported', fallback=True)
+        splash_supp = CONFIG.getboolean('General', 'splash_supported')
         try:
             pos = self._position.get()
             for w in self.ewmh.getClientList():

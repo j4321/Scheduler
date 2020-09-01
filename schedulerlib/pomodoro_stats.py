@@ -121,7 +121,7 @@ class Stats(tk.Toplevel):
             self.ax.set_ylabel(_("time (h)"))
             self.ax.set_xlabel(_("date"))
             self.ax.xaxis_date()
-            rows = CONFIG.getint("Pomodoro", "legend_max_height", fallback=6)
+            rows = CONFIG.getint("Pomodoro", "legend_max_height")
             ncol = int(np.ceil(len(tasks) / rows))
 
             lgd = self.ax.legend(fontsize=10, ncol=ncol, columnspacing=0.7, handlelength=0.9, handletextpad=0.5)
