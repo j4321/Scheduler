@@ -230,6 +230,9 @@ if CONFIG.read(PATH_CONFIG):
 if not CONFIG.options('Categories'):
     CONFIG.set('Categories', 'default', 'white, #186CBE, 0')
 
+if not CONFIG.has_option('Events', 'categories'):
+    CONFIG.set('Events', 'categories', ', '.join(CONFIG.options('Categories')))
+
 if not CONFIG.get('Calendar', 'default_category'):
     CONFIG.set('Calendar', 'default_category', CONFIG.options('Categories')[0])
 # --- language
