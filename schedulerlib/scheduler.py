@@ -75,7 +75,7 @@ class EventScheduler(Tk):
         self.menu_widgets = SubMenu(parent=self.icon.menu)
         self.menu_eyes = Eyes(self.icon.menu, self)
         self.icon.menu.add_checkbutton(label=_('Silent mode'), command=self.toggle_silent_mode)
-        self.icon.menu.set_item_value(_('Silent mode'), CONFIG.getboolean('General', 'silent_mode', fallback=False))
+        self.icon.menu.set_item_value(_('Silent mode'), CONFIG.getboolean('General', 'silent_mode'))
         self.icon.menu.add_separator()
         self.icon.menu.add_checkbutton(label=_('Manager'), command=self.display_hide)
         self.icon.menu.add_cascade(label=_('Widgets'), menu=self.menu_widgets)
@@ -255,7 +255,7 @@ class EventScheduler(Tk):
         self._im_slider_vert_active = {}
         self._slider_alpha = Image.open(IM_SCROLL_ALPHA)
         for widget in ['Events', 'Tasks', 'Timer']:
-            bg = CONFIG.get(widget, 'background', fallback='gray10')
+            bg = CONFIG.get(widget, 'background')
             fg = CONFIG.get(widget, 'foreground')
 
             widget_bg = self.winfo_rgb(bg)
@@ -432,8 +432,8 @@ apply {name {
     def _setup_style(self):
         # scrollbars
         for widget in ['Events', 'Tasks', 'Timer']:
-            bg = CONFIG.get(widget, 'background', fallback='gray10')
-            fg = CONFIG.get(widget, 'foreground', fallback='white')
+            bg = CONFIG.get(widget, 'background')
+            fg = CONFIG.get(widget, 'foreground')
 
             widget_bg = self.winfo_rgb(bg)
             widget_fg = tuple(round(c * 255 / 65535) for c in self.winfo_rgb(fg))
@@ -848,7 +848,7 @@ apply {name {
         self.destroy()
 
     def settings(self):
-        splash_supp = CONFIG.get('General', 'splash_supported', fallback=True)
+        splash_supp = CONFIG.get('General', 'splash_supported')
         dialog = Settings(self)
         self.wait_window(dialog)
         self._setup_style()
@@ -857,7 +857,7 @@ apply {name {
                 widget.update_position()
         # refresh categories
         cats = CONFIG.options('Categories')
-        default_cat = CONFIG.get('Calendar', 'default_category', fallback=cats[0])
+        default_cat = CONFIG.get('Calendar', 'default_category')
         for iid in self.tree.get_children():
             cat = self.tree.set(iid, 'Category')
             if cat not in cats:

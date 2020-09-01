@@ -261,8 +261,8 @@ class Pomodoro(BaseWidget):
     @staticmethod
     def ting():
         """Play the sound notifying the end of a period."""
-        if (not CONFIG.getboolean("Pomodoro", "mute", fallback=False) and
-                not CONFIG.getboolean('General', 'silent_mode', fallback=False)):
+        if (not CONFIG.getboolean("Pomodoro", "mute") and
+                not CONFIG.getboolean('General', 'silent_mode')):
             Popen([CONFIG.get("General", "soundplayer"),
                    CONFIG.get("Pomodoro", "beep")])
 
