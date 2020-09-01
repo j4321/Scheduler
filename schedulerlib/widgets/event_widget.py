@@ -20,17 +20,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Event desktop widget
 """
-from tkinter import Canvas
+from tkinter import Canvas, Menu, BooleanVar
 from tkinter.ttk import Label, Separator, Sizegrip, Frame
 from datetime import datetime
 
-from schedulerlib.constants import CONFIG
+from schedulerlib.constants import CONFIG, active_color, save_config
 from schedulerlib.ttkwidgets import AutoScrollbar, ToggledFrame
 from .base_widget import BaseWidget
 
 
 class EventWidget(BaseWidget):
     def __init__(self, master):
+        self._cat_var = {}
         BaseWidget.__init__(self, 'Events', master)
 
     def create_content(self):
@@ -54,7 +55,6 @@ class EventWidget(BaseWidget):
         self.display = Frame(self.canvas, style='Events.TFrame')
         self.display.columnconfigure(0, weight=1)
         self.canvas.create_window(0, 0, anchor='nw', window=self.display, tags=('display',))
-        self.display_evts()
 
         corner = Sizegrip(self, style="Events.TSizegrip")
         corner.place(relx=1, rely=1, anchor='se')
@@ -70,16 +70,52 @@ class EventWidget(BaseWidget):
         self.update_idletasks()
         self.canvas.configure(scrollregion=self.canvas.bbox('all'))
 
+    def _populate_menu(self):
+        """Create menu."""
+        BaseWidget._populate_menu(self)
+        self.menu.add_separator()
+        self.menu_cat = Menu(self.menu, tearoff=False)
+        self.menu_cat.add_command(label=_('Select all'), command=self.display_all_cats)
+        self.menu_cat.add_command(label=_('Unselect all'), command=self.hide_all_cats)
+        self.menu_cat.add_separator()
+        self.menu.add_cascade(label=_('Display categories'), menu=self.menu_cat)
+
+    def display_all_cats(self):
+        for var in self._cat_var.values():
+            var.set(True)
+        self.display_evts()
+
+    def hide_all_cats(self):
+        for var in self._cat_var.values():
+            var.set(False)
+        self.display_evts()
+
     def update_style(self):
         """Update widget's style."""
         BaseWidget.update_style(self)
         bg = CONFIG.get('Events', 'background')
+        fg = CONFIG.get('Events', 'foreground')
+        active_bg = active_color(*self.winfo_rgb(bg))
+        self.attributes('-alpha', CONFIG.get(self.name, 'alpha'))
+        self.configure(bg=bg)
+        self.menu_cat.configure(bg=bg, fg=fg, selectcolor=fg, activeforeground=fg,
+                                activebackground=active_bg)
+
         self.style.configure('day.Events.TLabel',
                              font=CONFIG.get('Events', 'font_day'))
         self.style.configure('Toggle', background=bg)
         self.canvas.configure(bg=bg)
-
+        for cat in list(self._cat_var.keys()):
+            if not CONFIG.has_option('Categories', cat):
+                del self._cat_var[cat]
+                self.menu_cat.delete(cat)
+        displayed_cats = CONFIG.get('Events', 'categories').split(', ')
         for cat, val in CONFIG.items('Categories'):
+            if cat not in self._cat_var:
+                self._cat_var[cat] = BooleanVar(self, cat in displayed_cats)
+                self.menu_cat.add_checkbutton(label=cat,
+                                              variable=self._cat_var[cat],
+                                              command=self.display_evts)
             props = val.split(', ')
             self.style.configure(f'ev_{cat}.Events.TFrame',
                                  background=props[1], foreground=props[0])
@@ -121,6 +157,8 @@ class EventWidget(BaseWidget):
             Label(self.display, text=text,
                   style='day.Events.TLabel').grid(sticky='w', pady=(4, 0), padx=4)
             for ev, desc, cat in evts:
+                if not self._cat_var[cat].get():
+                    continue
                 if desc.strip():
                     tf = ToggledFrame(self.display, text=ev.strip(), category=cat,
                                       style='Events.TFrame')
@@ -140,3 +178,7 @@ class EventWidget(BaseWidget):
                     l.bind('<Configure>', wrap)
                     l.pack(side='left', fill='x', expand=True)
                     frame.grid(sticky='ew', pady=2, padx=(21, 10))
+
+        displayed_cat = [cat for cat, var in self._cat_var.items() if var.get()]
+        CONFIG.set('Events', 'categories', ', '.join(displayed_cat))
+        save_config()

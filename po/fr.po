@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-01 09:46+0200\n"
+"POT-Creation-Date: 2020-09-01 15:41+0200\n"
 "PO-Revision-Date:  2020-02-03 11:24+0100\n"
 "Last-Translator:  Juliette Monsel <j_4321@protonmail.com>\n"
 "Language-Team: French\n"
@@ -25,7 +25,7 @@ msgstr ""
 #: schedulerlib/widgets/pomodoro_widget.py:292
 #: schedulerlib/settings/pomodoro_params.py:68
 #: schedulerlib/settings/pomodoro_params.py:153
-#: schedulerlib/settings/pomodoro_params.py:323 schedulerlib/constants.py:320
+#: schedulerlib/settings/pomodoro_params.py:323 schedulerlib/constants.py:273
 msgid "Work"
 msgstr "Travail"
 
@@ -92,11 +92,23 @@ msgstr "Intervalles :"
 msgid "Display current month"
 msgstr "Afficher le mois en cours"
 
-#: schedulerlib/widgets/event_widget.py:42
+#: schedulerlib/widgets/event_widget.py:43
 msgid "Events"
 msgstr "Événements"
 
-#: schedulerlib/widgets/event_widget.py:111
+#: schedulerlib/widgets/event_widget.py:78
+msgid "Select all"
+msgstr "Sélectionner tout"
+
+#: schedulerlib/widgets/event_widget.py:79
+msgid "Unselect all"
+msgstr "Désélectionner tout"
+
+#: schedulerlib/widgets/event_widget.py:81
+msgid "Display categories"
+msgstr "Afficher des catégories"
+
+#: schedulerlib/widgets/event_widget.py:154
 msgid "Today"
 msgstr "Aujourd'hui"
 
@@ -251,17 +263,17 @@ msgid "Deadline"
 msgstr "Date butoire"
 
 #: schedulerlib/form.py:492 schedulerlib/form.py:508 schedulerlib/form.py:511
-#: schedulerlib/constants.py:310
+#: schedulerlib/constants.py:263
 msgid "minutes"
 msgstr "minutes"
 
 #: schedulerlib/form.py:492 schedulerlib/form.py:505
-#: schedulerlib/constants.py:310
+#: schedulerlib/constants.py:263
 msgid "hours"
 msgstr "heures"
 
 #: schedulerlib/form.py:492 schedulerlib/form.py:500
-#: schedulerlib/constants.py:310
+#: schedulerlib/constants.py:263
 msgid "days"
 msgstr "jours"
 
@@ -665,8 +677,8 @@ msgid ""
 "Are you sure you want to delete the category \"{category}\"? This action "
 "cannot be undone."
 msgstr ""
-"Voulez-vous vraiment supprimer la catégorie \"{category}\" ? Cette action "
-"ne peut pas être annulée."
+"Voulez-vous vraiment supprimer la catégorie \"{category}\" ? Cette action ne "
+"peut pas être annulée."
 
 #: schedulerlib/settings/settings.py:673
 #, python-brace-format
@@ -788,11 +800,11 @@ msgstr ""
 "Vous devriez avoir reçu une copie de la Licence Publique Générale GNU avec "
 "ce programme. Sinon, consultez http://www.gnu.org/licenses/."
 
-#: schedulerlib/constants.py:656
+#: schedulerlib/constants.py:609
 msgid "Open"
 msgstr "Ouvrir"
 
-#: schedulerlib/constants.py:704
+#: schedulerlib/constants.py:657
 msgid "Save As"
 msgstr "Enregistrer sous"
 

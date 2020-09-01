@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-01 09:46+0200\n"
+"POT-Creation-Date: 2020-09-01 15:41+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,7 +25,7 @@ msgstr ""
 #: schedulerlib/widgets/pomodoro_widget.py:292
 #: schedulerlib/settings/pomodoro_params.py:68
 #: schedulerlib/settings/pomodoro_params.py:153
-#: schedulerlib/settings/pomodoro_params.py:323 schedulerlib/constants.py:320
+#: schedulerlib/settings/pomodoro_params.py:323 schedulerlib/constants.py:273
 msgid "Work"
 msgstr ""
 
@@ -92,11 +92,23 @@ msgstr ""
 msgid "Display current month"
 msgstr ""
 
-#: schedulerlib/widgets/event_widget.py:42
+#: schedulerlib/widgets/event_widget.py:43
 msgid "Events"
 msgstr ""
 
-#: schedulerlib/widgets/event_widget.py:111
+#: schedulerlib/widgets/event_widget.py:78
+msgid "Select all"
+msgstr ""
+
+#: schedulerlib/widgets/event_widget.py:79
+msgid "Unselect all"
+msgstr ""
+
+#: schedulerlib/widgets/event_widget.py:81
+msgid "Display categories"
+msgstr ""
+
+#: schedulerlib/widgets/event_widget.py:154
 msgid "Today"
 msgstr ""
 
@@ -251,17 +263,17 @@ msgid "Deadline"
 msgstr ""
 
 #: schedulerlib/form.py:492 schedulerlib/form.py:508 schedulerlib/form.py:511
-#: schedulerlib/constants.py:310
+#: schedulerlib/constants.py:263
 msgid "minutes"
 msgstr ""
 
 #: schedulerlib/form.py:492 schedulerlib/form.py:505
-#: schedulerlib/constants.py:310
+#: schedulerlib/constants.py:263
 msgid "hours"
 msgstr ""
 
 #: schedulerlib/form.py:492 schedulerlib/form.py:500
-#: schedulerlib/constants.py:310
+#: schedulerlib/constants.py:263
 msgid "days"
 msgstr ""
 
@@ -765,11 +777,11 @@ msgid ""
 "this program. If not, see http://www.gnu.org/licenses/."
 msgstr ""
 
-#: schedulerlib/constants.py:656
+#: schedulerlib/constants.py:609
 msgid "Open"
 msgstr ""
 
-#: schedulerlib/constants.py:704
+#: schedulerlib/constants.py:657
 msgid "Save As"
 msgstr ""
 

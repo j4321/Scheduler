@@ -673,7 +673,7 @@ class Settings(tk.Toplevel):
                           _("The category {category} already exists.").format(category=cat),
                           parent=self)
             elif cat:
-                row = self.cat_frame.grid_size()[1] + 1
+                row = self.cat_frame.grid_size()[1]
                 self._add_cat(cat, '#186CBE', 'white', row)
             top.destroy()
 
@@ -747,13 +747,23 @@ class Settings(tk.Toplevel):
         for name, widget in self.cal_colors.items():
             CONFIG.set("Calendar", name, widget.get_color())
 
+        categories = CONFIG.options('Categories')
+        new_cats = []
         for row in range(self.cat_frame.grid_size()[1]):
             cat = self.cat_frame.grid_slaves(row, 0)[0].cget('text')
+            if cat not in categories:
+                new_cats.append(cat)
             CONFIG.set("Categories", cat,
                        "{}, {}, {}".format(self.cats[cat][2].get_color(),
                                            self.cats[cat][1].get_color(), row))
 
         # --- Events
+        displayed_cats_old = CONFIG.get('Events', 'categories').split(', ')
+        # remove deleted categories
+        displayed_cats = [cat for cat in displayed_cats_old if cat in categories]
+        # add new categories
+        displayed_cats.extend(new_cats)
+        CONFIG.set('Events', 'categories', ', '.join(displayed_cats))
         CONFIG.set("Events", "alpha", "%.2f" % (self.events_opacity.get_opacity()))
 
         font = self.events_font.get_font()
