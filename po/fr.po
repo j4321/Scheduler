@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-31 11:34+0200\n"
+"POT-Creation-Date: 2020-09-01 09:46+0200\n"
 "PO-Revision-Date:  2020-02-03 11:24+0100\n"
 "Last-Translator:  Juliette Monsel <j_4321@protonmail.com>\n"
 "Language-Team: French\n"
@@ -33,8 +33,8 @@ msgstr "Travail"
 msgid "Task: "
 msgstr "Tâche : "
 
-#: schedulerlib/widgets/pomodoro_widget.py:239 schedulerlib/scheduler.py:487
-#: schedulerlib/settings/settings.py:598
+#: schedulerlib/widgets/pomodoro_widget.py:239 schedulerlib/scheduler.py:497
+#: schedulerlib/settings/settings.py:635
 #: schedulerlib/settings/pomodoro_params.py:304
 msgid "Confirmation"
 msgstr "Confirmation"
@@ -88,6 +88,10 @@ msgstr "Intervalle"
 msgid "Intervals:"
 msgstr "Intervalles :"
 
+#: schedulerlib/widgets/calendar_widget.py:37
+msgid "Display current month"
+msgstr "Afficher le mois en cours"
+
 #: schedulerlib/widgets/event_widget.py:42
 msgid "Events"
 msgstr "Événements"
@@ -96,23 +100,23 @@ msgstr "Événements"
 msgid "Today"
 msgstr "Aujourd'hui"
 
-#: schedulerlib/event_calendar.py:334 schedulerlib/form.py:52
+#: schedulerlib/event_calendar.py:366 schedulerlib/form.py:52
 msgid "New Event"
 msgstr "Nouvel événement"
 
-#: schedulerlib/event_calendar.py:342 schedulerlib/scheduler.py:96
+#: schedulerlib/event_calendar.py:374 schedulerlib/scheduler.py:96
 msgid "Edit"
 msgstr "Éditer"
 
-#: schedulerlib/event_calendar.py:345 schedulerlib/scheduler.py:97
+#: schedulerlib/event_calendar.py:377 schedulerlib/scheduler.py:97
 msgid "Delete"
 msgstr "Supprimer"
 
-#: schedulerlib/event_calendar.py:350
+#: schedulerlib/event_calendar.py:382
 msgid "Remove Holiday"
 msgstr "Pas férié"
 
-#: schedulerlib/event_calendar.py:353
+#: schedulerlib/event_calendar.py:385
 msgid "Set Holiday"
 msgstr "Férié"
 
@@ -121,9 +125,9 @@ msgid "Edit Event"
 msgstr "Éditer l'événement"
 
 #: schedulerlib/form.py:67 schedulerlib/messagebox.py:32
-#: schedulerlib/messagebox.py:94 schedulerlib/messagebox.py:325
-#: schedulerlib/messagebox.py:391 schedulerlib/messagebox.py:393
-#: schedulerlib/settings/settings.py:95
+#: schedulerlib/messagebox.py:95 schedulerlib/messagebox.py:327
+#: schedulerlib/messagebox.py:393 schedulerlib/messagebox.py:395
+#: schedulerlib/settings/settings.py:98
 #: schedulerlib/settings/pomodoro_params.py:357
 msgid "Ok"
 msgstr "Ok"
@@ -132,21 +136,23 @@ msgstr "Ok"
 msgid "Event"
 msgstr "Événement"
 
-#: schedulerlib/form.py:77 schedulerlib/scheduler.py:288
+#: schedulerlib/form.py:77 schedulerlib/scheduler.py:293
+#: schedulerlib/scheduler.py:294
 msgid "Summary"
 msgstr "Résumé"
 
-#: schedulerlib/form.py:78 schedulerlib/scheduler.py:289
+#: schedulerlib/form.py:78 schedulerlib/scheduler.py:295
+#: schedulerlib/scheduler.py:296
 msgid "Place"
 msgstr "Lieu"
 
 #: schedulerlib/form.py:79 schedulerlib/eyes.py:38 schedulerlib/eyes.py:51
-#: schedulerlib/scheduler.py:290
+#: schedulerlib/scheduler.py:297 schedulerlib/scheduler.py:298
 msgid "Start"
 msgstr "Début"
 
 #: schedulerlib/form.py:80 schedulerlib/form.py:431
-#: schedulerlib/scheduler.py:291
+#: schedulerlib/scheduler.py:299 schedulerlib/scheduler.py:300
 msgid "End"
 msgstr "Fin"
 
@@ -154,8 +160,9 @@ msgstr "Fin"
 msgid "Description"
 msgstr "Description"
 
-#: schedulerlib/form.py:85 schedulerlib/scheduler.py:292
-#: schedulerlib/scheduler.py:313 schedulerlib/settings/settings.py:637
+#: schedulerlib/form.py:85 schedulerlib/scheduler.py:301
+#: schedulerlib/scheduler.py:302 schedulerlib/scheduler.py:323
+#: schedulerlib/settings/settings.py:687
 msgid "Category"
 msgstr "Catégorie"
 
@@ -262,9 +269,9 @@ msgstr "jours"
 msgid "Reminder:"
 msgstr "Rappel :"
 
-#: schedulerlib/form.py:525 schedulerlib/scheduler.py:682
-#: schedulerlib/scheduler.py:702 schedulerlib/navtoolbar.py:135
-#: schedulerlib/settings/settings.py:612
+#: schedulerlib/form.py:525 schedulerlib/scheduler.py:692
+#: schedulerlib/scheduler.py:712 schedulerlib/navtoolbar.py:135
+#: schedulerlib/settings/settings.py:629 schedulerlib/settings/settings.py:672
 #: schedulerlib/settings/pomodoro_params.py:278
 #: schedulerlib/settings/pomodoro_params.py:332 scheduler.py:71
 msgid "Error"
@@ -303,32 +310,32 @@ msgstr "Temps depuis le dernier repos des yeux"
 msgid "The eyes' rest script is not active."
 msgstr "Le script de repos des yeux n'est pas actif."
 
-#: schedulerlib/messagebox.py:181
+#: schedulerlib/messagebox.py:183
 msgid "Please report this bug on "
 msgstr "Merci de signaler ce bug sur "
 
-#: schedulerlib/messagebox.py:268 schedulerlib/messagebox.py:410
-#: schedulerlib/messagebox.py:412
+#: schedulerlib/messagebox.py:270 schedulerlib/messagebox.py:412
+#: schedulerlib/messagebox.py:414
 msgid "Yes"
 msgstr "Oui"
 
-#: schedulerlib/messagebox.py:268 schedulerlib/messagebox.py:410
+#: schedulerlib/messagebox.py:270 schedulerlib/messagebox.py:412
 msgid "No"
 msgstr "Non"
 
-#: schedulerlib/messagebox.py:268 schedulerlib/messagebox.py:391
-#: schedulerlib/settings/settings.py:96
+#: schedulerlib/messagebox.py:270 schedulerlib/messagebox.py:393
+#: schedulerlib/settings/settings.py:99
 #: schedulerlib/settings/pomodoro_params.py:356
 msgid "Cancel"
 msgstr "Annuler"
 
 #: schedulerlib/scheduler.py:77 schedulerlib/scheduler.py:78
-#: schedulerlib/scheduler.py:471
+#: schedulerlib/scheduler.py:481
 msgid "Silent mode"
 msgstr "Mode silencieux"
 
-#: schedulerlib/scheduler.py:80 schedulerlib/scheduler.py:523
-#: schedulerlib/scheduler.py:526 schedulerlib/scheduler.py:529
+#: schedulerlib/scheduler.py:80 schedulerlib/scheduler.py:533
+#: schedulerlib/scheduler.py:536 schedulerlib/scheduler.py:539
 msgid "Manager"
 msgstr "Gestionnaire"
 
@@ -360,40 +367,40 @@ msgstr "À propos"
 msgid "Quit"
 msgstr "Quitter"
 
-#: schedulerlib/scheduler.py:309
+#: schedulerlib/scheduler.py:319
 msgid "Filter by"
 msgstr "Filtrer par"
 
-#: schedulerlib/scheduler.py:319
+#: schedulerlib/scheduler.py:329
 msgid "Delete All Outdated"
 msgstr "Supprimer les événement périmés"
 
-#: schedulerlib/scheduler.py:487
+#: schedulerlib/scheduler.py:497
 msgid "Delete selected events?"
 msgstr "Supprimer les événements sélectionnés ?"
 
-#: schedulerlib/scheduler.py:637 schedulerlib/scheduler.py:670
+#: schedulerlib/scheduler.py:647 schedulerlib/scheduler.py:680
 #: schedulerlib/settings/sound.py:69
 msgid "All files"
 msgstr "Tous les fichiers"
 
-#: schedulerlib/scheduler.py:682
+#: schedulerlib/scheduler.py:692
 msgid "The import of the .ics file failed."
 msgstr "L'importation du fichier .ics a échouée."
 
-#: schedulerlib/scheduler.py:703
+#: schedulerlib/scheduler.py:713
 msgid "The import of the .ics data failed."
 msgstr "L'importation des données .ics a échouée."
 
-#: schedulerlib/scheduler.py:711
+#: schedulerlib/scheduler.py:721
 msgid "Import .ics data from url:"
 msgstr "Url du fichier .ics à importer :"
 
-#: schedulerlib/scheduler.py:714
+#: schedulerlib/scheduler.py:724
 msgid "Import"
 msgstr "Importer"
 
-#: schedulerlib/scheduler.py:794 schedulerlib/scheduler.py:805
+#: schedulerlib/scheduler.py:804 schedulerlib/scheduler.py:815
 msgid "Progress"
 msgstr "Avancement"
 
@@ -453,27 +460,27 @@ msgstr "Souligné"
 msgid "Opacity"
 msgstr "Opacité"
 
-#: schedulerlib/settings/settings.py:108
+#: schedulerlib/settings/settings.py:111
 msgid "Language"
 msgstr "Langue"
 
-#: schedulerlib/settings/settings.py:120
+#: schedulerlib/settings/settings.py:123
 msgid "GUI Toolkit for the system tray icon"
 msgstr "Bibliothèque logicielle pour l'icône de la zone de notification"
 
-#: schedulerlib/settings/settings.py:137
+#: schedulerlib/settings/settings.py:140
 msgid "Check this box if the widgets disappear when you click"
 msgstr "Cochez cette case si les widgets disparaissent quand vous cliquez"
 
-#: schedulerlib/settings/settings.py:145
+#: schedulerlib/settings/settings.py:148
 msgid "Maintenance"
 msgstr "Maintenance"
 
-#: schedulerlib/settings/settings.py:148
+#: schedulerlib/settings/settings.py:151
 msgid "Delete all outdated events"
 msgstr "Supprimer tous les événements périmés"
 
-#: schedulerlib/settings/settings.py:155
+#: schedulerlib/settings/settings.py:158
 msgid ""
 "Refresh scheduled reminders\n"
 "(needed after APScheduler's updates)"
@@ -481,31 +488,31 @@ msgstr ""
 "Rafraîchir les rappels\n"
 "(nécessaire après les mises à jour d'APScheduler)"
 
-#: schedulerlib/settings/settings.py:165
+#: schedulerlib/settings/settings.py:169
 msgid "Interface"
 msgstr "Interface"
 
-#: schedulerlib/settings/settings.py:177
+#: schedulerlib/settings/settings.py:181
 msgid "Interval between two eyes' rest (min)"
 msgstr "Intervalle entre deux repos des yeux (min)"
 
-#: schedulerlib/settings/settings.py:187
+#: schedulerlib/settings/settings.py:191
 #: schedulerlib/settings/pomodoro_params.py:113
 msgid "Sound"
 msgstr "Son"
 
-#: schedulerlib/settings/settings.py:204
+#: schedulerlib/settings/settings.py:208
 msgid "Banner"
 msgstr "Bannière"
 
-#: schedulerlib/settings/settings.py:213
+#: schedulerlib/settings/settings.py:217
 msgid "Timeout (min)"
 msgstr "Délai d'expiration (min)"
 
-#: schedulerlib/settings/settings.py:225 schedulerlib/settings/settings.py:342
-#: schedulerlib/settings/settings.py:364 schedulerlib/settings/settings.py:403
-#: schedulerlib/settings/settings.py:464 schedulerlib/settings/settings.py:512
-#: schedulerlib/settings/settings.py:562 schedulerlib/settings/settings.py:619
+#: schedulerlib/settings/settings.py:229 schedulerlib/settings/settings.py:347
+#: schedulerlib/settings/settings.py:369 schedulerlib/settings/settings.py:470
+#: schedulerlib/settings/settings.py:519 schedulerlib/settings/settings.py:570
+#: schedulerlib/settings/settings.py:651
 #: schedulerlib/settings/pomodoro_params.py:123
 #: schedulerlib/settings/pomodoro_params.py:126
 #: schedulerlib/settings/pomodoro_params.py:129
@@ -513,10 +520,10 @@ msgstr "Délai d'expiration (min)"
 msgid "Background"
 msgstr "Fond"
 
-#: schedulerlib/settings/settings.py:229 schedulerlib/settings/settings.py:345
-#: schedulerlib/settings/settings.py:367 schedulerlib/settings/settings.py:404
-#: schedulerlib/settings/settings.py:468 schedulerlib/settings/settings.py:516
-#: schedulerlib/settings/settings.py:566 schedulerlib/settings/settings.py:620
+#: schedulerlib/settings/settings.py:233 schedulerlib/settings/settings.py:350
+#: schedulerlib/settings/settings.py:372 schedulerlib/settings/settings.py:474
+#: schedulerlib/settings/settings.py:523 schedulerlib/settings/settings.py:574
+#: schedulerlib/settings/settings.py:652
 #: schedulerlib/settings/pomodoro_params.py:135
 #: schedulerlib/settings/pomodoro_params.py:138
 #: schedulerlib/settings/pomodoro_params.py:141
@@ -524,148 +531,157 @@ msgstr "Fond"
 msgid "Foreground"
 msgstr "Texte"
 
-#: schedulerlib/settings/settings.py:253
+#: schedulerlib/settings/settings.py:257
 msgid "Blink"
 msgstr "Clignoter"
 
-#: schedulerlib/settings/settings.py:260
+#: schedulerlib/settings/settings.py:264
 msgid "Alternate Background"
 msgstr "Fond alternatif"
 
-#: schedulerlib/settings/settings.py:264
+#: schedulerlib/settings/settings.py:268
 msgid "Alternate Foreground"
 msgstr "Texte alternatif"
 
-#: schedulerlib/settings/settings.py:274
+#: schedulerlib/settings/settings.py:278
 msgid "Alarm"
 msgstr "Alarme"
 
-#: schedulerlib/settings/settings.py:279
+#: schedulerlib/settings/settings.py:283
 msgid "Notification"
 msgstr "Notification"
 
-#: schedulerlib/settings/settings.py:294 schedulerlib/settings/settings.py:339
+#: schedulerlib/settings/settings.py:298 schedulerlib/settings/settings.py:344
 #: schedulerlib/settings/pomodoro_params.py:61
 #: schedulerlib/settings/pomodoro_params.py:146
 msgid "General"
 msgstr "Général"
 
-#: schedulerlib/settings/settings.py:297 schedulerlib/settings/settings.py:428
-#: schedulerlib/settings/settings.py:484 schedulerlib/settings/settings.py:534
+#: schedulerlib/settings/settings.py:301 schedulerlib/settings/settings.py:433
+#: schedulerlib/settings/settings.py:490 schedulerlib/settings/settings.py:541
 #: schedulerlib/settings/pomodoro_params.py:92
 msgid "Font"
 msgstr "Police"
 
-#: schedulerlib/settings/settings.py:313
+#: schedulerlib/settings/settings.py:318
 msgid "Default category"
 msgstr "Catégorie par défaut"
 
-#: schedulerlib/settings/settings.py:335 schedulerlib/settings/settings.py:459
-#: schedulerlib/settings/settings.py:507 schedulerlib/settings/settings.py:557
+#: schedulerlib/settings/settings.py:340 schedulerlib/settings/settings.py:465
+#: schedulerlib/settings/settings.py:514 schedulerlib/settings/settings.py:565
 #: schedulerlib/settings/pomodoro_params.py:119
 msgid "Colors"
 msgstr "Couleurs"
 
-#: schedulerlib/settings/settings.py:348
+#: schedulerlib/settings/settings.py:353
 msgid "Border"
 msgstr "Contour"
 
-#: schedulerlib/settings/settings.py:353
+#: schedulerlib/settings/settings.py:358
 msgid "Normal day"
 msgstr "Jour normal"
 
-#: schedulerlib/settings/settings.py:354
+#: schedulerlib/settings/settings.py:359
 msgid "Weekend"
 msgstr "Weekend"
 
-#: schedulerlib/settings/settings.py:355
+#: schedulerlib/settings/settings.py:360
 msgid "Other month day"
 msgstr "Jour d'un autre mois"
 
-#: schedulerlib/settings/settings.py:356
+#: schedulerlib/settings/settings.py:361
 msgid "Other month weekend"
 msgstr "Weekend d'un autre mois"
 
-#: schedulerlib/settings/settings.py:357
+#: schedulerlib/settings/settings.py:362
 msgid "Selected day"
 msgstr "Jour sélectionné"
 
-#: schedulerlib/settings/settings.py:358
+#: schedulerlib/settings/settings.py:363
 msgid "Headers"
 msgstr "Entêtes"
 
-#: schedulerlib/settings/settings.py:359
+#: schedulerlib/settings/settings.py:364
 msgid "Tooltip"
 msgstr "Info-bulle"
 
-#: schedulerlib/settings/settings.py:384
+#: schedulerlib/settings/settings.py:389
 msgid "Event categories"
 msgstr "Catégories d'événements"
 
-#: schedulerlib/settings/settings.py:432 schedulerlib/settings/settings.py:488
+#: schedulerlib/settings/settings.py:437 schedulerlib/settings/settings.py:494
 msgid "Title"
 msgstr "Titre"
 
-#: schedulerlib/settings/settings.py:441
+#: schedulerlib/settings/settings.py:446
 msgid "Day"
 msgstr "Jour"
 
-#: schedulerlib/settings/settings.py:449 schedulerlib/settings/settings.py:497
+#: schedulerlib/settings/settings.py:454 schedulerlib/settings/settings.py:503
 msgid "Text"
 msgstr "Texte"
 
-#: schedulerlib/settings/settings.py:526
+#: schedulerlib/settings/settings.py:533
 msgid "Hide completed tasks"
 msgstr "Cacher les tâches accomplies"
 
-#: schedulerlib/settings/settings.py:538
+#: schedulerlib/settings/settings.py:545
 msgid "Time"
 msgstr "Temps"
 
-#: schedulerlib/settings/settings.py:547
+#: schedulerlib/settings/settings.py:554
 msgid "Intervals"
 msgstr "Intervalles"
 
-#: schedulerlib/settings/settings.py:587 schedulerlib/settings/settings.py:593
-#: schedulerlib/settings/settings.py:646 schedulerlib/settings/settings.py:650
+#: schedulerlib/settings/settings.py:595 schedulerlib/settings/settings.py:601
+#: schedulerlib/settings/settings.py:696 schedulerlib/settings/settings.py:700
 msgid "Information"
 msgstr "Information"
 
-#: schedulerlib/settings/settings.py:588
+#: schedulerlib/settings/settings.py:596
 msgid "The language setting will take effect after restarting the application."
 msgstr ""
 "Le changement de langue prendra effet après le redémarrage du logiciel."
 
-#: schedulerlib/settings/settings.py:594
+#: schedulerlib/settings/settings.py:602
 msgid ""
 "The GUI Toolkit setting will take effect after restarting the application"
 msgstr ""
 "Le changement de bibliothèque logicielle prendra effet au prochain démarrage "
 "de l'application"
 
-#: schedulerlib/settings/settings.py:599
+#: schedulerlib/settings/settings.py:630
 #, python-brace-format
 msgid ""
-"Are you sure you want to delete the category {category}? This action cannot "
-"be undone."
+"Impossible to delete the category \"{category}\": At least one category has "
+"to exist."
 msgstr ""
-"Voulez-vous vraiment supprimer la catégorie {category}? Cette action ne peut "
-"pas être annulée."
+"Impossible de supprimer la catégorie \"{category}\": Il doit exister au "
+"moins une catégorie."
 
-#: schedulerlib/settings/settings.py:613
+#: schedulerlib/settings/settings.py:636
+#, python-brace-format
+msgid ""
+"Are you sure you want to delete the category \"{category}\"? This action "
+"cannot be undone."
+msgstr ""
+"Voulez-vous vraiment supprimer la catégorie \"{category}\" ? Cette action "
+"ne peut pas être annulée."
+
+#: schedulerlib/settings/settings.py:673
 #, python-brace-format
 msgid "The category {category} already exists."
 msgstr "La catégorie {category} existe déjà."
 
-#: schedulerlib/settings/settings.py:633
+#: schedulerlib/settings/settings.py:683
 msgid "New category"
 msgstr "Nouvelle catégorie"
 
-#: schedulerlib/settings/settings.py:646
+#: schedulerlib/settings/settings.py:696
 msgid "Outdated events have been deleted."
 msgstr "Les événenements périmés ont été supprimés."
 
-#: schedulerlib/settings/settings.py:650
+#: schedulerlib/settings/settings.py:700
 msgid "All reminders have been rescheduled."
 msgstr "Tous les rappels ont été reprogrammés."
 
@@ -732,7 +748,7 @@ msgstr "Gestion de tâches et calendrier"
 msgid "License"
 msgstr "Licence"
 
-#: schedulerlib/about.py:49 schedulerlib/about.py:98
+#: schedulerlib/about.py:49 schedulerlib/about.py:105
 msgid "Close"
 msgstr "Fermer"
 
@@ -750,7 +766,7 @@ msgstr ""
 "votre convenance) une version ultérieure.\n"
 "\n"
 
-#: schedulerlib/about.py:83
+#: schedulerlib/about.py:86
 msgid ""
 "Scheduler is distributed in the hope that it will be useful, but WITHOUT ANY "
 "WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS "
@@ -764,7 +780,7 @@ msgstr ""
 "pour plus de détails.\n"
 "\n"
 
-#: schedulerlib/about.py:85
+#: schedulerlib/about.py:91
 msgid ""
 "You should have received a copy of the GNU General Public License along with "
 "this program. If not, see http://www.gnu.org/licenses/."
@@ -772,11 +788,11 @@ msgstr ""
 "Vous devriez avoir reçu une copie de la Licence Publique Générale GNU avec "
 "ce programme. Sinon, consultez http://www.gnu.org/licenses/."
 
-#: schedulerlib/constants.py:654
+#: schedulerlib/constants.py:656
 msgid "Open"
 msgstr "Ouvrir"
 
-#: schedulerlib/constants.py:702
+#: schedulerlib/constants.py:704
 msgid "Save As"
 msgstr "Enregistrer sous"
 
@@ -808,6 +824,14 @@ msgstr "Lance scheduler sans afficher le gestionnaire d'événements"
 #, python-brace-format
 msgid "Scheduler is already running. If not deletes {pidfile}."
 msgstr "Scheduler est déjà lancé, si ce n'est pas le cas, supprimez {pidfile}."
+
+#, python-brace-format
+msgid ""
+"Are you sure you want to delete the category {category}? This action "
+"cannot be undone."
+msgstr ""
+"Voulez-vous vraiment supprimer la catégorie {category}? Cette action ne "
+"peut pas être annulée."
 
 msgid "Reminders"
 msgstr "Rappels"
