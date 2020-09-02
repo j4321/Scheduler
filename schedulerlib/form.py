@@ -320,7 +320,6 @@ class Form(Toplevel):
         self.start_min.bind("<<ComboboxSelected>>", self._select_start_min)
         self.end_min.bind("<<ComboboxSelected>>", self._select_end_time)
         self.end_hour.bind("<<ComboboxSelected>>", self._select_end_time)
-        self.bind_class("TCombobox", "<<ComboboxSelected>>", self.__clear_selection, add=True)
 
         # self.wait_visibility(self)
         # self.grab_set()
@@ -434,11 +433,6 @@ class Form(Toplevel):
         self.start_cal.withdraw()
         self.end_cal.withdraw()
         self.until_cal.withdraw()
-
-    @staticmethod
-    def __clear_selection(event):
-        combo = event.widget
-        combo.selection_clear()
 
     def _select_start(self, event=None):
         dt = self.start_entry.get_date() - self.start_date

@@ -366,11 +366,13 @@ class EventScheduler(Tk):
 
         # --- bindings
         self.bind_class("TCombobox", "<<ComboboxSelected>>",
-                        self.clear_selection, add=True)
+                        self._clear_selection, add=True)
         self.bind_class("TCombobox", "<Control-a>",
-                        self.select_all)
+                        self._select_all_entry)
         self.bind_class("TEntry", "<Control-a>",
-                        self.select_all)
+                        self._select_all_entry)
+        self.bind_class("Text", "<Control-a>",
+                        self._select_all_text)
         self.tree.bind('<3>', self._post_menu)
         self.tree.bind('<1>', self._select)
         self.tree.bind('<Double-1>', self._edit_on_click)
@@ -500,13 +502,17 @@ apply {name {
 
     # --- class bindings
     @staticmethod
-    def clear_selection(event):
-        combo = event.widget
-        combo.selection_clear()
+    def _clear_selection(event):
+        event.widget.selection_clear()
 
     @staticmethod
-    def select_all(event):
+    def _select_all_entry(event):
         event.widget.selection_range(0, "end")
+        return "break"
+
+    @staticmethod
+    def _select_all_text(event):
+        event.widget.tag_add('sel', '1.0', 'end')
         return "break"
 
     # --- show / hide
