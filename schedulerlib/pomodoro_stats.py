@@ -28,7 +28,8 @@ import numpy as np
 import matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
-from matplotlib.dates import DateFormatter
+from matplotlib.ticker import FuncFormatter
+from babel.dates import format_date
 
 from schedulerlib.constants import CONFIG, PATH_STATS, scrub
 from schedulerlib.navtoolbar import NavigationToolbar
@@ -51,10 +52,17 @@ class Stats(tk.Toplevel):
         self.figAgg = FigureCanvasTkAgg(self.fig, self)
         self.figAgg.draw()
         self.figAgg.get_tk_widget().pack(fill='both', expand=True)
+        self.figAgg.get_tk_widget().pack(fill='both', expand=True)
         self.figAgg.get_tk_widget().configure(bg=bg)
-        self.toolbar = NavigationToolbar(self.figAgg, self, self.tight_layout, self.toggle_grid)
-
+        self.toolbar = NavigationToolbar(self.figAgg, self, self.tight_layout,
+                                         self.toggle_grid, self.view_week,
+                                         self.view_month)
+        self._locale = CONFIG.get('General', 'locale')
+        self._formatter = FuncFormatter(self._date_formatter)
         self.plot_stats()
+
+    def _date_formatter(self, x, position):
+        return format_date(dt.date.fromordinal(int(x)), 'short', locale=self._locale)
 
     def toggle_grid(self):
         self.ax.grid()
@@ -62,6 +70,16 @@ class Stats(tk.Toplevel):
 
     def tight_layout(self):
         self.fig.tight_layout()
+        self.figAgg.draw()
+
+    def view_month(self):
+        today = dt.date.today().toordinal()
+        self.ax.set_xlim(today - 30.5, today + 0.5)
+        self.figAgg.draw()
+
+    def view_week(self):
+        today = dt.date.today().toordinal()
+        self.ax.set_xlim(today - 7.5, today + 0.5)
         self.figAgg.draw()
 
     def plot_stats(self):
@@ -99,8 +117,8 @@ class Stats(tk.Toplevel):
         db.close()
 
         # plots
-        xx = np.arange(min_x, demain, dtype=float)
-        yy0 = np.zeros_like(xx)  # pour empiler les stats
+        xx = np.array(range(min_x, demain))
+        yy0 = np.zeros(len(xx), dtype=float)  # pour empiler les stats
         if not no_data:
             for (i, task), x, y in zip(enumerate(tasks), stats_x, stats_y):
                 yy = np.array([], dtype=int)
@@ -116,14 +134,16 @@ class Stats(tk.Toplevel):
                 yy = np.concatenate((yy, [y[-1]], np.zeros(len(xxx) - 1, dtype=int)))
                 self.ax.bar(xx, yy, bottom=yy0, width=0.8, label=task, color=coul[i])
                 yy0 += yy
-            self.ax.xaxis.set_major_formatter(DateFormatter('%x'))
-            self.ax.set_xlim(min_x - 0.5, demain - 0.5)
             self.ax.set_ylabel(_("time (h)"))
             self.ax.set_xlabel(_("date"))
-            self.ax.xaxis_date()
             rows = CONFIG.getint("Pomodoro", "legend_max_height")
             ncol = int(np.ceil(len(tasks) / rows))
-
+            self.ax.xaxis_date()
+            self.ax.xaxis.set_major_formatter(self._formatter)
+            if demain - min_x > 5:
+                self.ax.set_xlim(min_x - 0.5, demain - 0.5)
+            else:
+                self.ax.set_xlim(demain - 5.5, demain - 0.5)
             lgd = self.ax.legend(fontsize=10, ncol=ncol, columnspacing=0.7, handlelength=0.9, handletextpad=0.5)
             try:
                 lgd.set_draggable(True)
@@ -136,6 +156,6 @@ class Stats(tk.Toplevel):
             self.fig.tight_layout()
         self.figAgg.draw()
         self.toolbar.push_current()
-        self.ax.set_xlim(max(demain - 30, min_x) - 0.5, demain - 0.5)
+        self.ax.set_xlim(min(max(demain - 30, min_x), demain - 5) - 0.5, demain - 0.5)
         self.toolbar.push_current()
         self.figAgg.draw()

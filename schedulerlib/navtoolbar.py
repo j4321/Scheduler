@@ -41,7 +41,7 @@ from matplotlib.backend_bases import NavigationToolbar2
 from matplotlib import rcParams
 
 from .messagebox import showerror
-from .constants import IM_LAYOUT, IM_GRID
+from .constants import IM_LAYOUT, IM_GRID, IM_WEEK, IM_MONTH
 
 
 class NavigationToolbar(NavigationToolbar2Tk):
@@ -49,6 +49,9 @@ class NavigationToolbar(NavigationToolbar2Tk):
         ('Home', _('Reset original view'), os.path.join(rcParams['datapath'], 'images', 'home.gif'), 'home'),
         ('Back', _('Back to previous view'), os.path.join(rcParams['datapath'], 'images', 'back.gif'), 'back'),
         ('Forward', _('Forward to next view'), os.path.join(rcParams['datapath'], 'images', 'forward.gif'), 'forward'),
+        (None, None, None, None),
+        ('Week', _('View last 7 days'), IM_WEEK, 'view_week'),
+        ('Month', _('View last 30 days'), IM_MONTH, 'view_month'),
         (None, None, None, None),
         ('Pan', _('Pan axes with left mouse, zoom with right'), os.path.join(rcParams['datapath'], 'images', 'move.gif'), 'pan'),
         ('Zoom', _('Zoom to rectangle'), os.path.join(rcParams['datapath'], 'images', 'zoom_to_rect.gif'), 'zoom'),
@@ -59,9 +62,12 @@ class NavigationToolbar(NavigationToolbar2Tk):
         ('Save', _('Save the figure'), os.path.join(rcParams['datapath'], 'images', 'filesave.gif'), 'save_figure'),
     )
 
-    def __init__(self, canvas, window, tight_layout_cmd, toggle_grid_cmd, pack_toolbar=True):
+    def __init__(self, canvas, window, tight_layout_cmd, toggle_grid_cmd,
+                 view_week_cmd, view_month_cmd, pack_toolbar=True):
         self.tight_layout = tight_layout_cmd
         self.toggle_grid = toggle_grid_cmd
+        self.view_week = view_week_cmd
+        self.view_month = view_month_cmd
 
         # Avoid using self.window (prefer self.canvas.get_tk_widget().master),
         # so that Tool implementations can reuse the methods.
@@ -136,7 +142,8 @@ class NavigationToolbar(NavigationToolbar2Tk):
 
     def _Button(self, text, image_file, toggle, command):
         im = PhotoImage(master=self, file=image_file)
-        b = ttk.Button(master=self, text=text, padding=1, image=im, command=command)
+        b = ttk.Button(master=self, text=text, padding=1, image=im, command=command,
+                       style='nav.TButton')
         b._ntimage = im
         b.pack(side=tk.LEFT)
         return b

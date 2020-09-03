@@ -128,6 +128,7 @@ class EventScheduler(Tk):
         # --- style
         self.style = Style(self)
         self.style.theme_use("clam")
+        self.style.configure('nav.TButton', background='white')
         self.style.configure('title.TLabel', font='TkdefaultFont 10 bold')
         self.style.configure('title.TCheckbutton', font='TkdefaultFont 10 bold')
         self.style.configure('subtitle.TLabel', font='TkdefaultFont 9 bold')
