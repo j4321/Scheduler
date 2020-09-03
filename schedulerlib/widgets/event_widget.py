@@ -20,13 +20,48 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Event desktop widget
 """
-from tkinter import Canvas, Menu, BooleanVar
+from tkinter import Canvas, Menu, BooleanVar, Text, IntVar
 from tkinter.ttk import Label, Separator, Sizegrip, Frame
 from datetime import datetime
+from webbrowser import open as urlopen
 
 from schedulerlib.constants import CONFIG, active_color, save_config
 from schedulerlib.ttkwidgets import AutoScrollbar, ToggledFrame
 from .base_widget import BaseWidget
+
+class DescText(Text):
+    """Text widget to display the event's description."""
+
+    def __init__(self, master=None, desc="", **kw):
+        kw.setdefault('wrap', 'word')
+        kw.setdefault('height', 1)
+        kw.setdefault('width', 1)
+        Text.__init__(self, master, **kw)
+        self.tag_configure('link', underline=True)
+        self.tag_bind('link', '<Enter>', lambda ev: self.configure(cursor='hand1'))
+        self.tag_bind('link', '<Leave>', lambda ev: self.configure(cursor=''))
+        self.insert('1.0', desc.strip())
+        self.bind("<1>", lambda event: self.focus_set())
+        self.bind('<Configure>', self._on_resize)
+        self.format_content()
+        self.configure(state='disabled')
+
+    def _on_resize(self, event):
+        if self.master.winfo_ismapped():
+            self.configure(height=self.count('1.0', 'end', 'displaylines'))
+
+    def format_content(self):
+        link_nb = 1
+        count = IntVar(self)
+        index_start = self.search(r'https?://[^\s<>"]+|www\.[^\s<>"]+', '1.0', 'end', count=count, regexp=True)
+        while index_start:
+            index_end = self.index(f'{index_start}+{count.get()}c')
+            self.tag_add('link', index_start, index_end)
+            self.tag_add(f'link#{link_nb}', index_start, index_end)
+            url = self.get(index_start, index_end)
+            self.tag_bind(f'link#{link_nb}', '<1>', lambda ev, u=url: urlopen(u))
+            index_start = self.search(r'https?://[^\s<>"]+|www\.[^\s<>"]+', f'{index_end}+1c', 'end', count=count, regexp=True)
+            link_nb += 1
 
 
 class EventWidget(BaseWidget):
@@ -105,6 +140,16 @@ class EventWidget(BaseWidget):
                              font=CONFIG.get('Events', 'font_day'))
         self.style.configure('Toggle', background=bg)
         self.canvas.configure(bg=bg)
+        name = self.winfo_name()
+        self.option_add(f'*{name}*Text.font', CONFIG.get('Events', 'font'))
+        self.option_add(f'*{name}*Text.relief', 'flat')
+        self.option_add(f'*{name}*Text.highlightThickness', 0)
+        self.option_add(f'*{name}*Text.borderwidth', 0)
+        self.option_add(f'*{name}*Text.background', bg)
+        self.option_add(f'*{name}*Text.foreground', fg)
+        self.option_add(f'*{name}*Text.selectBackground', active_bg)
+        self.option_add(f'*{name}*Text.selectForeground', fg)
+        self.option_add(f'*{name}*Text.inactiveSelectBackground', active_bg)
         for cat in list(self._cat_var.keys()):
             if not CONFIG.has_option('Categories', cat):
                 del self._cat_var[cat]
@@ -162,12 +207,8 @@ class EventWidget(BaseWidget):
                 if desc.strip():
                     tf = ToggledFrame(self.display, text=ev.strip(), category=cat,
                                       style='Events.TFrame')
-                    l = Label(tf.interior,
-                              text=desc.strip(),
-                              style='Events.TLabel')
+                    l = DescText(tf.interior, desc=desc)
                     l.pack(padx=4, fill='both', expand=True)
-                    l.configure(wraplength=l.winfo_width())
-                    l.bind('<Configure>', wrap)
                     tf.grid(sticky='we', pady=2, padx=(8, 4))
                 else:
                     frame = Frame(self.display, style='Events.TFrame')
