@@ -259,15 +259,30 @@ class Event:
             self.reminder_remove(job_id)
 
     def values(self):
-        """Return the properties (Summary, Place, Start, End)."""
+        """Return the properties (Summary, Place, Category, Start, End, Is recurring, Next occurrence)."""
         locale = CONFIG.get("General", "locale")
+        next_occurrence = ''
+        is_rec = _('Yes') if self.rrule else _('No')
         if self['WholeDay']:
             start = format_date(self['Start'], locale=locale)
             end = format_date(self['End'], locale=locale)
+            if self.rrule:
+                next_oc = self.rrule.after(datetime.now())
+                if next_oc:
+                    next_occurrence = format_date(next_oc, locale=locale)
+            elif self['Start'] > datetime.now():
+                next_occurrence = start
         else:
             start = format_datetime(self['Start'], locale=locale)
             end = format_datetime(self['End'], locale=locale)
-        return self['Summary'], self['Place'], start, end, self['Category']
+            if self.rrule:
+                next_oc = self.rrule.after(datetime.now())
+                if next_oc:
+                    next_occurrence = format_datetime(next_oc, locale=locale)
+            elif self['Start'] > datetime.now():
+                next_occurrence = start
+        return (self['Summary'], self['Place'], self['Category'], start, end,
+                is_rec, next_occurrence)
 
     def get(self, key, default=None):
         return self._properties.get(key, default)
