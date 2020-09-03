@@ -292,16 +292,24 @@ class EventScheduler(Tk):
                                                {'expand': '1'})],
                                  'sticky': 'ns'})])
         # --- tree
-        columns = {_('Summary'): ({'stretch': True, 'width': 300},
-                                  lambda: self._sort_by_desc(_('Summary'), False)),
-                   _('Place'): ({'stretch': True, 'width': 200},
-                                lambda: self._sort_by_desc(_('Place'), False)),
-                   _('Start'): ({'stretch': False, 'width': 150},
-                                lambda: self._sort_by_date(_('Start'), False)),
-                   _('End'): ({'stretch': False, 'width': 150},
-                              lambda: self._sort_by_date(_("End"), False)),
-                   _('Category'): ({'stretch': False, 'width': 100},
-                                   lambda: self._sort_by_desc(_('Category'), False))}
+        columns = {
+            _('Summary'): ({'stretch': True, 'width': 300},
+                           lambda: self._sort_by_desc(_('Summary'), False)),
+            _('Place'): ({'stretch': True, 'width': 200},
+                         lambda: self._sort_by_desc(_('Place'), False)),
+            _('Category'): ({'stretch': False, 'width': 100},
+                            lambda: self._sort_by_desc(_('Category'), False)),
+            _('Start'): ({'stretch': False, 'width': 150},
+                         lambda: self._sort_by_date(_('Start'), False)),
+            _('End'): ({'stretch': False, 'width': 150},
+                       lambda: self._sort_by_date(_("End"), False)),
+            _('Recurring'): ({'stretch': False, 'width': 70},
+                             lambda: self._sort_by_desc(_('Recurring'), False)),
+            _('Next occurence'): ({'stretch': False, 'width': 150},
+                                  lambda: self._sort_by_date(_('Next occurence'), False))
+
+        }
+        #Summary, Place, Category, Start, End, Is recurring, Next occurrence
         self.tree = Treeview(self, show="headings", columns=list(columns))
         for label, (col_prop, cmd) in columns.items():
             self.tree.column(label, **col_prop)
@@ -323,11 +331,11 @@ class EventScheduler(Tk):
                command=self.delete_outdated_events).pack(side="right", padx=4)
         # --- --- filters
         self.filter_col = Combobox(toolbar, state="readonly",
-                                   values=("", _("Category"), _("Date")),
+                                   values=("", _("Category"), _("Date"), _("Recurring")),
                                    exportselection=False)
         self.filter_col.pack(side="left", padx=4)
         # --- --- --- category
-        self.filter_category = Combobox(toolbar, state="readonly",
+        self.filter_value = Combobox(toolbar, state="readonly",
                                         exportselection=False)
         # --- --- --- start date
         self.filter_date = Frame(toolbar)
@@ -397,7 +405,7 @@ class EventScheduler(Tk):
         self.tree.bind('<Delete>', self._delete_events)
         self.menu.bind('<FocusOut>', lambda e: self.menu.unpost())
         self.filter_col.bind("<<ComboboxSelected>>", self.select_filter)
-        self.filter_category.bind("<<ComboboxSelected>>", self.apply_filter_category)
+        self.filter_value.bind("<<ComboboxSelected>>", self.apply_filter_value)
         self.filter_date_end.bind("<<DateEntrySelected>>", self.apply_filter_date)
         self.filter_date_start.bind("<<DateEntrySelected>>", self._select_filter_date_start)
 
@@ -768,6 +776,8 @@ apply {name {
 
     @staticmethod
     def to_datetime(date):
+        if not date:
+            return datetime.fromordinal(1)
         date_format = get_date_format("short", CONFIG.get("General", "locale")).pattern
         dayfirst = date_format.startswith("d")
         yearfirst = date_format.startswith("y")
@@ -804,19 +814,23 @@ apply {name {
 
     def select_filter(self, event):
         col = self.filter_col.get()
+        print(col, col == _("Date"))
         self._reset_filter()
-        if col == _("Category"):
-            self.filter_category.configure(values=sorted(CONFIG.options('Categories')))
-            self.filter_category.set("")
-            self.filter_category.pack(side="left", padx=4)
+        if not col:
+            self.filter_value.pack_forget()
             self.filter_date.pack_forget()
-        elif col == _("Start"):
+        elif col == _("Date"):
             self.filter_date_start.set_date(self.min_date)
             self.filter_date_end.set_date(self.max_date)
-            self.filter_category.pack_forget()
+            self.filter_value.pack_forget()
             self.filter_date.pack(side="left", padx=4)
         else:
-            self.filter_category.pack_forget()
+            if col == _("Category"):
+                self.filter_value.configure(values=sorted(CONFIG.options('Categories')))
+            elif col == _("Recurring"):
+                self.filter_value.configure(values=[_("Yes"), _("No")])
+            self.filter_value.set("")
+            self.filter_value.pack(side="left", padx=4)
             self.filter_date.pack_forget()
 
     def apply_filter_date(self, event):
@@ -835,12 +849,13 @@ apply {name {
         self.filter_date_end.configure(mindate=self.filter_date_start.get_date())
         self.apply_filter_date(event)
 
-    def apply_filter_category(self, event):
-        val = self.filter_category.get()
+    def apply_filter_value(self, event):
+        col = self.filter_col.get()
+        val = self.filter_value.get()
         items = list(self.events.keys())
         i = 0
         for item in items:
-            if self.tree.set(item, _("Category")) == val:
+            if self.tree.set(item, col) == val:
                 self._move_item(item, i)
                 i += 1
             else:
