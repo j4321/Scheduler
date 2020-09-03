@@ -40,6 +40,7 @@ import icalendar
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers import SchedulerNotRunningError
 from apscheduler.triggers.cron import CronTrigger
+from tkcalendar import DateEntry
 
 from schedulerlib.messagebox import showerror, askokcancel
 from schedulerlib.constants import ICON48, ICON, IM_ADD, CONFIG, IM_DOT, JOBSTORE, \
@@ -317,18 +318,30 @@ class EventScheduler(Tk):
         Button(toolbar, image=self.img_plus, padding=1,
                command=self.add).pack(side="left", padx=4)
         Label(toolbar, text=_("Filter by")).pack(side="left", padx=4)
-        # --- TODO: add filter by start date (after date)
-        self.filter_col = Combobox(toolbar, state="readonly",
-                                   # values=("",) + self.tree.cget('columns')[1:],
-                                   values=("", _("Category")),
-                                   exportselection=False)
-        self.filter_col.pack(side="left", padx=4)
-        self.filter_val = Combobox(toolbar, state="readonly",
-                                   exportselection=False)
-        self.filter_val.pack(side="left", padx=4)
         Button(toolbar, text=_('Delete All Outdated'), padding=1,
                command=self.delete_outdated_events).pack(side="right", padx=4)
-
+        # --- --- filters
+        self.filter_col = Combobox(toolbar, state="readonly",
+                                   values=("", _("Category"), _("Date")),
+                                   exportselection=False)
+        self.filter_col.pack(side="left", padx=4)
+        # --- --- --- category
+        self.filter_category = Combobox(toolbar, state="readonly",
+                                        exportselection=False)
+        # --- --- --- start date
+        self.filter_date = Frame(toolbar)
+        prop = {op: CONFIG.get('Calendar', op) for op in CONFIG.options('Calendar')}
+        prop['font'] = "Liberation\ Sans 9"
+        prop.update(selectforeground='white', selectbackground=active_bg)
+        locale = CONFIG.get('General', 'locale')
+        self.filter_date_start = DateEntry(self.filter_date, locale=locale, width=10,
+                                           justify='center', **prop)
+        self.filter_date_end = DateEntry(self.filter_date, locale=locale, width=10,
+                                         justify='center', **prop)
+        Label(self.filter_date, text=_('From')).pack(side='left')
+        self.filter_date_start.pack(side='left', padx=4)
+        Label(self.filter_date, text=_('to')).pack(side='left')
+        self.filter_date_end.pack(side='left', padx=(4, 0))
         # --- grid
         toolbar.grid(row=0, columnspan=2, sticky='we', pady=4)
         self.tree.grid(row=1, column=0, sticky='eswn')
@@ -352,9 +365,13 @@ class EventScheduler(Tk):
                     data = dp.load()
         backup()
         now = datetime.now()
+        self.min_date = now
+        self.max_date = now
         for i, prop in enumerate(data):
             iid = prop.setdefault("iid", "I%.3i" % i)
             self.events[iid] = Event(self.scheduler, **prop)
+            self.min_date = min(self.min_date, self.events[iid]['Start'])
+            self.max_date = max(self.max_date, self.events[iid]['Start'])
             self.tree.insert('', 'end', iid, values=self.events[iid].values())
             tags = [str(self.tree.index(iid) % 2)]
             self.tree.item(iid, tags=tags)
@@ -378,8 +395,10 @@ class EventScheduler(Tk):
         self.tree.bind('<Double-1>', self._edit_on_click)
         self.tree.bind('<Delete>', self._delete_events)
         self.menu.bind('<FocusOut>', lambda e: self.menu.unpost())
-        self.filter_col.bind("<<ComboboxSelected>>", self.update_filter_val)
-        self.filter_val.bind("<<ComboboxSelected>>", self.apply_filter)
+        self.filter_col.bind("<<ComboboxSelected>>", self.select_filter)
+        self.filter_category.bind("<<ComboboxSelected>>", self.apply_filter_category)
+        self.filter_date_end.bind("<<DateEntrySelected>>", self.apply_filter_date)
+        self.filter_date_start.bind("<<DateEntrySelected>>", self._select_filter_date_start)
 
         # --- widgets
         self.widgets = {}
@@ -556,6 +575,8 @@ apply {name {
         if event.iid is None:
             event.iid = iid
         self.events[iid] = event
+        self.min_date = min(self.min_date, event['Start'])
+        self.max_date = max(self.max_date, event['Start'])
         self.tree.item(iid, tags=str(self.tree.index(iid) % 2))
         self.widgets['Calendar'].add_event(event)
         self.widgets['Events'].display_evts()
@@ -564,6 +585,8 @@ apply {name {
 
     def event_configure(self, iid):
         self.tree.item(iid, values=self.events[iid].values())
+        self.min_date = min(self.min_date, self.events[iid]['Start'])
+        self.max_date = max(self.max_date, self.events[iid]['Start'])
         self.widgets['Calendar'].add_event(self.events[iid])
         self.widgets['Events'].display_evts()
         self.widgets['Tasks'].display_tasks()
@@ -774,34 +797,53 @@ apply {name {
                           command=lambda: self._sort_by_desc(col, not reverse))
 
     # --- filter
-    def update_filter_val(self, event):
-        col = self.filter_col.get()
-        self.filter_val.set("")
-        if col:
-            l = set()
-            for k in self.events:
-                l.add(self.tree.set(k, col))
+    def _reset_filter(self):
+        for i, item in enumerate(self.events.keys()):
+            self._move_item(item, i)
 
-            self.filter_val.configure(values=tuple(l))
+    def select_filter(self, event):
+        col = self.filter_col.get()
+        self._reset_filter()
+        if col == _("Category"):
+            self.filter_category.configure(values=sorted(CONFIG.options('Categories')))
+            self.filter_category.set("")
+            self.filter_category.pack(side="left", padx=4)
+            self.filter_date.pack_forget()
+        elif col == _("Start"):
+            self.filter_date_start.set_date(self.min_date)
+            self.filter_date_end.set_date(self.max_date)
+            self.filter_category.pack_forget()
+            self.filter_date.pack(side="left", padx=4)
         else:
-            self.filter_val.configure(values=[])
-            self.apply_filter(event)
+            self.filter_category.pack_forget()
+            self.filter_date.pack_forget()
 
-    def apply_filter(self, event):
-        col = self.filter_col.get()
-        val = self.filter_val.get()
-        items = list(self.events.keys())
-        if not col:
-            for i, item in enumerate(items):
+    def apply_filter_date(self, event):
+        start_date = self.filter_date_start.get_date()
+        end_date = self.filter_date_end.get_date()
+
+        i = 0
+        for item, evt in self.events.items():
+            if evt.occurs_between(start_date, end_date):
                 self._move_item(item, i)
-        else:
-            i = 0
-            for item in items:
-                if self.tree.set(item, col) == val:
-                    self._move_item(item, i)
-                    i += 1
-                else:
-                    self.tree.detach(item)
+                i += 1
+            else:
+                self.tree.detach(item)
+
+    def _select_filter_date_start(self, event):
+        self.filter_date_end.configure(mindate=self.filter_date_start.get_date())
+        self.apply_filter_date(event)
+
+    def apply_filter_category(self, event):
+        val = self.filter_category.get()
+        items = list(self.events.keys())
+        i = 0
+        for item in items:
+            if self.tree.set(item, _("Category")) == val:
+                self._move_item(item, i)
+                i += 1
+            else:
+                self.tree.detach(item)
 
     # --- manager's menu
     def _post_menu(self, event):
