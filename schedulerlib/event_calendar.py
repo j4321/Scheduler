@@ -456,8 +456,7 @@ class EventCalendar(Calendar):
         else:
             desc = '➢ %s' % event['Summary']
         dt = end - start
-        drrule = event.get_rrule()
-        self._add_event(start, dt.days + 1, desc, event.iid, drrule, event['Category'])
+        self._add_event(start, dt.days + 1, desc, event.iid, event.rrule, event['Category'])
 
     def remove_event(self, event):
         start = event['Start']
@@ -468,9 +467,8 @@ class EventCalendar(Calendar):
             desc = '➢ %s - %s %s' % (deb, fin, event['Summary'])
         else:
             desc = '➢ %s' % event['Summary']
-        drrule = event.get_rrule()
         dt = end - start
-        self._remove_event(start, dt.days + 1, desc, event.iid, drrule, event['Category'])
+        self._remove_event(start, dt.days + 1, desc, event.iid, event.rrule, event['Category'])
 
     def bind(self, *args):
         Calendar.bind(self, *args)

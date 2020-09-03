@@ -21,7 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Event class
 """
 from subprocess import run
-from datetime import timedelta, datetime, time, timezone
+from datetime import timedelta, datetime, time
+from datetime import date as datetime_date
 
 from apscheduler.triggers.date import DateTrigger
 from apscheduler.triggers.cron import CronTrigger
@@ -44,6 +45,8 @@ DAYS_REV = {i: k for k, i in DAYS.items()}
 
 
 class Rrule(drrule.rrule):
+    """Like drrule.rrule but accepts datetime.date as arguments in between() method."""
+
     def replace(self, **kwargs):
         """Return new rrule with same attributes except for those attributes given new
            values by whichever keyword arguments are specified."""
@@ -65,14 +68,15 @@ class Rrule(drrule.rrule):
 
 
 class Event:
+    """Event class to store event's information."""
 
     def __init__(self, scheduler, iid=None, **kw):
         d = datetime.now() + timedelta(minutes=5)
         d = d.replace(minute=(d.minute // 5) * 5)
         d = kw.pop('Start', d)
         self.scheduler = scheduler
-        default_cat = CONFIG.get('Calendar', 'default_category',
-                                 fallback=CONFIG.options('Categories')[0])
+        self.rrule = None
+        default_cat = CONFIG.get('Calendar', 'default_category')
         defaults = {'Summary': '', 'Place': '', 'Description': '',
                     'Start': d, 'End': d + timedelta(hours=1), 'Task': False,
                     'Repeat': {}, 'WholeDay': False, 'Reminders': {},
@@ -82,6 +86,7 @@ class Event:
             defaults['Category'] = default_cat
         self._properties = defaults
         self.iid = iid
+        self._create_rrule()
 
     @classmethod
     def from_vevent(cls, vevent, scheduler, category):
@@ -175,6 +180,7 @@ class Event:
             self._properties[item] = bool(value)
         elif item == 'Repeat':
             self._properties[item] = value
+            self._create_rrule()
         elif item == 'Task':
             vals = [False]
             vals.extend(TASK_STATE.keys())
@@ -253,8 +259,7 @@ class Event:
             self.reminder_remove(job_id)
 
     def values(self):
-        """ return the values (Summary, Place, Start, End)
-            to put in the main window treeview """
+        """Return the properties (Summary, Place, Start, End)."""
         locale = CONFIG.get("General", "locale")
         if self['WholeDay']:
             start = format_date(self['Start'], locale=locale)
@@ -264,8 +269,8 @@ class Event:
             end = format_datetime(self['End'], locale=locale)
         return self['Summary'], self['Place'], start, end, self['Category']
 
-    def get(self, key):
-        return self._properties.get(key)
+    def get(self, key, default=None):
+        return self._properties.get(key, default)
 
     def get_start_time(self):
         start = self['Start']
@@ -287,11 +292,13 @@ class Event:
     def items(self):
         return self._properties.items()
 
-    def get_rrule(self):
-        """Return dateutil.rrule.rrule corresponding to the repeat properties."""
+    def _create_rrule(self):
+        """Create dateutil.rrule.rrule corresponding to the repeat properties."""
+        self.rrule = None
+
         repeat = self['Repeat']
         if not repeat:
-            return None
+            return
 
         freq = DRRULE_FREQS[repeat['Frequency']]
         rrule_kw = {"dtstart": self._properties['Start'],
@@ -320,15 +327,16 @@ class Event:
                 rrule_kw["byweekday"] = relativedelta.weekday(day)(pos)
         elif repeat['Frequency'] == 'week':
             rrule_kw["byweekday"] = repeat["WeekDays"]
-        return Rrule(freq, **rrule_kw)
+        self.rrule = Rrule(freq, **rrule_kw)
 
     def to_dict(self):
+        """Convert event to dictionnary."""
         ev = {"iid": self.iid}
         ev.update(self._properties)
         return ev
 
     def to_vevent(self):
-        """Convert event to icalendar VEVENT"""
+        """Convert event to icalendar VEVENT."""
         ev = icalendar.Event()
         ev.add("summary", self["Summary"])
         ev.add("description", self["Description"])
@@ -372,4 +380,12 @@ class Event:
 
         return ev
 
+    def occurs_between(self, after, before):
+        """Return whether the event (start date) occurs between after and before."""
 
+        if self.rrule:
+            return len(self.rrule.between(after, before)) > 0
+        else:
+            after_dt = datetime(after.year, after.month, after.day, 0, 0)
+            before_dt = datetime(before.year, before.month, before.day, 23, 59)
+            return after_dt <= self['Start'] <= before_dt
