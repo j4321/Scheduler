@@ -21,8 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Custom tkinter messageboxes
 """
 from webbrowser import open as url_open
-from tkinter import Toplevel, PhotoImage, Text
-from tkinter.ttk import Label, Button, Frame, Style
+from tkinter import Toplevel, PhotoImage, Text, IntVar
+from tkinter.ttk import Label, Button, Frame, Style, Radiobutton
 
 from schedulerlib.ttkwidgets import AutoScrollbar as Scrollbar
 from schedulerlib.constants import ICONS
@@ -201,8 +201,8 @@ class ShowError(Toplevel):
 class TwoButtonBox(Toplevel):
     """Messagebox with two buttons."""
 
-    def __init__(self, parent, title="", message="", button1="Yes",
-                 button2="No", image=None):
+    def __init__(self, parent, title="", message="", button1=_("Yes"),
+                 button2=_("No"), image=None):
         """
         Create a messagebox with two buttons.
 
@@ -257,13 +257,13 @@ class TwoButtonBox(Toplevel):
         return self.result
 
 
-class AskYesNoCancel(Toplevel):
-    """Messagebox with two buttons."""
+class AskOptions(Toplevel):
+    """Messagebox with options."""
 
-    def __init__(self, parent, title="", message="", image=None,
-                 button1=_("Yes"), button2=_("No"), button3=_("Cancel")):
+    def __init__(self, parent, title, message, *options,
+                 button1=_("Ok"), button2=_("Cancel"), image=None):
         """
-        Create a messagebox with three buttons.
+        Create a messagebox to choose between options.
 
         Arguments:
             parent: parent of the toplevel window
@@ -271,16 +271,16 @@ class AskYesNoCancel(Toplevel):
             message: message box text
             button1/2: message displayed on the first/second button
             image: image displayed at the left of the message
+            options: option list
         """
 
         Toplevel.__init__(self, parent, class_='Scheduler')
         self.transient(parent)
         self.resizable(False, False)
         self.title(title)
-        self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
-        self.columnconfigure(2, weight=1)
         self.result = None
 
         if image in ICONS:
@@ -289,27 +289,28 @@ class AskYesNoCancel(Toplevel):
             self.img = PhotoImage(master=self, file=image)
             image = self.img
         frame = Frame(self)
-        frame.grid(row=0, columnspan=3, sticky="ewsn")
+        frame.grid(row=0, columnspan=2, sticky="ewsn")
         if image:
             Label(frame, image=image).pack(side="left", padx=(10, 4), pady=(10, 4))
         Label(frame, text=message, font="TkDefaultFont 10 bold",
               wraplength=335).pack(side="left", padx=(4, 10), pady=(10, 4))
 
+        opt_frame = Frame(self)
+        self.options = options
+        self.choice = IntVar(self, 0)
+        for i, opt in enumerate(options):
+            Radiobutton(opt_frame, text=opt, value=i, variable=self.choice).grid(sticky='w', pady=4, padx=(10, 4))
+        opt_frame.grid(row=1, columnspan=2, sticky="ewsn")
+
         b1 = Button(self, text=button1, command=self.command1)
-        b1.grid(row=1, column=0, padx=10, pady=10)
-        Button(self, text=button2, command=self.command2).grid(row=1, column=1,
+        b1.grid(row=2, column=0, padx=10, pady=10)
+        Button(self, text=button2, command=self.destroy).grid(row=2, column=1,
                                                                padx=10, pady=10)
-        Button(self, text=button3, command=self.destroy).grid(row=1, column=2,
-                                                              padx=10, pady=10)
         self.grab_set()
         b1.focus_set()
 
     def command1(self):
-        self.result = True
-        self.destroy()
-
-    def command2(self):
-        self.result = False
+        self.result = self.options[self.choice.get()]
         self.destroy()
 
     def get_result(self):
@@ -405,12 +406,11 @@ def askyesno(title="", message="", parent=None, icon="question"):
     box.wait_window(box)
     return box.get_result() == _("Yes")
 
-
-def askyesnocancel(title="", message="", parent=None, icon="question"):
+def askoptions(title, message, *options, parent=None, icon="question"):
     """
-    Display a dialog with buttons "Yes","No" and "Cancel".
+    Display a dialog with buttons "Ok" and "Cancel".
 
-    Return True if "Ok" is selected, False if "No" is selected, None otherwise.
+    Return True if "Ok" is selected, False otherwise.
 
     Arguments:
         title: dialog title
@@ -420,6 +420,6 @@ def askyesnocancel(title="", message="", parent=None, icon="question"):
               or a string ('information', 'error', 'question', 'warning' or
                mage path)
     """
-    box = AskYesNoCancel(parent, title, message, image=icon)
+    box = AskOptions(parent, title, message, *options, button1=_("Ok"), button2=_("Cancel"), image=icon)
     box.wait_window(box)
     return box.get_result()
