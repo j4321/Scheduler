@@ -42,7 +42,7 @@ from apscheduler.schedulers import SchedulerNotRunningError
 from apscheduler.triggers.cron import CronTrigger
 from tkcalendar import DateEntry
 
-from schedulerlib.messagebox import showerror, askokcancel
+from schedulerlib.messagebox import showerror, askokcancel, askoptions
 from schedulerlib.constants import IMAGES, ICON, ICON_FALLBACK, IM_SCROLL_ALPHA, \
     CONFIG, JOBSTORE, DATA_PATH, BACKUP_PATH, active_color, backup, add_trace, \
     format_time, askopenfilename, asksaveasfilename
@@ -599,6 +599,29 @@ apply {name {
         else:
             event = Event(self.scheduler)
         Form(self, event, new=True)
+
+    def delete_from_cal(self, iid, date):
+        event = self.events[iid]
+        if not event['Repeat']:
+            self.delete(iid)
+        else:
+            opt = askoptions(_('Delete'), _('Delete recurring event:'),
+                             _('This occurrence'),
+                             _('This occurrence and the following ones'),
+                             _('All occurences'))
+            if opt == _('All occurences'):
+                self.delete(iid)
+            else:
+                self.widgets['Calendar'].remove_event(event)
+                if opt == _('This occurrence'):
+                    start = event['Start']
+                    event.exclude_date(date.replace(hour=start.hour, minute=start.minute))
+                else:
+                    event['Repeat']['Limit'] = 'until'
+                    event['Repeat']['EndDate'] = date - timedelta(days=1)
+                    event.create_rrule()
+                self.widgets['Events'].display_evts()
+                self.widgets['Calendar'].add_event(event)
 
     def delete(self, *iids):
         for iid in iids:

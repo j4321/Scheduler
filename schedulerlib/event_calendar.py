@@ -382,7 +382,7 @@ class EventCalendar(Calendar):
                                          command=lambda i=iid: self.master.master.edit(i))
                 index_edit += 1
                 self.menu.add_command(label=_("Delete") + " %s" % desc,
-                                      command=lambda i=iid: self.master.master.delete(i))
+                                      command=lambda i=iid: self.master.master.delete_from_cal(i, date))
         else:
             self.menu.add_separator()
             if date.strftime('%Y/%m/%d') in HOLIDAYS:

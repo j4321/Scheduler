@@ -76,7 +76,7 @@ class Event:
         self._properties = defaults
         self.iid = iid
         self.rrule = None
-        self._create_rrule()
+        self.create_rrule()
 
     @classmethod
     def from_vevent(cls, vevent, scheduler, category):
@@ -175,7 +175,7 @@ class Event:
             self._properties[item] = bool(value)
         elif item == 'Repeat':
             self._properties[item] = value
-            self._create_rrule()
+            self.create_rrule()
         elif item == 'Task':
             vals = [False]
             vals.extend(TASK_STATE.keys())
@@ -300,7 +300,7 @@ class Event:
     def items(self):
         return self._properties.items()
 
-    def _create_rrule(self):
+    def create_rrule(self):
         """Create dateutil.rrule.rruleset corresponding to the repeat properties."""
         repeat = self['Repeat']
         if not repeat:
