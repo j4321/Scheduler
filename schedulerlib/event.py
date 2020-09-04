@@ -47,22 +47,8 @@ WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 ORDINALS = {-1: 'last', 1: '1st', 2: '2nd', 3: '3rd'}
 
 
-class Rrule(drrule.rrule):
-    """Like drrule.rrule but accepts datetime.date as arguments in between() method."""
-
-    def replace(self, **kwargs):
-        """Return new rrule with same attributes except for those attributes given new
-           values by whichever keyword arguments are specified."""
-        new_kwargs = {"interval": self._interval,
-                      "count": self._count,
-                      "dtstart": self._dtstart,
-                      "freq": self._freq,
-                      "until": self._until,
-                      "wkst": self._wkst,
-                      "cache": False if self._cache is None else True}
-        new_kwargs.update(self._original_rule)
-        new_kwargs.update(kwargs)
-        return Rrule(**new_kwargs)
+class Rruleset(drrule.rruleset):
+    """Like drrule.rruleset but accepts datetime.date as arguments in between() method."""
 
     def between(self, after, before, inc=True, count=1):
         after_dt = datetime(after.year, after.month, after.day, 0, 0)
@@ -89,6 +75,7 @@ class Event:
             defaults['Category'] = default_cat
         self._properties = defaults
         self.iid = iid
+        self.rrule = None
         self._create_rrule()
 
     @classmethod
@@ -143,14 +130,19 @@ class Event:
                             mday = f"last {DAYS[day]}"
                         else:
                             mday = f"{wnb % 5}th {DAYS[day]}"
-
+            try:
+                excl = [excl_date.dt.astimezone(tz=None).replace(tzinfo=None)
+                        for excl_date in vevent.get('exdate').dts]
+            except AttributeError:
+                excl = []
             props["Repeat"] = {'Frequency': freq,
                                'Every': rrule.get("interval", [1])[0],
                                'Limit': limit,  # always until after
                                'NbTimes': count,
                                'EndDate': until.date(),
                                'MonthDay': mday,
-                               'WeekDays': byday}
+                               'WeekDays': byday,
+                               'ExclDates': excl}
 
         # reminders
         ev = cls(scheduler, iid=str(vevent.get("uid")), **props)
@@ -271,25 +263,17 @@ class Event:
         """Return the properties (Summary, Place, Category, Start, End, Is recurring, Next occurrence)."""
         locale = CONFIG.get("General", "locale")
         next_occurrence = ''
-        is_rec = _('Yes') if self.rrule else _('No')
-        if self['WholeDay']:
-            start = format_date(self['Start'], locale=locale)
-            end = format_date(self['End'], locale=locale)
-            if self.rrule:
-                next_oc = self.rrule.after(datetime.now())
-                if next_oc:
-                    next_occurrence = format_date(next_oc, locale=locale)
-            elif self['Start'] > datetime.now():
-                next_occurrence = start
-        else:
-            start = format_datetime(self['Start'], locale=locale)
-            end = format_datetime(self['End'], locale=locale)
-            if self.rrule:
-                next_oc = self.rrule.after(datetime.now())
-                if next_oc:
-                    next_occurrence = format_datetime(next_oc, locale=locale)
-            elif self['Start'] > datetime.now():
-                next_occurrence = start
+        repeat = self['Repeat']
+        is_rec = _('Yes') if repeat else _('No')
+        format_func = format_date if self['WholeDay'] else format_datetime
+        start = format_func(self['Start'], locale=locale)
+        end = format_func(self['End'], locale=locale)
+        if repeat:
+            next_oc = self.rrule.after(datetime.now())
+            if next_oc:
+                next_occurrence = format_func(next_oc, locale=locale)
+        elif self['Start'] > datetime.now():
+            next_occurrence = start
         return (self['Summary'], self['Place'], self['Category'], start, end,
                 is_rec, next_occurrence)
 
@@ -317,13 +301,13 @@ class Event:
         return self._properties.items()
 
     def _create_rrule(self):
-        """Create dateutil.rrule.rrule corresponding to the repeat properties."""
-        self.rrule = None
-
+        """Create dateutil.rrule.rruleset corresponding to the repeat properties."""
         repeat = self['Repeat']
         if not repeat:
+            self.rrule = None
             return
 
+        self.rrule = Rruleset()
         freq = DRRULE_FREQS[repeat['Frequency']]
         rrule_kw = {"dtstart": self._properties['Start'],
                     "interval": repeat.get("Every", 1),
@@ -345,7 +329,20 @@ class Event:
                 rrule_kw["byweekday"] = relativedelta.weekday(day)(pos)
         elif repeat['Frequency'] == 'week':
             rrule_kw["byweekday"] = repeat["WeekDays"]
-        self.rrule = Rrule(freq, **rrule_kw)
+        rrule = drrule.rrule(freq, **rrule_kw)
+        self.rrule.rrule(rrule)
+        # excluded dates
+        for excl_date in repeat.get('ExclDates', []):
+            self.rrule.exdate(excl_date)
+
+    def exclude_date(self, date):
+        repeat = self['Repeat']
+        if not repeat:
+            return
+        if 'ExclDates' not in repeat:
+            repeat['ExclDates'] = []
+        repeat['ExclDates'].append(date)
+        self.rrule.exdate(date)
 
     def to_dict(self):
         """Convert event to dictionnary."""
@@ -369,6 +366,11 @@ class Event:
         # repeat
         repeat = self["Repeat"]
         if repeat:
+            excl = repeat.get('ExclDates', [])
+            if excl:
+                # TODO
+                pass
+                #~ev.add('exdate')
             recur_kw = {}
             freq = repeat['Frequency']
             recur_kw["freq"] = FREQS_REV[freq]
