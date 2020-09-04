@@ -699,6 +699,7 @@ apply {name {
         if not CONFIG.has_option("Categories", category):
             CONFIG.set("Categories", category, "white, #186CBE, 0")
             self.widgets['Calendar'].update_style()
+            self.widgets['Events'].update_style()
         for component in ical.subcomponents:
             if component.name == "VEVENT":
                 event = Event.from_vevent(component, self.scheduler, category)
