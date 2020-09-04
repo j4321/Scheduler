@@ -155,13 +155,13 @@ class EventWidget(BaseWidget):
                 del self._cat_var[cat]
                 self.menu_cat.delete(cat)
         displayed_cats = CONFIG.get('Events', 'categories').split(', ')
-        for cat, val in CONFIG.items('Categories'):
+        for cat in sorted(CONFIG.options('Categories')):
             if cat not in self._cat_var:
                 self._cat_var[cat] = BooleanVar(self, cat in displayed_cats)
                 self.menu_cat.add_checkbutton(label=cat,
                                               variable=self._cat_var[cat],
                                               command=self.display_evts)
-            props = val.split(', ')
+            props = CONFIG.get('Categories', cat).split(', ')
             self.style.configure(f'ev_{cat}.Events.TFrame',
                                  background=props[1], foreground=props[0])
         self.display_evts()
