@@ -160,7 +160,7 @@ class Event:
         return ev
 
     def __str__(self):
-        return '%s\n%s - %s - %s' % self.values()[:-1]
+        return '{0}\n{1} - {3} - {4}'.format(*self.values())
 
     def __getitem__(self, item):
         if item in self._properties:
