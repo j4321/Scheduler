@@ -29,15 +29,15 @@ from PIL.ImageTk import PhotoImage
 from babel.dates import get_day_names, format_date
 from tkcalendar import DateEntry
 from num2words import num2words
-from dateutil import relativedelta
 
 from schedulerlib.constants import IM_BELL, IM_DEL, CONFIG, \
-    TASK_REV_TRANSLATION, FREQ_REV_TRANSLATION, only_nb
+    TASK_REV_TRANSLATION, FREQ_REV_TRANSLATION, only_nb, get_rel_month_day
 from schedulerlib.ttkwidgets import LabelFrame
 from schedulerlib.messagebox import showerror
 
 
 class Form(Toplevel):
+
     def __init__(self, master, event, new=False):
         Toplevel.__init__(self, master)
         self.minsize(410, 402)
@@ -235,21 +235,11 @@ class Form(Toplevel):
         self._month_days = []
         self._repeat_month = StringVar(self, "abs" if repeat.get('MonthDay', 'abs') == "abs" else "rel")
         rb1 = Radiobutton(frame_month_days, value="abs", variable=self._repeat_month,
-                          text=_("The exact same day ({day_number})").format(day_number=self.start_date.day))
+                          text='')
         rb1.pack(anchor='w')
         self._month_days.append(rb1)
-        wd = self.start_date.weekday()
-        wday = get_day_names("wide", locale=lang)[wd]  # week day name
-        last = self.start_date + relativedelta.relativedelta(day=31, weekday=relativedelta.weekday(wd)(-1))
-        if last == self.start_date:
-            rbtext = _("The last {week_day}").format(week_day=wday)
-        else:
-            mweek = int(format_date(self.start_date, "W"))  # week number in the month
-            mweek = num2words(mweek, ordinal=True, lang=lang)
-            rbtext = _("The {week_number_ordinal} {week_day}").format(week_number_ordinal=mweek,
-                                                                      week_day=wday)
         rb2 = Radiobutton(frame_month_days, value="rel",
-                          variable=self._repeat_month, text=rbtext)
+                          variable=self._repeat_month, text='')
         rb2.pack(anchor='w')
         self._month_days.append(rb2)
 
@@ -310,6 +300,7 @@ class Form(Toplevel):
 
         self._toggle_rep()
         self._change_label()
+        self._update_repeat()
 
         # --- bindings
         self.bind('<Configure>')
@@ -331,14 +322,12 @@ class Form(Toplevel):
         # days of the month
         rb1, rb2 = self._month_days
         rb1.configure(text=_("The exact same day ({day_number})").format(day_number=self.start_date.day))
-        wd = self.start_date.weekday()
+        wd, rel_day_nb = get_rel_month_day(self.start_date)
         wday = get_day_names("wide", locale=lang)[wd]  # week day name
-        last = self.start_date + relativedelta.relativedelta(day=31, weekday=relativedelta.weekday(wd)(-1))
-        if last == self.start_date:
+        if rel_day_nb == -1:
             rbtext = _("The last {week_day}").format(week_day=wday)
         else:
-            mweek = int(format_date(self.start_date, "W"))  # week number in the month
-            mweek = num2words(mweek, ordinal=True, lang=lang)
+            mweek = num2words(rel_day_nb, ordinal=True, lang=lang)
             rbtext = _("The {week_number_ordinal} {week_day}").format(week_number_ordinal=mweek,
                                                                       week_day=wday)
         rb2.configure(text=rbtext)
@@ -549,13 +538,7 @@ class Form(Toplevel):
                     days.append(i)
             monthday = self._repeat_month.get()
             if monthday == "rel":
-                wd = self.start_date.weekday()
-                last = self.start_date + relativedelta.relativedelta(day=31, weekday=relativedelta.weekday(wd)(-1))
-                if last == self.start_date:
-                    monthday = f"last {wd}"
-                else:
-                    mweek = int(format_date(self.start_date, "W"))  # week number in the month
-                    monthday = f"{mweek}th {wd}"
+                monthday = get_rel_month_day(self.start_date)
 
             repeat = {'Frequency': self._repeat_freq.get(),
                       'Every': int(self.s_freq.get()),
