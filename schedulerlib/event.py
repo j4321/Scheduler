@@ -368,9 +368,7 @@ class Event:
         if repeat:
             excl = repeat.get('ExclDates', [])
             if excl:
-                # TODO
-                pass
-                #~ev.add('exdate')
+                ev.add('exdate', excl)
             recur_kw = {}
             freq = repeat['Frequency']
             recur_kw["freq"] = FREQS_REV[freq]
