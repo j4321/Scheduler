@@ -43,6 +43,7 @@ from tkinter import filedialog
 from tkinter import colorchooser
 
 from babel import dates
+from dateutil import relativedelta
 
 
 APP_NAME = "scheduler"
@@ -799,6 +800,19 @@ def scrub(table_name):
     return ''.join(ch for ch in table_name if ch.isalnum() or ch == '_')
 
 
+def get_rel_month_day(date):
+    """
+    Return (week day number, relative month day nb) for date.
 
-
-
+    For instance, returns (0, 1) for the first Monday of the month and
+    (6, -1) for the last Sunday.
+    """
+    wd = date.weekday()
+    last = date + relativedelta.relativedelta(day=31,
+                                              weekday=relativedelta.weekday(wd)(-1)) # last wday of the month
+    if last == date:
+        return wd, -1
+    else:
+        first = date + relativedelta.relativedelta(day=1,
+                                                   weekday=relativedelta.weekday(wd)(1))  # first wday of the month
+        return wd, date.isocalendar()[1] - first.isocalendar()[1] + 1
