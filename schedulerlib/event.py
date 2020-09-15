@@ -33,7 +33,7 @@ from dateutil import relativedelta
 import icalendar
 
 from schedulerlib.constants import NOTIF_PATH, TASK_STATE, CONFIG,\
-    format_date, format_datetime
+    format_date, format_datetime, get_rel_month_day
 
 DRRULE_FREQS = {"year": drrule.YEARLY, "month": drrule.MONTHLY,
                 "week": drrule.WEEKLY, "day": drrule.DAILY}
@@ -42,6 +42,10 @@ FREQS_REV = {i: k for k, i in FREQS.items()}
 
 DAYS = {d.upper(): i for i, d in get_day_names("short", locale="en_US").items()}
 DAYS_REV = {i: k for k, i in DAYS.items()}
+
+WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+
+ORDINALS = {-1: 'last', 1: '1st', 2: '2nd', 3: '3rd'}
 
 
 class Rrule(drrule.rrule):
@@ -231,6 +235,12 @@ class Event:
                 mday = repeat.get("MonthDay", "abs")
                 if mday == "abs":
                     mday = date.day
+                else:
+                    # there will be issues if Start is the last month day
+                    # and the reminder is days appart
+                    wd, rel_mday = get_rel_month_day(date)
+                    mday = f"{ORDINALS.get(rel_mday, f'{rel_mday}th')} {WEEKDAYS[wd]}"
+
                 cron_prop['day'] = mday
                 cron_prop['month'] = '*' + every
                 cron_prop['year'] = '*'
@@ -332,13 +342,7 @@ class Event:
             if mday == "abs":
                 rrule_kw["bymonthday"] = self._properties['Start'].day
             else:
-                if mday.startswith("last"):
-                    day = int(mday[-1])
-                    pos = -1
-                else:
-                    wnb, day = mday.split("th ")
-                    day = int(day)
-                    pos = int(wnb)
+                day, pos = mday
                 rrule_kw["byweekday"] = relativedelta.weekday(day)(pos)
         elif repeat['Frequency'] == 'week':
             rrule_kw["byweekday"] = repeat["WeekDays"]
@@ -383,13 +387,7 @@ class Event:
                 if mday == "abs":
                     recur_kw["bymonthday"] = self['Start'].day
                 else:
-                    if mday.startswith("last"):
-                        day = int(mday[-1])
-                        pos = -1
-                    else:
-                        wnb, day = mday.split("th ")
-                        day = int(day)
-                        pos = int(wnb)
+                    day, pos = mday
                     recur_kw["byday"] = [f"{pos}{DAYS_REV[day]}"]
             ev.add("rrule", icalendar.vRecur(**recur_kw))
 
