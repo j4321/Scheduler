@@ -620,6 +620,7 @@ apply {name {
                     event['Repeat']['Limit'] = 'until'
                     event['Repeat']['EndDate'] = date - timedelta(days=1)
                     event.create_rrule()
+                    event.reminder_refresh_all()
                 self.widgets['Events'].display_evts()
                 self.widgets['Calendar'].add_event(event)
 
@@ -681,10 +682,7 @@ apply {name {
         Required when APScheduler is updated.
         """
         for event in self.events.values():
-            reminders = [date for date in event['Reminders'].values()]
-            event.reminder_remove_all()
-            for date in reminders:
-                event.reminder_add(date)
+            event.reminder_refresh_all()
         logging.info('Refreshed reminders')
 
     # --- import export
