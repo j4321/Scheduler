@@ -69,7 +69,6 @@ class MyCronTrigger(BaseCombiningTrigger):
             fire_time = self.triggers[0].get_next_fire_time(previous_fire_time, now)
             excl_dates = [trigger.get_next_fire_time(previous_fire_time, now)
                           for trigger in self.triggers[1:]]
-            print(fire_time, excl_dates)
             if fire_time is None:
                 return None
             elif fire_time not in excl_dates:
@@ -226,14 +225,14 @@ class Event:
 
     def reminder_add(self, date):
         repeat = self._properties['Repeat']
+
         if repeat:
             cron_prop = {}
             cron_prop['start_date'] = date
             cron_prop['hour'] = date.hour
             cron_prop['minute'] = date.minute
             cron_prop['second'] = date.second
-            time_delta = date - self['Start']
-            cron_prop['exdate'] = [exdate + time_delta for exdate in repeat.get('ExclDates', [])]
+            cron_prop['exdate'] = repeat['ExclDates']
             if repeat['Limit'] == 'until':
                 end = repeat['EndDate']
                 cron_prop['end_date'] = date.replace(year=end.year,
