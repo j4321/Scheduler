@@ -641,6 +641,52 @@ apply {name {
         self.widgets['Tasks'].display_tasks()
         self.save()
 
+    def edit_from_cal(self, iid, date):
+        event = self.events[iid]
+        if not event['Repeat']:
+            self.edit(iid)
+        else:
+            opt = askoptions(_('Edit'), _('Edit recurring event:'),
+                             _('This occurrence'),
+                             _('This occurrence and the following ones'),
+                             _('All occurences'))
+            if opt == _('All occurences'):
+                self.edit(iid)
+            else:
+                prop = event.to_dict()
+                prop['iid'] = None
+                start = event['Start']
+                duration = event['End'] - start
+                prop['Start'] = date.replace(hour=start.hour, minute=start.minute)
+                prop['End'] = prop['Start'] + duration
+
+                if opt == _('This occurrence'):
+                    prop['Repeat'] = {}
+                    event2 = Event(self.scheduler, **prop)
+                    form = Form(self, event2, new=True)
+                    self.wait_window(form)
+                    if event2.iid:  # change was validated
+                        self.widgets['Calendar'].remove_event(event)
+                        event.exclude_date(date.replace(hour=start.hour, minute=start.minute))
+                        self.widgets['Calendar'].add_event(event)
+                        self.widgets['Events'].display_evts()
+                else:
+                    if prop['Repeat']['Limit'] == 'after':
+                        end = event.get_last_date()
+                        prop['Repeat']['Limit'] = 'until'
+                        prop['Repeat']['EndDate'] = end
+                    event2 = Event(self.scheduler, **prop)
+                    form = Form(self, event2, new=True)
+                    self.wait_window(form)
+                    if event2.iid:  # change was validated
+                        self.widgets['Calendar'].remove_event(event)
+                        event['Repeat']['Limit'] = 'until'
+                        event['Repeat']['EndDate'] = date - timedelta(days=1)
+                        event.create_rrule()
+                        event.reminder_refresh_all()
+                        self.widgets['Calendar'].add_event(event)
+                        self.widgets['Events'].display_evts()
+
     def edit(self, iid):
         try:
             self.widgets['Calendar'].remove_event(self.events[iid])

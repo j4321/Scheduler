@@ -379,7 +379,7 @@ class EventCalendar(Calendar):
             for start_time, desc, iid, cat in evts:
                 self.menu.insert_command(index_edit,
                                          label=_("Edit") + " %s" % desc,
-                                         command=lambda i=iid: self.master.master.edit(i))
+                                         command=lambda i=iid: self.master.master.edit_from_cal(i, date))
                 index_edit += 1
                 self.menu.add_command(label=_("Delete") + " %s" % desc,
                                       command=lambda i=iid: self.master.master.delete_from_cal(i, date))
