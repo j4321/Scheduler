@@ -564,4 +564,3 @@ class Form(Toplevel):
         if not self._new:
             self.master.widgets['Calendar'].add_event(self.event)
         self.destroy()
-
