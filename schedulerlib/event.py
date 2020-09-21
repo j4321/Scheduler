@@ -22,7 +22,6 @@ Event class
 """
 from subprocess import run
 from datetime import timedelta, datetime, time
-from datetime import date as datetime_date
 
 from apscheduler.triggers.date import DateTrigger
 from apscheduler.triggers.cron import CronTrigger

@@ -24,9 +24,6 @@ from webbrowser import open as webOpen
 from tkinter import Text, Toplevel
 from tkinter.ttk import Button, Label
 
-from PIL.ImageTk import PhotoImage
-
-from schedulerlib.constants import ICON48
 from schedulerlib.version import __version__
 
 
@@ -37,8 +34,7 @@ class About(Toplevel):
         Toplevel.__init__(self, master, class_='Scheduler')
 
         self.title(_("About Scheduler"))
-        self.image = PhotoImage(file=ICON48, master=self)
-        Label(self, image=self.image).grid(row=0, columnspan=2, pady=10)
+        Label(self, image='img_icon48').grid(row=0, columnspan=2, pady=10)
 
         Label(self,
               text="Scheduler %(version)s" % ({"version": __version__})).grid(row=1, columnspan=2)

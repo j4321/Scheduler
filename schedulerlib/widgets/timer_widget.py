@@ -24,9 +24,7 @@ Timer desktop widget
 from tkinter import Text
 from tkinter.ttk import Button, Label, Sizegrip, Frame
 
-from PIL.ImageTk import PhotoImage
-
-from schedulerlib.constants import IM_START, IM_PAUSE, IM_STOP, CONFIG
+from schedulerlib.constants import CONFIG
 from schedulerlib.ttkwidgets import AutoScrollbar
 from .base_widget import BaseWidget
 
@@ -42,10 +40,6 @@ class Timer(BaseWidget):
         self._time = [0, 0, 0]
         self._on = False
         self._after_id = ''
-
-        self.img_play = PhotoImage(master=self, file=IM_START)
-        self.img_pause = PhotoImage(master=self, file=IM_PAUSE)
-        self.img_stop = PhotoImage(master=self, file=IM_STOP)
 
         self.rowconfigure(2, weight=1)
         self.columnconfigure(0, weight=1)
@@ -73,9 +67,9 @@ class Timer(BaseWidget):
                                command=self.add_interval)
         self.b_interv.state(('disabled',))
 
-        self.b_launch = Button(self, image=self.img_play, padding=2,
+        self.b_launch = Button(self, image='img_start', padding=2,
                                command=self.launch, style='Timer.TButton')
-        self.b_stop = Button(self, image=self.img_stop, padding=2,
+        self.b_stop = Button(self, image='img_stop', padding=2,
                              command=self.stop, style='Timer.TButton')
 
         # --- placement
@@ -144,12 +138,12 @@ class Timer(BaseWidget):
         """Start/Pause timer."""
         if self._on:
             self._on = False
-            self.b_launch.configure(image=self.img_play)
+            self.b_launch.configure(image='img_start')
             self.b_interv.state(('disabled',))
         else:
             self._on = True
             self.b_interv.state(('!disabled',))
-            self.b_launch.configure(image=self.img_pause)
+            self.b_launch.configure(image='img_pause')
             self.after(1000, self._run)
 
     def add_interval(self):
@@ -165,7 +159,7 @@ class Timer(BaseWidget):
         """Stop timer."""
         self._on = False
         self.b_interv.state(('disabled',))
-        self.b_launch.configure(image=self.img_play)
+        self.b_launch.configure(image='img_start')
         self._time = [0, 0, 0]
         self.intervals.configure(state='normal')
         self.intervals.delete('1.0', 'end')
