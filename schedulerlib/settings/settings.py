@@ -152,7 +152,7 @@ class Settings(tk.Toplevel):
                                                                        sticky='w',
                                                                        padx=4,
                                                                        pady=4)
-        ttk.Button(frame_maintenance, image=self._im_refresh, padding=1,
+        ttk.Button(frame_maintenance, image='img_refresh', padding=1,
                    command=self.refresh).grid(row=2, column=1,
                                               sticky='w', padx=4, pady=4)
 
@@ -813,11 +813,3 @@ class Settings(tk.Toplevel):
             self.master.widgets['Pomodoro'].stop(False)
         save_config()
         self.destroy()
-
-
-
-
-
-
-
-
