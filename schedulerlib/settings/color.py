@@ -23,22 +23,19 @@ Settings
 import tkinter as tk
 from tkinter import ttk
 
-from PIL.ImageTk import PhotoImage
-
-from schedulerlib.constants import IM_COLOR, askcolor
+from schedulerlib.constants import askcolor
 
 
 class ColorFrame(ttk.Frame):
     def __init__(self, master=None, color='white', label='Color'):
         ttk.Frame.__init__(self, master)
-        self._im_color = PhotoImage(master=self, file=IM_COLOR)
         frame = ttk.Frame(self, border=1, relief='groove')
         self.preview = tk.Frame(frame, width=23, height=23, bg=color)
         self.preview.pack()
         self.label = ttk.Label(self, text=label)
         self.label.pack(side='left', pady=4)
         frame.pack(side='left', padx=6, pady=4)
-        self.button = ttk.Button(self, image=self._im_color, padding=2,
+        self.button = ttk.Button(self, image='img_color', padding=2,
                                  command=self.askcolor)
         self.button.pack(side='left', pady=4)
 

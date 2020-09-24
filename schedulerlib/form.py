@@ -25,13 +25,12 @@ from tkinter.ttk import Entry, Label, Button, Frame, Style, Combobox,\
     Radiobutton, Checkbutton, Notebook
 from datetime import timedelta, time, datetime
 
-from PIL.ImageTk import PhotoImage
-from babel.dates import get_day_names, format_date
+from babel.dates import get_day_names
 from tkcalendar import DateEntry
 from num2words import num2words
 
-from schedulerlib.constants import IM_BELL, IM_DEL, CONFIG, \
-    TASK_REV_TRANSLATION, FREQ_REV_TRANSLATION, only_nb, get_rel_month_day
+from schedulerlib.constants import CONFIG, TASK_REV_TRANSLATION, FREQ_REV_TRANSLATION, \
+    only_nb, get_rel_month_day
 from schedulerlib.ttkwidgets import LabelFrame
 from schedulerlib.messagebox import showerror
 
@@ -72,8 +71,6 @@ class Form(Toplevel):
         frame_event.columnconfigure(1, weight=1)
         frame_event.rowconfigure(5, weight=1)
 
-        self.img_moins = PhotoImage(master=self, file=IM_DEL)
-        self.img_bell = PhotoImage(master=self, file=IM_BELL)
         Label(frame_event, text=_('Summary')).grid(row=0, column=0, padx=4, pady=6, sticky='e')
         Label(frame_event, text=_('Place')).grid(row=1, column=0, padx=4, pady=6, sticky='e')
         Label(frame_event, text=_('Start')).grid(row=2, column=0, padx=4, pady=6, sticky='e')
@@ -83,7 +80,7 @@ class Form(Toplevel):
         frame_task.grid(row=4, column=1, padx=4, pady=6, sticky='w')
         Label(frame_event, text=_('Description')).grid(row=5, column=0, padx=4, pady=6, sticky='e')
         Label(frame_event, text=_('Category')).grid(row=6, column=0, padx=4, pady=6, sticky='e')
-        Button(frame_event, image=self.img_bell, command=self.add_reminder,
+        Button(frame_event, image='img_bell', command=self.add_reminder,
                padding=0).grid(row=7, column=0, padx=4, pady=6, sticky='en')
 
         self.summary = Entry(frame_event, width=35)
@@ -498,7 +495,7 @@ class Form(Toplevel):
         Label(rem, text=_('Reminder:')).pack(side='left', padx=4, pady=4)
         frame_when.pack(side='left', pady=4, padx=4)
         what.pack(side='left', pady=4, padx=4)
-        Button(rem, image=self.img_moins, padding=0,
+        Button(rem, image='img_del', padding=0,
                command=remove).pack(side='left', padx=4, pady=4)
         rem.pack()
 

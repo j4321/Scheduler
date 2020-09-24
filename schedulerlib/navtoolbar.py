@@ -41,7 +41,7 @@ from matplotlib.backend_bases import NavigationToolbar2
 from matplotlib import rcParams
 
 from .messagebox import showerror
-from .constants import IM_LAYOUT, IM_GRID, IM_WEEK, IM_MONTH
+from .constants import IMAGES
 
 
 class NavigationToolbar(NavigationToolbar2Tk):
@@ -50,14 +50,14 @@ class NavigationToolbar(NavigationToolbar2Tk):
         ('Back', _('Back to previous view'), os.path.join(rcParams['datapath'], 'images', 'back.gif'), 'back'),
         ('Forward', _('Forward to next view'), os.path.join(rcParams['datapath'], 'images', 'forward.gif'), 'forward'),
         (None, None, None, None),
-        ('Week', _('View last 7 days'), IM_WEEK, 'view_week'),
-        ('Month', _('View last 30 days'), IM_MONTH, 'view_month'),
+        ('Week', _('View last 7 days'), IMAGES['week'], 'view_week'),
+        ('Month', _('View last 30 days'), IMAGES['month'], 'view_month'),
         (None, None, None, None),
         ('Pan', _('Pan axes with left mouse, zoom with right'), os.path.join(rcParams['datapath'], 'images', 'move.gif'), 'pan'),
         ('Zoom', _('Zoom to rectangle'), os.path.join(rcParams['datapath'], 'images', 'zoom_to_rect.gif'), 'zoom'),
         ('Subplots', _('Configure subplots'), os.path.join(rcParams['datapath'], 'images', 'subplots.gif'), 'configure_subplots'),
-        ('Layout', _('Tight layout'), IM_LAYOUT, 'tight_layout'),
-        ('Grid', _('Toggle grid'), IM_GRID, 'toggle_grid'),
+        ('Layout', _('Tight layout'), IMAGES['layout'], 'tight_layout'),
+        ('Grid', _('Toggle grid'), IMAGES['grid'], 'toggle_grid'),
         (None, None, None, None),
         ('Save', _('Save the figure'), os.path.join(rcParams['datapath'], 'images', 'filesave.gif'), 'save_figure'),
     )

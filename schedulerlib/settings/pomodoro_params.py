@@ -26,10 +26,8 @@ from tkinter import Canvas, Toplevel
 from tkinter.ttk import Notebook, Style, Label, Separator, Frame, Entry, Button
 from tkinter.messagebox import showerror, askyesno
 
-from PIL.ImageTk import PhotoImage
-
-from schedulerlib.constants import IM_COLOR, only_nb, CONFIG, askcolor, \
-    CMAP, IM_ADD, IM_DEL, PATH_STATS, save_config, scrub
+from schedulerlib.constants import only_nb, CONFIG, askcolor, \
+    CMAP, PATH_STATS, save_config, scrub
 from schedulerlib.ttkwidgets import AutoScrollbar
 from .color import ColorFrame
 from .opacity import OpacityFrame
@@ -45,9 +43,6 @@ class PomodoroParams(Frame):
 
         self.onglets = Notebook(self)
         self.onglets.pack(fill='both', expand=True)
-        self.im_color = PhotoImage(master=self, file=IM_COLOR)
-        self.im_plus = PhotoImage(master=self, file=IM_ADD)
-        self.im_moins = PhotoImage(master=self, file=IM_DEL)
 
         self.okfct = self.register(only_nb)
 
@@ -202,7 +197,7 @@ class PomodoroParams(Frame):
         for i, (coul, task) in enumerate(zip(cmap, tasks)):
             self.tasks[task] = ColorFrame(self.task_frame, coul, task.capitalize())
             self.tasks[task].grid(row=i, column=0, sticky='e', padx=4, pady=4)
-            b = Button(self.task_frame, image=self.im_moins, padding=2,
+            b = Button(self.task_frame, image='img_del', padding=2,
                        command=lambda t=task: self.del_task(t))
             b.grid(row=i, column=1, sticky='w', padx=4, pady=4)
             self._tasks_btns[task] = b
@@ -214,7 +209,7 @@ class PomodoroParams(Frame):
               style='title.TLabel').grid(row=1, column=0, sticky='w', pady=4)
         can.grid(row=2, column=0, sticky='ewns')
         scroll.grid(row=2, column=1, sticky='ns')
-        Button(self.stats, image=self.im_plus, command=self.add_task).grid(row=3, column=0, sticky='w')
+        Button(self.stats, image='img_add', command=self.add_task).grid(row=3, column=0, sticky='w')
 
         self.update_idletasks()
         can.configure(width=self.task_frame.winfo_reqwidth())
@@ -338,7 +333,7 @@ class PomodoroParams(Frame):
                 i = self.task_frame.grid_size()[1] + 1
                 self.tasks[task] = ColorFrame(self.task_frame, coul, task.capitalize())
                 self.tasks[task].grid(row=i, column=0, sticky='e', padx=4, pady=4)
-                b = Button(self.task_frame, image=self.im_moins, padding=2,
+                b = Button(self.task_frame, image='img_del', padding=2,
                            command=lambda t=task: self.del_task(t))
                 b.grid(row=i, column=1, sticky='w', padx=4, pady=4)
                 self._tasks_btns[task] = b

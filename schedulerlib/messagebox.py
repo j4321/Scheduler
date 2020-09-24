@@ -46,12 +46,10 @@ class OneButtonBox(Toplevel):
         self.title(title)
         self.result = ""
         self.button = button
-        if isinstance(image, str):
-            data = ICONS.get(image)
-            if data:
-                self.img = PhotoImage(master=self, data=data)
-            else:
-                self.img = PhotoImage(master=self, file=image)
+        if image in ICONS:
+            image = f"::tk::icons::{image}"
+        elif isinstance(image, str):
+            self.img = PhotoImage(master=self, file=image)
             image = self.img
         frame = Frame(self)
         frame.rowconfigure(0, weight=1)
@@ -118,12 +116,10 @@ class ShowError(Toplevel):
         if not parent:
             style.theme_use('clam')
 
-        if isinstance(image, str):
-            data = ICONS.get(image)
-            if data:
-                self.img = PhotoImage(master=self, data=data)
-            else:
-                self.img = PhotoImage(master=self, file=image)
+        if image in ICONS:
+            image = f"::tk::icons::{image}"
+        elif isinstance(image, str):
+            self.img = PhotoImage(master=self, file=image)
             image = self.img
         frame = Frame(self)
         frame.rowconfigure(0, weight=1)
@@ -229,12 +225,10 @@ class TwoButtonBox(Toplevel):
         self.button1 = button1
         self.button2 = button2
 
-        if isinstance(image, str):
-            data = ICONS.get(image)
-            if data:
-                self.img = PhotoImage(master=self, data=data)
-            else:
-                self.img = PhotoImage(master=self, file=image)
+        if image in ICONS:
+            image = f"::tk::icons::{image}"
+        elif isinstance(image, str):
+            self.img = PhotoImage(master=self, file=image)
             image = self.img
         frame = Frame(self)
         frame.grid(row=0, columnspan=2, sticky="ewsn")
@@ -289,12 +283,10 @@ class AskYesNoCancel(Toplevel):
         self.columnconfigure(2, weight=1)
         self.result = None
 
-        if isinstance(image, str):
-            data = ICONS.get(image)
-            if data:
-                self.img = PhotoImage(master=self, data=data)
-            else:
-                self.img = PhotoImage(master=self, file=image)
+        if image in ICONS:
+            image = f"::tk::icons::{image}"
+        elif isinstance(image, str):
+            self.img = PhotoImage(master=self, file=image)
             image = self.img
         frame = Frame(self)
         frame.grid(row=0, columnspan=3, sticky="ewsn")
@@ -431,5 +423,3 @@ def askyesnocancel(title="", message="", parent=None, icon="question"):
     box = AskYesNoCancel(parent, title, message, image=icon)
     box.wait_window(box)
     return box.get_result()
-
-

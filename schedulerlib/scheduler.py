@@ -43,11 +43,9 @@ from apscheduler.triggers.cron import CronTrigger
 from tkcalendar import DateEntry
 
 from schedulerlib.messagebox import showerror, askokcancel
-from schedulerlib.constants import ICON48, ICON, IM_ADD, CONFIG, IM_DOT, JOBSTORE, \
-    DATA_PATH, BACKUP_PATH, IM_SCROLL_ALPHA, active_color, backup, add_trace, \
-    IM_SOUND, IM_MUTE, IM_SOUND_DIS, IM_MUTE_DIS, IM_CLOSED, IM_OPENED, \
-    IM_CLOSED_SEL, IM_OPENED_SEL, ICON_FALLBACK, format_time, \
-    askopenfilename, asksaveasfilename
+from schedulerlib.constants import IMAGES, ICON, ICON_FALLBACK, IM_SCROLL_ALPHA, \
+    CONFIG, JOBSTORE, DATA_PATH, BACKUP_PATH, active_color, backup, add_trace, \
+    format_time, askopenfilename, asksaveasfilename
 from schedulerlib.trayicon import TrayIcon, SubMenu
 from schedulerlib.form import Form
 from schedulerlib.event import Event
@@ -66,11 +64,14 @@ class EventScheduler(Tk):
         self._visible = BooleanVar(self, False)
         self.withdraw()
 
-        self.icon_img = PhotoImage(master=self, file=ICON48)
-        self.iconphoto(True, self.icon_img)
-
         # --- systray icon
         self.icon = TrayIcon(ICON, fallback_icon_path=ICON_FALLBACK)
+
+        # --- images
+        self._images = {name: PhotoImage(name=f'img_{name}', file=IMAGES[name], master=self)
+                        for name, path in IMAGES.items()}
+        self.iconphoto(True, 'img_icon48')
+
 
         # --- menu
         self.menu_widgets = SubMenu(parent=self.icon.menu)
@@ -215,10 +216,6 @@ class EventScheduler(Tk):
         self.option_add('*Text.inactiveSelectForeground',
                         self.style.lookup('TEntry', 'selectforeground'))
         # toggle text
-        self._open_image = PhotoImage(name='img_opened', file=IM_OPENED, master=self)
-        self._closed_image = PhotoImage(name='img_closed', file=IM_CLOSED, master=self)
-        self._open_image_sel = PhotoImage(name='img_opened_sel', file=IM_OPENED_SEL, master=self)
-        self._closed_image_sel = PhotoImage(name='img_closed_sel', file=IM_CLOSED_SEL, master=self)
         self.style.element_create("toggle", "image", "img_closed",
                                   ("selected", "!disabled", "img_opened"),
                                   ("active", "!selected", "!disabled", "img_closed_sel"),
@@ -233,14 +230,10 @@ class EventScheduler(Tk):
                                             'sticky': 'nswe'})],
                              'sticky': 'nswe'})])
         # toggle sound
-        self._im_sound = PhotoImage(master=self, file=IM_SOUND)
-        self._im_mute = PhotoImage(master=self, file=IM_MUTE)
-        self._im_sound_dis = PhotoImage(master=self, file=IM_SOUND_DIS)
-        self._im_mute_dis = PhotoImage(master=self, file=IM_MUTE_DIS)
-        self.style.element_create('mute', 'image', self._im_sound,
-                                  ('selected', '!disabled', self._im_mute),
-                                  ('selected', 'disabled', self._im_mute_dis),
-                                  ('!selected', 'disabled', self._im_sound_dis),
+        self.style.element_create('mute', 'image', 'img_sound',
+                                  ('selected', '!disabled', 'img_mute'),
+                                  ('selected', 'disabled', 'img_mute_dis'),
+                                  ('!selected', 'disabled', 'img_sound_dis'),
                                   border=2, sticky='')
         self.style.layout('Mute',
                           [('Mute.border',
@@ -323,8 +316,7 @@ class EventScheduler(Tk):
 
         # --- toolbar
         toolbar = Frame(self)
-        self.img_plus = PhotoImage(master=self, file=IM_ADD)
-        Button(toolbar, image=self.img_plus, padding=1,
+        Button(toolbar, image='img_add', padding=1,
                command=self.add).pack(side="left", padx=4)
         Label(toolbar, text=_("Filter by")).pack(side="left", padx=4)
         Button(toolbar, text=_('Delete All Outdated'), padding=1,
@@ -876,7 +868,7 @@ apply {name {
             if state:
                 self._task_var.set(state)
                 if '%' in state:
-                    self._img_dot = PhotoImage(master=self, file=IM_DOT)
+                    self._img_dot = 'img_dot'
                 else:
                     self._img_dot = tkPhotoImage(master=self)
                 self.menu_task.entryconfigure(1, image=self._img_dot)
@@ -896,7 +888,7 @@ apply {name {
             self.events[self.right_click_iid]['Task'] = self._task_var.get()
             self.widgets['Tasks'].display_tasks()
             if '%' in self._task_var.get():
-                self._img_dot = PhotoImage(master=self, file=IM_DOT)
+                self._img_dot = 'img_dot'
             else:
                 self._img_dot = tkPhotoImage(master=self)
             self.menu_task.entryconfigure(1, image=self._img_dot)

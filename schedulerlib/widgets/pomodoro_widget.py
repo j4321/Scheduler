@@ -28,11 +28,8 @@ from tkinter import StringVar, Menu, IntVar
 from tkinter.ttk import Button, Label, Frame, Menubutton, Sizegrip
 from tkinter.messagebox import askyesno
 
-from PIL.ImageTk import PhotoImage
-
 from schedulerlib.pomodoro_stats import Stats
-from schedulerlib.constants import CONFIG, CMAP, PATH_STATS, IM_START, \
-    IM_STOP, IM_POMODORO, IM_GRAPH, active_color, scrub
+from schedulerlib.constants import CONFIG, CMAP, PATH_STATS, active_color, scrub
 from .base_widget import BaseWidget
 
 
@@ -68,12 +65,6 @@ class Pomodoro(BaseWidget):
         self.nb_cycles = 0
         self.pomodori = IntVar(self, 0)
 
-        # --- images
-        self.im_go = PhotoImage(master=self, file=IM_START)
-        self.im_stop = PhotoImage(master=self, file=IM_STOP)
-        self.im_tomate = PhotoImage(master=self, file=IM_POMODORO)
-        self.im_graph = PhotoImage(master=self, file=IM_GRAPH)
-
         # --- tasks list
         tasks_frame = Frame(self, style='Pomodoro.TFrame')
         tasks_frame.grid(row=3, column=0, columnspan=3, sticky="wnse")
@@ -107,16 +98,16 @@ class Pomodoro(BaseWidget):
         self.temps.grid(row=1, column=0, columnspan=2, sticky="nswe", padx=4)
         self.aff_pomodori = Label(self, textvariable=self.pomodori, anchor='e',
                                   padding=(20, 4, 20, 4),
-                                  image=self.im_tomate, compound="left",
+                                  image='img_pomodoro', compound="left",
                                   style='timer.Pomodoro.TLabel',
                                   font='TkDefaultFont 14')
         self.aff_pomodori.grid(row=2, columnspan=2, sticky="ew", padx=4)
 
         # --- buttons
-        self.b_go = Button(self, image=self.im_go, command=self.go,
+        self.b_go = Button(self, image='img_start', command=self.go,
                            style='Pomodoro.TButton')
         self.b_go.grid(row=4, column=0, sticky="ew")
-        self.b_stats = Button(self, image=self.im_graph,
+        self.b_stats = Button(self, image='img_graph',
                               command=self.display_stats,
                               style='Pomodoro.TButton')
         self.b_stats.grid(row=4, column=1, sticky="ew")
@@ -225,7 +216,7 @@ class Pomodoro(BaseWidget):
         else:
             self.on = True
             self.choose_task.state(["disabled"])
-            self.b_go.configure(image=self.im_stop)
+            self.b_go.configure(image='img_stop')
             self.after(1000, self.affiche)
             logging.info('Start work cycle for task ' + self.task.get())
 
@@ -240,7 +231,7 @@ class Pomodoro(BaseWidget):
                            message=_("Are you sure you want to give up the current session?"))
         if rep:
             self.choose_task.state(["!disabled"])
-            self.b_go.configure(image=self.im_go)
+            self.b_go.configure(image='img_start')
             if self.activite.get() == _("Work"):
                 self.stats(tps)
             self.pomodori.set(0)
