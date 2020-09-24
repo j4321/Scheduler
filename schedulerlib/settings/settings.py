@@ -23,10 +23,8 @@ Settings
 import tkinter as tk
 from tkinter import ttk
 
-from PIL.ImageTk import PhotoImage
-
 from schedulerlib.constants import save_config, CONFIG, LANGUAGES, REV_LANGUAGES, \
-    TOOLKITS, IM_ADD, IM_DEL, only_nb, IM_CLEANUP, IM_REFRESH, IM_UP, IM_DOWN
+    TOOLKITS, only_nb
 from schedulerlib.messagebox import showerror, showinfo, askyesno
 from schedulerlib.ttkwidgets import AutoScrollbar
 from .font import FontFrame
@@ -45,13 +43,6 @@ class Settings(tk.Toplevel):
         self.minsize(574, 565)
 
         self._only_nb = self.register(only_nb)
-
-        self._im_up = PhotoImage(master=self, file=IM_UP)
-        self._im_down = PhotoImage(master=self, file=IM_DOWN)
-        self._im_plus = PhotoImage(master=self, file=IM_ADD)
-        self._im_moins = PhotoImage(master=self, file=IM_DEL)
-        self._im_cleanup = PhotoImage(master=self, file=IM_CLEANUP)
-        self._im_refresh = PhotoImage(master=self, file=IM_REFRESH)
 
         frame = ttk.Frame(self, style='border.TFrame', relief='sunken',
                           border=1)
@@ -151,7 +142,7 @@ class Settings(tk.Toplevel):
                   text=_("Delete all outdated events")).grid(row=1, column=0,
                                                              sticky='w',
                                                              padx=4, pady=4)
-        ttk.Button(frame_maintenance, image=self._im_cleanup, padding=1,
+        ttk.Button(frame_maintenance, image='img_cleanup', padding=1,
                    command=self.cleanup).grid(row=1, column=1,
                                               sticky='w', padx=4, pady=4)
         ttk.Label(frame_maintenance,
@@ -161,7 +152,7 @@ class Settings(tk.Toplevel):
                                                                        sticky='w',
                                                                        padx=4,
                                                                        pady=4)
-        ttk.Button(frame_maintenance, image=self._im_refresh, padding=1,
+        ttk.Button(frame_maintenance, image='img_refresh', padding=1,
                    command=self.refresh).grid(row=2, column=1,
                                               sticky='w', padx=4, pady=4)
 
@@ -396,7 +387,7 @@ class Settings(tk.Toplevel):
         can.grid(row=0, column=0, sticky='ewns')
         scroll.grid(row=0, column=1, sticky='ns')
 
-        ttk.Button(categories, image=self._im_plus,
+        ttk.Button(categories, image='img_add',
                    command=self.add_cat).grid(row=1, column=0, sticky='w', pady=4)
 
         self.cat_frame = ttk.Frame(can)
@@ -650,11 +641,11 @@ class Settings(tk.Toplevel):
         l = ttk.Label(self.cat_frame, text=cat, style='subtitle.TLabel')
         bg = ColorFrame(self.cat_frame, bg.strip(), _('Background'))
         fg = ColorFrame(self.cat_frame, fg.strip(), _('Foreground'))
-        b = ttk.Button(self.cat_frame, image=self._im_moins, padding=2,
+        b = ttk.Button(self.cat_frame, image='img_del', padding=2,
                        command=lambda c=cat: self.del_cat(c))
-        b_up = ttk.Button(self.cat_frame, image=self._im_up, padding=2,
+        b_up = ttk.Button(self.cat_frame, image='img_up', padding=2,
                           command=lambda c=cat: self.up_cat(c))
-        b_down = ttk.Button(self.cat_frame, image=self._im_down, padding=2,
+        b_down = ttk.Button(self.cat_frame, image='img_down', padding=2,
                             command=lambda c=cat: self.down_cat(c))
         self.cats[cat] = [l, bg, fg, b, b_up, b_down]
         l.grid(row=row, column=0, sticky='e', padx=4, pady=4)
@@ -822,11 +813,3 @@ class Settings(tk.Toplevel):
             self.master.widgets['Pomodoro'].stop(False)
         save_config()
         self.destroy()
-
-
-
-
-
-
-
-

@@ -22,7 +22,7 @@ Eyes' rest script
 """
 from subprocess import Popen
 
-from .constants import IM_EYE, IM_START_M, IM_STOP_M, CONFIG
+from .constants import IM_EYE, IMAGES, CONFIG
 from .trayicon import SubMenu
 
 
@@ -35,7 +35,7 @@ class Eyes(SubMenu):
         self.tkwindow = tkwindow
         self._after_id = None
 
-        self.add_command(label=_('Start'), command=self.start_stop, image=IM_START_M)
+        self.add_command(label=_('Start'), command=self.start_stop, image=IMAGES['start_m'])
         self.add_command(label=_('Status'), command=self.status)
 
     def quit(self):
@@ -49,13 +49,13 @@ class Eyes(SubMenu):
             self.is_on = False
             self.time = [0, 0]
             self.set_item_label(0, _('Start'))
-            self.set_item_image(0, IM_START_M)
+            self.set_item_image(0, IMAGES['start_m'])
         else:
             self.is_on = True
             Popen(["notify-send", "-i", IM_EYE, "Scheduler",
                    _("The eyes' rest script has been launched!")])
             self.set_item_label(0, _('Stop'))
-            self.set_item_image(0, IM_STOP_M)
+            self.set_item_image(0, IMAGES['stop_m'])
             self._after_id = self.tkwindow.after(1000, self.timer)
 
     def timer(self):
