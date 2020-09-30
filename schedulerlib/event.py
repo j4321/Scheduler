@@ -232,7 +232,7 @@ class Event:
             cron_prop['hour'] = date.hour
             cron_prop['minute'] = date.minute
             cron_prop['second'] = date.second
-            cron_prop['exdate'] = repeat['ExclDates']
+            cron_prop['exdate'] = repeat.get('ExclDates', [])
             if repeat['Limit'] == 'until':
                 end = repeat['EndDate']
                 cron_prop['end_date'] = date.replace(year=end.year,
