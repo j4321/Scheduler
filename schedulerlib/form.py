@@ -543,6 +543,7 @@ class Form(Toplevel):
                       'NbTimes': int(self.s_after.get()),
                       'EndDate': self.until_entry.get_date(),
                       'MonthDay': monthday,
+                      'ExclDates': [],
                       'WeekDays': days}
             self.event['Repeat'] = repeat
 

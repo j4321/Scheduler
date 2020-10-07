@@ -25,6 +25,7 @@ from datetime import timedelta, datetime, time
 
 from apscheduler.triggers.date import DateTrigger
 from apscheduler.triggers.cron import CronTrigger
+from apscheduler.triggers.combining import BaseCombiningTrigger
 from apscheduler.jobstores.base import JobLookupError
 from babel.dates import get_day_names
 from dateutil import rrule as drrule
@@ -45,6 +46,40 @@ DAYS_REV = {i: k for k, i in DAYS.items()}
 WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 
 ORDINALS = {-1: 'last', 1: '1st', 2: '2nd', 3: '3rd'}
+
+
+class MyCronTrigger(BaseCombiningTrigger):
+    """CronTrigger with exclusion date field (exdate)."""
+
+    __slots__ = ()
+
+    def __init__(self, year=None, month=None, day=None, week=None, day_of_week=None, hour=None,
+                 minute=None, second=None, start_date=None, end_date=None, timezone=None,
+                 jitter=None, exdate=None):
+        cron_trig = CronTrigger(year, month, day, week, day_of_week, hour,
+                                minute, second, start_date, end_date, timezone, jitter)
+        triggers = [cron_trig]
+        if exdate is not None:
+            triggers.extend([DateTrigger(date) for date in exdate])
+
+        BaseCombiningTrigger.__init__(self, triggers, jitter)
+
+    def get_next_fire_time(self, previous_fire_time, now):
+        while True:
+            fire_time = self.triggers[0].get_next_fire_time(previous_fire_time, now)
+            excl_dates = [trigger.get_next_fire_time(previous_fire_time, now)
+                          for trigger in self.triggers[1:]]
+            print(fire_time, excl_dates)
+            if fire_time is None:
+                return None
+            elif fire_time not in excl_dates:
+                return self._apply_jitter(fire_time, self.jitter, now)
+            else:
+                now = fire_time + timedelta(seconds=1)
+
+    def __str__(self):
+        return 'cron_excl[{}]'.format(', '.join(str(trigger) for trigger in self.triggers))
+
 
 
 class Rruleset(drrule.rruleset):
@@ -191,13 +226,14 @@ class Event:
 
     def reminder_add(self, date):
         repeat = self._properties['Repeat']
-
         if repeat:
             cron_prop = {}
             cron_prop['start_date'] = date
             cron_prop['hour'] = date.hour
             cron_prop['minute'] = date.minute
             cron_prop['second'] = date.second
+            time_delta = date - self['Start']
+            cron_prop['exdate'] = [exdate + time_delta for exdate in repeat.get('ExclDates', [])]
             if repeat['Limit'] == 'until':
                 end = repeat['EndDate']
                 cron_prop['end_date'] = date.replace(year=end.year,
@@ -240,7 +276,7 @@ class Event:
                 cron_prop['month'] = date.month
                 cron_prop['year'] = '*' + every
 
-            job = self.scheduler.add_job(run, trigger=CronTrigger(**cron_prop),
+            job = self.scheduler.add_job(run, trigger=MyCronTrigger(**cron_prop),
                                          args=(['python3', NOTIF_PATH, str(self)],))
         else:
             job = self.scheduler.add_job(run, trigger=DateTrigger(date),
@@ -258,6 +294,13 @@ class Event:
         ids = list(self._properties['Reminders'].keys())
         for job_id in ids:
             self.reminder_remove(job_id)
+
+    def reminder_refresh_all(self):
+        """Delete and reschedule all reminders."""
+        reminders = [date for date in self['Reminders'].values()]
+        self.reminder_remove_all()
+        for date in reminders:
+            self.reminder_add(date)
 
     def values(self):
         """Return the properties (Summary, Place, Category, Start, End, Is recurring, Next occurrence)."""
@@ -343,6 +386,7 @@ class Event:
             repeat['ExclDates'] = []
         repeat['ExclDates'].append(date)
         self.rrule.exdate(date)
+        self.reminder_refresh_all()
 
     def to_dict(self):
         """Convert event to dictionnary."""
