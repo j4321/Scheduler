@@ -131,6 +131,8 @@ class Stats(tk.Toplevel):
                     xxx = np.arange(x[j], x[j + 1])
                     yy = np.concatenate((yy, [y[j]], np.zeros(len(xxx) - 1, dtype=int)))
                 xxx = np.arange(x[-1], demain)
+                if not len(xxx):
+                    continue
                 yy = np.concatenate((yy, [y[-1]], np.zeros(len(xxx) - 1, dtype=int)))
                 self.ax.bar(xx, yy, bottom=yy0, width=0.8, label=task, color=coul[i])
                 yy0 += yy
