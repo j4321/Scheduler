@@ -104,14 +104,21 @@ class EventCalendar(Calendar):
             Calendar.__setitem__(self, item, value)
 
     def _get_cal(self, year, month):
+        """Get calendar for given month of given year."""
         cal = self._cal.monthdatescalendar(year, month)
-        m = month + 1
+        next_m = month + 1
         y = year
-        if m == 13:
-            m = 1
+        if next_m == 13:
+            next_m = 1
             y += 1
         if len(cal) < 6:
-            cal.append(self._cal.monthdatescalendar(y, m)[1])
+            if cal[-1][-1].month == month:
+                i = 0
+            else:
+                i = 1
+            cal.append(self._cal.monthdatescalendar(y, next_m)[i])
+            if len(cal) < 6:
+                cal.append(self._cal.monthdatescalendar(y, next_m)[i + 1])
         return cal
 
     def update_sel(self):
