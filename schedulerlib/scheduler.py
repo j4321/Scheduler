@@ -26,6 +26,7 @@ import logging
 import traceback
 import signal
 import requests
+from subprocess import Popen
 from pickle import Pickler, Unpickler
 from tkinter import Tk, Menu, StringVar, TclError, BooleanVar, Toplevel
 from tkinter import PhotoImage as tkPhotoImage
@@ -45,7 +46,7 @@ from tkcalendar import DateEntry
 from schedulerlib.messagebox import showerror, askokcancel, askoptions
 from schedulerlib.constants import IMAGES, ICON, ICON_FALLBACK, IM_SCROLL_ALPHA, \
     CONFIG, JOBSTORE, DATA_PATH, BACKUP_PATH, active_color, backup, add_trace, \
-    format_time, askopenfilename, asksaveasfilename
+    format_time, askopenfilename, asksaveasfilename, OPENFILE_PATH, ICON_NOTIF
 from schedulerlib.trayicon import TrayIcon, SubMenu
 from schedulerlib.form import Form
 from schedulerlib.event import Event
@@ -57,7 +58,13 @@ from schedulerlib.eyes import Eyes
 
 
 class EventScheduler(Tk):
-    def __init__(self):
+    """Main class."""
+    def __init__(self, *files):
+        """
+        Create the main window containing the task manager.
+
+        files: list of .ics files to load in the calendar
+        """
         Tk.__init__(self, className='Scheduler')
         logging.info('Start')
         self.protocol("WM_DELETE_WINDOW", self.hide)
@@ -443,6 +450,8 @@ apply {name {
 
         # react to scheduler --update-date in command line
         signal.signal(signal.SIGUSR1, self.update_date)
+        # load .ics files from command line
+        signal.signal(signal.SIGUSR2, self.load_ics_files_cmdline)
 
         # update selected date in calendar and event list every day
         self.scheduler.add_job(self.update_date,
@@ -450,6 +459,9 @@ apply {name {
                                jobstore='memo')
 
         self.scheduler.start()
+
+        for filepath in files:
+            self.load_ics_file(filepath)
 
     def _setup_style(self):
         # scrollbars
@@ -777,11 +789,12 @@ apply {name {
         self.widgets['Tasks'].display_tasks()
         self.save()
 
-    def load_ics_file(self):
-        filetypes = [('iCal', '*.ics'), (_("All files"), "*")]
-        filename = askopenfilename(filetypes=filetypes,
-                                   defaultextension=".ics",
-                                   initialdir=os.path.expanduser("~"))
+    def load_ics_file(self, filename=None):
+        if filename is None:
+            filetypes = [('iCal', '*.ics'), (_("All files"), "*")]
+            filename = askopenfilename(filetypes=filetypes,
+                                       defaultextension=".ics",
+                                       initialdir=os.path.expanduser("~"))
         if not filename:
             return
         try:
@@ -793,6 +806,22 @@ apply {name {
             showerror(_("Error"), _("The import of the .ics file failed."), err)
         else:
             self._load_ical(ical)
+
+    def load_ics_files_cmdline(self, *args):
+        """
+        Load .ics files from cmdline.
+
+        The command line input is stored in OPENFILE_PATH
+        """
+        with open(OPENFILE_PATH) as file:
+            files = file.read().splitlines()
+        os.remove(OPENFILE_PATH)
+        if not files:
+            return
+        for filepath in files:
+            self.load_ics_file(filepath)
+        Popen(["notify-send", "-i", ICON_NOTIF, "Scheduler",
+               f"Loaded files {', '.join(files)}"])
 
     def load_ics_url(self):
 
