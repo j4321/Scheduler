@@ -69,6 +69,7 @@ CONFIG_PATH = os.path.join(LOCAL_PATH, 'scheduler.ini')
 LOG_PATH = os.path.join(LOCAL_PATH, 'scheduler.log')
 NOTIF_PATH = os.path.join(PATH, 'notif.py')
 JOBSTORE = os.path.join(LOCAL_PATH, 'scheduler.sqlite')
+OPENFILE_PATH = os.path.join(LOCAL_PATH, ".file")
 
 if not os.path.exists(LOCAL_PATH):
     os.mkdir(LOCAL_PATH)
