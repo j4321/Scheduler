@@ -222,14 +222,10 @@ class EventCalendar(Calendar):
         return sorted(cats)[0][-1]
 
     def _remove_from_tooltip(self, date, txt):
-        y1, y2 = date.year, self._date.year
         m1, m2 = date.month, self._date.month
-        if y1 == y2 or (y1 - y2 == 1 and m1 == 1 and m2 == 12) or (y2 - y1 == 1 and m2 == 1 and m1 == 12):
-            _, week_nb, d = date.isocalendar()
-            d -= 1
-            week_nb -= self._date.isocalendar()[1]
-            week_nb %= 52
-            if week_nb < 6:
+        week_nb, d = self._get_day_coords(date)
+        if week_nb is not None:
+            if 0 <= week_nb < 6:
                 tp = self._events_tooltips[week_nb][d]
                 if tp is not None:
                     text = tp.cget('text').split('\n')
@@ -267,16 +263,12 @@ class EventCalendar(Calendar):
                                     label.configure(style='we_om.%s.TLabel' % self._style_prefixe)
 
     def _show_event(self, date, txt):
-        y1, y2 = date.year, self._date.year
-        m1, m2 = date.month, self._date.month
-        if y1 == y2 or (y1 - y2 == 1 and m1 == 1 and m2 == 12) or (y2 - y1 == 1 and m2 == 1 and m1 == 12):
-            _, w, d = date.isocalendar()
-            w -= self._date.isocalendar()[1]
-            w %= 52
-            if w < 6:
+        w, d = self._get_day_coords(date)
+        if w is not None:
+            if 0 <= w and w < 6:
                 evts = self._current_month_events[date.strftime('%Y/%m/%d')]
                 txt = '\n'.join([evt[1] for evt in evts])
-                self._set_tooltip(w, d - 1, txt, self._get_cat(evts))
+                self._set_tooltip(w, d, txt, self._get_cat(evts))
 
     def _add_event(self, start, nbdays, desc, iid, drrule, cat):
         cal = self._get_cal(self._date.year, self._date.month)
@@ -407,42 +399,35 @@ class EventCalendar(Calendar):
         return evts
 
     def add_holiday(self, date):
-        year = date.year
         HOLIDAYS.add(date.strftime('%Y/%m/%d'))
-
-        if year == self._date.year:
-            _, w, d = date.isocalendar()
-            w -= self._date.isocalendar()[1]
-            w %= 52
-            if 0 <= w and w < 6:
-                style = self._calendar[w][d - 1].cget('style')
+        w, d = self._get_day_coords(date)
+        if w is not None:
+            if 0 <= w < 6:
+                style = self._calendar[w][d].cget('style')
                 we_style = 'we.%s.TLabel' % self._style_prefixe
                 we_om_style = 'we_om.%s.TLabel' % self._style_prefixe
                 normal_style = 'normal.%s.TLabel' % self._style_prefixe
                 normal_om_style = 'normal_om.%s.TLabel' % self._style_prefixe
                 if style == normal_style:
-                    self._calendar[w][d - 1].configure(style=we_style)
+                    self._calendar[w][d].configure(style=we_style)
                 elif style == normal_om_style:
-                    self._calendar[w][d - 1].configure(style=we_om_style)
+                    self._calendar[w][d].configure(style=we_om_style)
 
     def remove_holiday(self, date):
-        year = date.year
         try:
             HOLIDAYS.remove(date.strftime('%Y/%m/%d'))
-            if year == self._date.year:
-                _, w, d = date.isocalendar()
-                w -= self._date.isocalendar()[1]
-                w %= 52
-                if 0 <= w and w < 6:
-                    style = self._calendar[w][d - 1].cget('style')
+            w, d = self._get_day_coords(date)
+            if w is not None:
+                if 0 <= w < 6:
+                    style = self._calendar[w][d].cget('style')
                     we_style = 'we.%s.TLabel' % self._style_prefixe
                     we_om_style = 'we_om.%s.TLabel' % self._style_prefixe
                     normal_style = 'normal.%s.TLabel' % self._style_prefixe
                     normal_om_style = 'normal_om.%s.TLabel' % self._style_prefixe
                     if style == we_style:
-                        self._calendar[w][d - 1].configure(style=normal_style)
+                        self._calendar[w][d].configure(style=normal_style)
                     elif style == we_om_style:
-                        self._calendar[w][d - 1].configure(style=normal_om_style)
+                        self._calendar[w][d].configure(style=normal_om_style)
         except ValueError:
             raise ValueError('%s is not a holiday.' % format_date(date, locale=self["locale"]))
 
