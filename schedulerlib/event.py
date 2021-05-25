@@ -285,8 +285,11 @@ class Event:
     def reminder_remove(self, job_id):
         try:
             self.scheduler.remove_job(job_id)
+        except JobLookupError:
+            pass
+        try:
             del(self._properties['Reminders'][job_id])
-        except (JobLookupError, KeyError):
+        except KeyError:
             pass
 
     def reminder_remove_all(self):

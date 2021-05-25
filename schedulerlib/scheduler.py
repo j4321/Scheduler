@@ -739,6 +739,7 @@ apply {name {
 
         Required when APScheduler is updated.
         """
+        self.scheduler.remove_all_jobs("default")
         for event in self.events.values():
             event.reminder_refresh_all()
         logging.info('Refreshed reminders')
