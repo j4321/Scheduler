@@ -48,10 +48,8 @@ if 'datapath' not in rcParams:
 
     def get_path(image_file):
         path = cbook._get_data_path(f"images/{image_file}.png")
-        print(path)
         if not path.exists():
             path = cbook._get_data_path(f"images/{image_file}.gif")
-            print(path)
             if not path.exists():
                 path = ""
         return str(path)
@@ -75,7 +73,7 @@ class NavigationToolbar(NavigationToolbar2Tk):
         ('Week', _('View last 7 days'), IMAGES['week'], 'view_week'),
         ('Month', _('View last 30 days'), IMAGES['month'], 'view_month'),
         (None, None, None, None),
-        ('Pan', _('Pan axes with left mouse, zoom with right'), get_path('move'), 'pan'),
+        ('Pan', _('Pan axes with left mouse, zoom with right'), get_path('move.gif'), 'pan'),
         ('Zoom', _('Zoom to rectangle'), get_path('zoom_to_rect'), 'zoom'),
         ('Subplots', _('Configure subplots'), get_path('subplots'), 'configure_subplots'),
         ('Layout', _('Tight layout'), IMAGES['layout'], 'tight_layout'),

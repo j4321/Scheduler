@@ -9,3 +9,8 @@ backup/
 dist/
 *.db
 stats_to_db.py
+*.orig
+*REMOTE*
+*BACKUP*
+*LOCAL*
+*BASE*
