@@ -37,6 +37,7 @@ try:
 except ImportError:
     from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg as NavigationToolbar2Tk
 from matplotlib import rcParams
+import matplotlib
 
 from .messagebox import showerror
 from .constants import IM_LAYOUT, IM_GRID
@@ -44,17 +45,17 @@ from .constants import IM_LAYOUT, IM_GRID
 
 class NavigationToolbar(NavigationToolbar2Tk):
     toolitems = (
-        ('Home', _('Reset original view'), os.path.join(rcParams['datapath'], 'images', 'home.gif'), 'home'),
-        ('Back', _('Back to previous view'), os.path.join(rcParams['datapath'], 'images', 'back.gif'), 'back'),
-        ('Forward', _('Forward to next view'), os.path.join(rcParams['datapath'], 'images', 'forward.gif'), 'forward'),
+        ('Home', _('Reset original view'), os.path.join(matplotlib.get_data_path(), 'images', 'home.gif'), 'home'),
+        ('Back', _('Back to previous view'), os.path.join(matplotlib.get_data_path(), 'images', 'back.gif'), 'back'),
+        ('Forward', _('Forward to next view'), os.path.join(matplotlib.get_data_path(), 'images', 'forward.gif'), 'forward'),
         (None, None, None, None),
-        ('Pan', _('Pan axes with left mouse, zoom with right'), os.path.join(rcParams['datapath'], 'images', 'move.gif'), 'pan'),
-        ('Zoom', _('Zoom to rectangle'), os.path.join(rcParams['datapath'], 'images', 'zoom_to_rect.gif'), 'zoom'),
-        ('Subplots', _('Configure subplots'), os.path.join(rcParams['datapath'], 'images', 'subplots.gif'), 'configure_subplots'),
+        ('Pan', _('Pan axes with left mouse, zoom with right'), os.path.join(matplotlib.get_data_path(), 'images', 'move.gif'), 'pan'),
+        ('Zoom', _('Zoom to rectangle'), os.path.join(matplotlib.get_data_path(), 'images', 'zoom_to_rect.gif'), 'zoom'),
+        ('Subplots', _('Configure subplots'), os.path.join(matplotlib.get_data_path(), 'images', 'subplots.gif'), 'configure_subplots'),
         ('Layout', _('Tight layout'), IM_LAYOUT, 'tight_layout'),
         ('Grid', _('Toggle grid'), IM_GRID, 'toggle_grid'),
         (None, None, None, None),
-        ('Save', _('Save the figure'), os.path.join(rcParams['datapath'], 'images', 'filesave.gif'), 'save_figure'),
+        ('Save', _('Save the figure'), os.path.join(matplotlib.get_data_path(), 'images', 'filesave.gif'), 'save_figure'),
     )
 
     def __init__(self, canvas, window, tight_layout_cmd, toggle_grid_cmd):
