@@ -70,6 +70,7 @@ class Notification(Tk):
         timeout = CONFIG.getint('Reminders', 'timeout') * 60 * 1000
         if timeout > 0:
             self.timeout_id = self.after(timeout, self.quit)
+        self.bind("<Double-1>", self.quit)
 
     def alarm(self):
         self.alarm_process = Popen([CONFIG.get("General", "soundplayer"),
@@ -82,7 +83,7 @@ class Notification(Tk):
         else:  # ringing is finished
             self.alarm()
 
-    def quit(self):
+    def quit(self, event=None):
         try:
             self.after_cancel(self.alarm_id)
         except ValueError:
