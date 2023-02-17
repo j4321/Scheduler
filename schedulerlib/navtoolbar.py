@@ -48,10 +48,8 @@ if 'datapath' not in rcParams:
 
     def get_path(image_file):
         path = cbook._get_data_path(f"images/{image_file}.png")
-        print(path)
         if not path.exists():
             path = cbook._get_data_path(f"images/{image_file}.gif")
-            print(path)
             if not path.exists():
                 path = ""
         return str(path)

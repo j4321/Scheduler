@@ -797,7 +797,7 @@ apply {name {
                                        defaultextension=".ics",
                                        initialdir=os.path.expanduser("~"))
         if not filename:
-            return
+            return False
         try:
             with open(filename, 'rb') as icalfile:
                 ical = icalendar.Calendar.from_ical(icalfile.read())
@@ -805,8 +805,10 @@ apply {name {
             err = ''.join(traceback.format_exc())
             logging.error(err)
             showerror(_("Error"), _("The import of the .ics file failed."), err)
+            return False
         else:
             self._load_ical(ical)
+            return True
 
     def load_ics_files_cmdline(self, *args):
         """
@@ -819,10 +821,20 @@ apply {name {
         os.remove(OPENFILE_PATH)
         if not files:
             return
+        success = []
+        fail = []
         for filepath in files:
-            self.load_ics_file(filepath)
+            if self.load_ics_file(filepath):
+                success.append(filepath)
+            else:
+                fail.append(filepath)
+        msg1, msg2 = "", ""
+        if success:
+            msg1 = _("Successfully loaded files {file_list}.").format(file_list=', '.join(success))
+        if fail:
+            msg2 = _("Failed to load files {file_list}.").format(file_list=', '.join(fail))
         Popen(["notify-send", "-i", ICON_NOTIF, "Scheduler",
-               f"Loaded files {', '.join(files)}"])
+               f"{msg1} {msg2}"])
 
     def load_ics_url(self):
 
@@ -1059,4 +1071,3 @@ apply {name {
             if event['Task']:
                 tasks.append(event)
         return tasks
-

@@ -228,7 +228,7 @@ class Event:
 
         if repeat:
             cron_prop = {}
-            cron_prop['start_date'] = date
+            cron_prop['start_date'] = date - timedelta(minutes=1)
             cron_prop['hour'] = date.hour
             cron_prop['minute'] = date.minute
             cron_prop['second'] = date.second
