@@ -242,7 +242,7 @@ if LANGUAGE not in LANGUAGES:
     else:
         CONFIG.set("General", "language", "en")
 
-gettext.bind_textdomain_codeset(APP_NAME, "UTF-8")
+
 gettext.bindtextdomain(APP_NAME, PATH_LOCALE)
 gettext.textdomain(APP_NAME)
 

@@ -830,9 +830,9 @@ apply {name {
                 fail.append(filepath)
         msg1, msg2 = "", ""
         if success:
-            msg1 = _("Successfully loaded files {file_list}.").format(file_list=', '.join(success))
+            msg1 = _("Successfully loaded {file_list}.").format(file_list=', '.join(success))
         if fail:
-            msg2 = _("Failed to load files {file_list}.").format(file_list=', '.join(fail))
+            msg2 = _("Failed to load {file_list}.").format(file_list=', '.join(fail))
         Popen(["notify-send", "-i", ICON_NOTIF, "Scheduler",
                f"{msg1} {msg2}"])
 
