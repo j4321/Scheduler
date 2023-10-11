@@ -89,7 +89,7 @@ logging.basicConfig(level=logging.INFO,
 logging.getLogger().addHandler(logging.StreamHandler())
 
 # --- config
-CONFIG = ConfigParser()
+CONFIG = ConfigParser(interpolation=None)
 
 
 def save_config():

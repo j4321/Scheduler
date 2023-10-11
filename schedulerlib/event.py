@@ -122,8 +122,8 @@ class Event:
         props['Description'] = str(vevent.get('description', ""))
         props['Place'] = str(vevent.get('location', ""))
         # start / end
-        start = vevent.get('dtstart').dt
-        end = vevent.get('dtend').dt
+        start = vevent['dtstart'].dt
+        end = vevent['dtend'].dt
         if isinstance(start, datetime):
             props['Start'] = start.astimezone(tz=None).replace(tzinfo=None)
             props['End'] = end.astimezone(tz=None).replace(tzinfo=None)
@@ -161,10 +161,7 @@ class Event:
                     if bmday:
                         day = bmday[0][-2:]
                         wnb = int(bmday[0][:-2])
-                        if wnb == -1:
-                            mday = f"last {DAYS[day]}"
-                        else:
-                            mday = f"{wnb % 5}th {DAYS[day]}"
+                        mday = (DAYS[day], wnb)
             try:
                 excl = [excl_date.dt.astimezone(tz=None).replace(tzinfo=None)
                         for excl_date in vevent.get('exdate').dts]

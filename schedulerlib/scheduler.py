@@ -806,7 +806,11 @@ apply {name {
             self.widgets['Events'].update_style()
         for component in ical.subcomponents:
             if component.name == "VEVENT":
-                event = Event.from_vevent(component, self.scheduler, category, category)
+                try:
+                    event = Event.from_vevent(component, self.scheduler, category, category)
+                except Exception:
+                    logging.exception("Malformed Event Error")
+                    continue
                 iid = event.iid
                 new_evts.append(iid)
                 if iid not in self.events:
@@ -858,7 +862,11 @@ apply {name {
             self.widgets['Events'].update_style()
         for component in ical.subcomponents:
             if component.name == "VEVENT":
-                event = Event.from_vevent(component, self.scheduler, category)
+                try:
+                    event = Event.from_vevent(component, self.scheduler, category)
+                except Exception:
+                    logging.exception("Malformed Event Error")
+                    continue
                 iid = event.iid
                 if iid not in self.events:
                     self.tree.insert('', 'end', iid, values=event.values())
