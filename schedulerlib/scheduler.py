@@ -463,6 +463,10 @@ apply {name {
         for filepath in files:
             self.load_ics_file(filepath)
 
+        # --- ext sync [one way sync remote -> local]
+        self.sync_after_id = ""
+        self.ext_cal_sync()
+
     def _setup_style(self):
         # scrollbars
         for widget in ['Events', 'Tasks', 'Timer']:
@@ -637,18 +641,19 @@ apply {name {
                 self.widgets['Calendar'].add_event(event)
 
     def delete(self, *iids):
+        min_ind = len(self.tree.get_children(''))
         for iid in iids:
             index = self.tree.index(iid)
+            min_ind = min(min_ind, index)
             self.tree.delete(iid)
-            for k, item in enumerate(self.tree.get_children('')[index:]):
-                tags = [t for t in self.tree.item(item, 'tags')
-                        if t not in ['1', '0']]
-                tags.append(str((index + k) % 2))
-                self.tree.item(item, tags=tags)
-
             self.events[iid].reminder_remove_all()
             self.widgets['Calendar'].remove_event(self.events[iid])
-            del(self.events[iid])
+            del self.events[iid]
+        for k, item in enumerate(self.tree.get_children('')[min_ind:], min_ind):
+            tags = [t for t in self.tree.item(item, 'tags')
+                    if t not in ['1', '0']]
+            tags.append(str(k % 2))
+            self.tree.item(item, tags=tags)
         self.widgets['Events'].display_evts()
         self.widgets['Tasks'].display_tasks()
         self.save()
@@ -764,6 +769,85 @@ apply {name {
         if filename:
             self._export_ical(filename)
 
+
+    def ext_cal_sync(self):
+        """Update the external calendars in the local calendar."""
+        sync = CONFIG["ExternalCalendars"].items()
+        for extcal, url in sync:
+            self._load_ics_extsync(url, extcal)
+            logging.info(f"Synchronized external calendar {extcal} - {url}")
+        if len(sync): # schedule the next sync
+            self.sync_after_id = self.after(CONFIG.getint("General", "sync")*60*1000,
+                                            self.ext_cal_sync)
+
+    def _load_ics_extsync(self, url, extcal):
+        """Import events from icalendar data (sync)."""
+        try:
+            data = requests.get(url)
+            if data.ok:
+                ical = icalendar.Calendar.from_ical(data.text)
+            else:
+                data.raise_for_status()
+        except Exception as e:
+            err = ''.join(traceback.format_exc())
+            logging.error(err)
+            showerror(_("Error"),
+                      _("The import of the .ics data failed.") + f"\n\n{e}",
+                      err)
+            return
+        # use external calendar name as category
+        category = extcal
+        # old version of the events
+        old_evts = [iid for iid, ev in self.events.items() if ev["ExtCal"] == extcal]  # to find deleted events in the updated version
+        new_evts = []
+        if not CONFIG.has_option("Categories", category):
+            CONFIG.set("Categories", category, "white, #186CBE, 0")
+            self.widgets['Calendar'].update_style()
+            self.widgets['Events'].update_style()
+        for component in ical.subcomponents:
+            if component.name == "VEVENT":
+                event = Event.from_vevent(component, self.scheduler, category, category)
+                iid = event.iid
+                new_evts.append(iid)
+                if iid not in self.events:
+                    # create new event
+                    self.tree.insert('', 'end', iid, values=event.values())
+                    self.tree.item(iid, tags=str(self.tree.index(iid) % 2))
+                else:
+                    # update existing event (but keep local reminders)
+                    dold = self.events[iid].to_dict()
+                    dnew = event.to_dict()
+                    del dold["Reminders"]
+                    del dnew["Reminders"]
+                    if dnew == dold:
+                        event.reminder_remove_all()
+                        del event
+                        continue
+                    # there were change
+                    self.tree.item(iid, values=self.events[iid].values())
+                    self.widgets['Calendar'].remove_event(self.events[iid])
+                    self.events[iid].reminder_remove_all()
+                    del self.events[iid]
+                self.events[iid] = event
+                self.widgets['Calendar'].add_event(event)
+        # delete events deleted from the remote
+        min_ind = len(self.tree.get_children(''))
+        for iid in old_evts:
+            if iid not in new_evts:
+                min_ind = min(min_ind, self.tree.index(iid))
+                self.tree.delete(iid)
+                self.events[iid].reminder_remove_all()
+                self.widgets['Calendar'].remove_event(self.events[iid])
+                del self.events[iid]
+        for k, item in enumerate(self.tree.get_children('')[min_ind:], min_ind):
+            tags = [t for t in self.tree.item(item, 'tags')
+                    if t not in ['1', '0']]
+            tags.append(str(k % 2))
+            self.tree.item(item, tags=tags)
+        self.widgets['Events'].display_evts()
+        self.widgets['Tasks'].display_tasks()
+        self.save()
+
     def _load_ical(self, ical):
         """Import events from icalendar data."""
         # use iCalendar name as category
@@ -783,7 +867,7 @@ apply {name {
                     self.tree.item(iid, values=self.events[iid].values())
                     self.widgets['Calendar'].remove_event(self.events[iid])
                     self.events[iid].reminder_remove_all()
-                    del(self.events[iid])
+                    del self.events[iid]
                 self.events[iid] = event
                 self.widgets['Calendar'].add_event(event)
         self.widgets['Events'].display_evts()
@@ -808,6 +892,7 @@ apply {name {
             return False
         else:
             self._load_ical(ical)
+            logging.info(f"Successfully loaded {filename}.")
             return True
 
     def load_ics_files_cmdline(self, *args):
@@ -831,8 +916,10 @@ apply {name {
         msg1, msg2 = "", ""
         if success:
             msg1 = _("Successfully loaded {file_list}.").format(file_list=', '.join(success))
+            logging.info("Successfully loaded {file_list}.".format(file_list=', '.join(success)))
         if fail:
             msg2 = _("Failed to load {file_list}.").format(file_list=', '.join(fail))
+            logging.info("Failed to load {file_list}.".format(file_list=', '.join(fail)))
         Popen(["notify-send", "-i", ICON_NOTIF, "Scheduler",
                f"{msg1} {msg2}"])
 
@@ -857,6 +944,7 @@ apply {name {
                           err)
             else:
                 self._load_ical(ical)
+                logging.info(f"Successfully loaded {url}.")
             finally:
                 top.destroy()
 
@@ -1011,6 +1099,10 @@ apply {name {
         self.menu_eyes.quit()
         self.after_cancel(self.after_id)
         try:
+            self.after_cancel(self.sync_after_id)
+        except ValueError:
+            pass
+        try:
             self.scheduler.shutdown()
         except SchedulerNotRunningError:
             pass
@@ -1024,6 +1116,19 @@ apply {name {
         if splash_supp != CONFIG.get('General', 'splash_supported'):
             for widget in self.widgets.values():
                 widget.update_position()
+        # update ext cals
+        extcals = CONFIG.options('ExternalCalendars')
+        to_delete = []
+        for iid, ev in self.events.items():
+            if ev["ExtCal"] and ev["ExtCal"] not in extcals:  # extcal was removed
+                to_delete.append(iid)
+        self.delete(*to_delete)
+        try:
+            self.after_cancel(self.sync_after_id)
+        except ValueError:
+            pass
+        if extcals:
+            self.ext_cal_sync()
         # refresh categories
         cats = CONFIG.options('Categories')
         default_cat = CONFIG.get('Calendar', 'default_category')

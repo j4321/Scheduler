@@ -106,7 +106,8 @@ default_config = {
         'language': "",
         'splash_supported': str(os.environ.get('DESKTOP_SESSION') != 'plasma'),
         'soundplayer': "mpg123",
-        'silent_mode': "False"
+        'silent_mode': "False",
+        'sync': "5"
     },
     'Eyes': {
         'interval': "20",
@@ -185,7 +186,8 @@ default_config = {
         'position': 'normal',
         'default_category': '',
     },
-    'Categories': {},
+    'Categories': {}, # name: "fg, bg, order"
+    'ExternalCalendars': {},  # name (-> ExtCal property of the event): url_to_ics_file [one way sync remote -> local]
     'Pomodoro': {
         'geometry': '',
         'visible': 'True',

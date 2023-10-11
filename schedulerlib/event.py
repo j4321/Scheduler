@@ -103,7 +103,8 @@ class Event:
         defaults = {'Summary': '', 'Place': '', 'Description': '',
                     'Start': d, 'End': d + timedelta(hours=1), 'Task': False,
                     'Repeat': {}, 'WholeDay': False, 'Reminders': {},
-                    'Category': default_cat}
+                    'Category': default_cat,
+                    'ExtCal': ''}  # on-way sync with external calendar (changes made in the local calendar will not be exported to the remote and will be overriden at the next sync)
         defaults.update(kw)
         if not CONFIG.has_option('Categories', defaults['Category']):
             defaults['Category'] = default_cat
@@ -113,13 +114,13 @@ class Event:
         self.create_rrule()
 
     @classmethod
-    def from_vevent(cls, vevent, scheduler, category):
+    def from_vevent(cls, vevent, scheduler, category, extcal=""):
         """Create Event from icalendar vEvent."""
-        props = {"Category": category}
+        props = {"Category": category, "ExtCal": extcal}
         # info
-        props['Summary'] = str(vevent.get('summary'))
-        props['Description'] = str(vevent.get('description'))
-        props['Place'] = str(vevent.get('location'))
+        props['Summary'] = str(vevent.get('summary', ""))
+        props['Description'] = str(vevent.get('description', ""))
+        props['Place'] = str(vevent.get('location', ""))
         # start / end
         start = vevent.get('dtstart').dt
         end = vevent.get('dtend').dt

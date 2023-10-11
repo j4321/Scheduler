@@ -47,6 +47,7 @@ class Form(Toplevel):
         self._only_nb = self.register(only_nb)
 
         self.event = event
+        self.readonly = bool(self.event["ExtCal"])
         if new:
             self.title(_('New Event'))
         else:
@@ -109,8 +110,9 @@ class Form(Toplevel):
         self.frame_alarms.grid(row=7, column=1, sticky='w')
 
         # --- *--- task
-        Checkbutton(frame_task, text=_('Task'), command=self._change_label,
-                    variable=self._task).pack(side='left')
+        task_cb = Checkbutton(frame_task, text=_('Task'), command=self._change_label,
+                              variable=self._task)
+        task_cb.pack(side='left')
 
         self.task_progress = Combobox(frame_task, state='readonly', width=9,
                                       values=(_('Pending'), _('In Progress'),
@@ -200,9 +202,9 @@ class Form(Toplevel):
         repeat.update(self.event['Repeat'])
 
         self._repeat_freq = StringVar(self, repeat['Frequency'])
-        Checkbutton(frame_rep, text=_('Repeat event'), variable=self._repeat,
-                    command=self._toggle_rep).grid(row=0, column=0,  # columnspan=2,
-                                                   padx=4, pady=6, sticky='w')
+        rep_cb = Checkbutton(frame_rep, text=_('Repeat event'), variable=self._repeat,
+                             command=self._toggle_rep)
+        rep_cb.grid(row=0, column=0, padx=4, pady=6, sticky='w')
         # --- *--- Frequency
         frame_freq = LabelFrame(frame_rep, text=_('Frequency'), labelanchor="nw")
         frame_freq.grid(row=1, column=0, sticky='eswn', padx=0, pady=1)
@@ -312,6 +314,39 @@ class Form(Toplevel):
         # self.wait_visibility(self)
         # self.grab_set()
         self.summary.focus_set()
+
+
+
+        if self.readonly:
+            # readonly ext event
+            self.summary.state(("disabled",))
+            self.place.state(("disabled",))
+            self.desc.configure(state="disabled")
+            self.category.state(("disabled",))
+            self.start_entry.state(("disabled",))
+            self.start_hour.state(("disabled",))
+            self.start_min.state(("disabled",))
+            self.end_entry.state(("disabled",))
+            self.end_hour.state(("disabled",))
+            self.end_min.state(("disabled",))
+            rep_cb.state(("disabled",))
+            self.s_after.configure(state='disabled')
+            self._llim.state(('disabled',))
+            self.until_entry.state(('disabled',))
+            for r in self._freqs:
+                r.state(('disabled',))
+            for r in self._rb_lim:
+                r.state(('disabled',))
+            self._lfreq.state(('disabled',))
+            self.s_freq.configure(state='disabled')
+            for ch in self._week_days:
+                ch.state(('disabled',))
+            # month options
+            for rb in self._month_days:
+                rb.state(('disabled',))
+            task_cb.state(('disabled',))
+            self.task_progress.state(('disabled',))
+
 
     def _update_repeat(self):
         lang = CONFIG.get('General', 'language')
@@ -500,52 +535,54 @@ class Form(Toplevel):
         rem.pack()
 
     def ok(self):
-        summary = self.summary.get()
-        if not summary:
-            showerror(_("Error"), _("The field 'Summary' cannot be empty."), parent=self)
-            return
+        if not self.readonly:
 
-        self.event['Summary'] = summary
-        self.event['Place'] = self.place.get()
-        self.event['Start'] = "%s %s:%s" % (self.start_entry.get_date().strftime("%Y-%m-%d"),
-                                            self.start_hour.get(),
-                                            self.start_min.get())
-        self.event['End'] = "%s %s:%s" % (self.end_entry.get_date().strftime("%Y-%m-%d"),
-                                          self.end_hour.get(),
-                                          self.end_min.get())
-        self.event['Description'] = self.desc.get('1.0', 'end')
-        self.event['Category'] = self.category.get()
-        if not self._task.get():
-            self.event['Task'] = False
-        else:
-            prog = self.task_progress.get()
-            if prog == _('In Progress'):
-                self.event['Task'] = self.in_progress.get()
+            summary = self.summary.get()
+            if not summary:
+                showerror(_("Error"), _("The field 'Summary' cannot be empty."), parent=self)
+                return
+
+            self.event['Summary'] = summary
+            self.event['Place'] = self.place.get()
+            self.event['Start'] = "%s %s:%s" % (self.start_entry.get_date().strftime("%Y-%m-%d"),
+                                                self.start_hour.get(),
+                                                self.start_min.get())
+            self.event['End'] = "%s %s:%s" % (self.end_entry.get_date().strftime("%Y-%m-%d"),
+                                              self.end_hour.get(),
+                                              self.end_min.get())
+            self.event['Description'] = self.desc.get('1.0', 'end')
+            self.event['Category'] = self.category.get()
+            if not self._task.get():
+                self.event['Task'] = False
             else:
-                self.event['Task'] = TASK_REV_TRANSLATION[prog]
+                prog = self.task_progress.get()
+                if prog == _('In Progress'):
+                    self.event['Task'] = self.in_progress.get()
+                else:
+                    self.event['Task'] = TASK_REV_TRANSLATION[prog]
 
-        self.event["WholeDay"] = self._whole_day.get()
+            self.event["WholeDay"] = self._whole_day.get()
 
-        if not self._repeat.get():
-            self.event['Repeat'] = {}
-        else:
-            days = []
-            for i in range(7):
-                if "selected" in self._week_days[i].state():
-                    days.append(i)
-            monthday = self._repeat_month.get()
-            if monthday == "rel":
-                monthday = get_rel_month_day(self.start_date)
+            if not self._repeat.get():
+                self.event['Repeat'] = {}
+            else:
+                days = []
+                for i in range(7):
+                    if "selected" in self._week_days[i].state():
+                        days.append(i)
+                monthday = self._repeat_month.get()
+                if monthday == "rel":
+                    monthday = get_rel_month_day(self.start_date)
 
-            repeat = {'Frequency': self._repeat_freq.get(),
-                      'Every': int(self.s_freq.get()),
-                      'Limit': self._repeat_lim.get(),
-                      'NbTimes': int(self.s_after.get()),
-                      'EndDate': self.until_entry.get_date(),
-                      'MonthDay': monthday,
-                      'ExclDates': [],
-                      'WeekDays': days}
-            self.event['Repeat'] = repeat
+                repeat = {'Frequency': self._repeat_freq.get(),
+                          'Every': int(self.s_freq.get()),
+                          'Limit': self._repeat_lim.get(),
+                          'NbTimes': int(self.s_after.get()),
+                          'EndDate': self.until_entry.get_date(),
+                          'MonthDay': monthday,
+                          'ExclDates': [],
+                          'WeekDays': days}
+                self.event['Repeat'] = repeat
 
         self.event.reminder_remove_all()
         for when, what in self.alarms:
