@@ -415,33 +415,36 @@ class Settings(tk.Toplevel):
         # --- External calendars
         extcals = ttk.Frame(self.frames['Calendar'], padding=4)
         extcals.columnconfigure(2, weight=1)
-        extcals.rowconfigure(0, weight=1)
+        extcals.rowconfigure(1, weight=1)
         self.frames['Calendar'].add(extcals, text=_('External calendars'))
+
+        label = ttk.Label(extcals, text=_('Refreshing frequency (min)'))
+        label.grid(row=0, column=0, padx=4, pady=4)
+        self.sync_freq = ttk.Entry(extcals, width=5,
+                                   justify='center', validate='key',
+                                   validatecommand=(self._only_nb, '%P'))
+        self.sync_freq.insert(0, CONFIG.get('ExternalSync', 'frequency'))
+        self.sync_freq.grid(row=0, column=1, padx=4, pady=4)
 
         can2 = tk.Canvas(extcals, bg=self['bg'],
                          highlightthickness=0, width=1,
                          relief='flat')
         scroll2 = AutoScrollbar(extcals, orient='vertical', command=can2.yview)
         can2.configure(yscrollcommand=scroll2.set)
-        can2.grid(row=0, column=0, columnspan=3, sticky='ewns')
-        scroll2.grid(row=0, column=3, sticky='ns')
+        can2.grid(row=1, column=0, columnspan=3, sticky='ewns')
+        scroll2.grid(row=1, column=3, sticky='ns')
 
         ttk.Button(extcals, image='img_add',
-                   command=self.add_extcal).grid(row=1, column=0, sticky='w', pady=4)
-        label = ttk.Label(extcals, text=_('Refreshing frequency (min)'))
-        label.grid(row=2, column=0, padx=4, pady=4)
-        self.sync_freq = ttk.Entry(extcals, width=5,
-                                   justify='center', validate='key',
-                                   validatecommand=(self._only_nb, '%P'))
-        self.sync_freq.insert(0, CONFIG.get('General', 'sync'))
-        self.sync_freq.grid(row=2, column=1, padx=4, pady=4)
+                   command=self.add_extcal).grid(row=2, column=0, sticky='w', pady=4)
+
 
         self.extcal_frame = ttk.Frame(can2)
         can2.create_window(0, 0, anchor='nw', window=self.extcal_frame)
 
         self.extcals = {}
+        active_cals = CONFIG.get("ExternalSync", "calendars").split(", ")
         for name, url in CONFIG.items('ExternalCalendars'):
-            self._add_extcal(name, url)
+            self._add_extcal(name, url, name in active_cals)
 
         self.update_idletasks()
         can2.configure(width=self.extcal_frame.winfo_reqwidth())
@@ -449,7 +452,6 @@ class Settings(tk.Toplevel):
         can2.bind('<4>', lambda e: self._scroll(e, -1))
         can2.bind('<5>', lambda e: self._scroll(e, 1))
         self.extcal_frame.bind('<Configure>', lambda e: can2.configure(scrollregion=can2.bbox('all')))
-
 
     def _scroll(self, event, delta):
         if event.widget.yview() != (0, 1):
@@ -753,16 +755,17 @@ class Settings(tk.Toplevel):
         url_entry.bind('<Escape>', lambda e: top.destroy())
         url_entry.bind('<Return>', ok)
 
-    def _add_extcal(self, name, url):
-        ln = ttk.Label(self.extcal_frame, text=name)
+    def _add_extcal(self, name, url, active=True):
+        ln = ttk.Checkbutton(self.extcal_frame, text=name)
+        ln.state(('!'*(not active) + 'selected', '!alternate'))
         if len(url) > 60:
             url = f"{url[:30]}...{url[-30:]}"
         lu = ttk.Label(self.extcal_frame, text=url, font="TkDefaultFont 8 italic")
         br = ttk.Button(self.extcal_frame, image='img_del', padding=2,
                         command=lambda n=name: self.del_extcal(name))
         row = self.extcal_frame.grid_size()[1]
-        ln.grid(row=row, column=0, sticky='e', padx=4, pady=4)
-        lu.grid(row=row, column=1, sticky='e', padx=4, pady=4)
+        ln.grid(row=row, column=0, sticky='w', padx=4, pady=4)
+        lu.grid(row=row, column=1, sticky='w', padx=4, pady=4)
         br.grid(row=row, column=2, sticky='e', padx=4, pady=4)
         self.extcals[name] = [ln, lu, br]
 
@@ -825,6 +828,8 @@ class Settings(tk.Toplevel):
         # --- Calendar
         CONFIG.set("Calendar", "alpha", "%.2f" % (self.cal_opacity.get_opacity()))
 
+
+
         font = self.cal_font.get_font()
         CONFIG.set("Calendar", "font", "{} {}".format(font['family'].replace(' ', '\ '),
                                                       font['size']))
@@ -851,7 +856,9 @@ class Settings(tk.Toplevel):
         sync = self.sync_freq.get()
         if sync == '':
             sync = '30'
-        CONFIG.set("General", 'sync', sync)
+        CONFIG.set("ExternalSync", 'frequency', sync)
+        active_cals = [name for name, (ln, lu, br) in self.extcals.items() if ln.instate(["selected"])]
+        CONFIG.set("ExternalSync", 'calendars', ", ".join(active_cals))
 
         # --- Events
         displayed_cats_old = CONFIG.get('Events', 'categories').split(', ')

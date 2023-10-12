@@ -321,7 +321,7 @@ class Form(Toplevel):
             # readonly ext event
             self.summary.state(("disabled",))
             self.place.state(("disabled",))
-            self.desc.configure(state="disabled")
+            self.desc.configure(state="disabled", fg="gray60")
             self.category.state(("disabled",))
             self.start_entry.state(("disabled",))
             self.start_hour.state(("disabled",))

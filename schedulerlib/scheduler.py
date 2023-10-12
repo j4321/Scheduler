@@ -772,12 +772,15 @@ apply {name {
 
     def ext_cal_sync(self):
         """Update the external calendars in the local calendar."""
-        sync = CONFIG["ExternalCalendars"].items()
-        for extcal, url in sync:
+        active_cals = CONFIG.get("ExternalSync", "calendars").split(", ")
+        while "" in active_cals:
+            active_cals.remove("")
+        for extcal in active_cals:
+            url = CONFIG.get("ExternalCalendars", extcal)
             self._load_ics_extsync(url, extcal)
             logging.info(f"Synchronized external calendar {extcal} - {url}")
-        if len(sync): # schedule the next sync
-            self.sync_after_id = self.after(CONFIG.getint("General", "sync")*60*1000,
+        if len(active_cals): # schedule the next sync
+            self.sync_after_id = self.after(CONFIG.getint("ExternalSync", "frequency")*60*1000,
                                             self.ext_cal_sync)
 
     def _load_ics_extsync(self, url, extcal):
@@ -1125,18 +1128,17 @@ apply {name {
             for widget in self.widgets.values():
                 widget.update_position()
         # update ext cals
-        extcals = CONFIG.options('ExternalCalendars')
+        active_cals = CONFIG.get('ExternalSync', "calendars").split(", ") + [""]
         to_delete = []
         for iid, ev in self.events.items():
-            if ev["ExtCal"] and ev["ExtCal"] not in extcals:  # extcal was removed
+            if ev["ExtCal"] not in active_cals:  # extcal was removed or deactivated
                 to_delete.append(iid)
         self.delete(*to_delete)
         try:
             self.after_cancel(self.sync_after_id)
         except ValueError:
             pass
-        if extcals:
-            self.ext_cal_sync()
+        self.ext_cal_sync()
         # refresh categories
         cats = CONFIG.options('Categories')
         default_cat = CONFIG.get('Calendar', 'default_category')
