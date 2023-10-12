@@ -38,6 +38,9 @@ class Eyes(SubMenu):
         self.add_command(label=_('Start'), command=self.start_stop, image=IMAGES['start_m'])
         self.add_command(label=_('Status'), command=self.status)
 
+        if CONFIG.getboolean("Eyes", "autostart"):
+            self.start_stop()
+
     def quit(self):
         try:
             self.tkwindow.after_cancel(self._after_id)
