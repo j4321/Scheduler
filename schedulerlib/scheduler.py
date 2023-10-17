@@ -775,29 +775,43 @@ apply {name {
         active_cals = CONFIG.get("ExternalSync", "calendars").split(", ")
         while "" in active_cals:
             active_cals.remove("")
+        nointernet = False
         for extcal in active_cals:
             url = CONFIG.get("ExternalCalendars", extcal)
-            self._load_ics_extsync(url, extcal)
-            logging.info(f"Synchronized external calendar {extcal} - {url}")
+            success, retry = self._load_ics_extsync(url, extcal)
+            if success:
+                logging.info(f"Synchronized external calendar {extcal} - {url}")
+            elif retry:
+                nointernet = True
         if len(active_cals): # schedule the next sync
-            self.sync_after_id = self.after(CONFIG.getint("ExternalSync", "frequency")*60*1000,
-                                            self.ext_cal_sync)
+            if nointernet:  # temporary lost internect connection, retry in 5 min
+                self.sync_after_id = self.after(5*60*1000, self.ext_cal_sync)
+            else:
+                self.sync_after_id = self.after(CONFIG.getint("ExternalSync", "frequency")*60*1000,
+                                                self.ext_cal_sync)
 
     def _load_ics_extsync(self, url, extcal):
-        """Import events from icalendar data (sync)."""
+        """
+        Import events from icalendar data (sync).
+
+        Return (success, retry)
+        """
         try:
             data = requests.get(url)
             if data.ok:
                 ical = icalendar.Calendar.from_ical(data.text)
             else:
                 data.raise_for_status()
+        except requests.exceptions.ConnectionError as e:
+            logging.error(f"Sync Error: {e}")
+            return False, True  # no Internet, retry later
         except Exception as e:
             err = ''.join(traceback.format_exc())
             logging.error(err)
             showerror(_("Error"),
                       _("The import of the .ics data failed.") + f"\n\n{e}",
                       err)
-            return
+            return False, False
         # use external calendar name as category
         category = extcal
         # old version of the events
@@ -854,6 +868,7 @@ apply {name {
         self.widgets['Events'].display_evts()
         self.widgets['Tasks'].display_tasks()
         self.save()
+        return True, False
 
     def _load_ical(self, ical):
         """Import events from icalendar data."""
