@@ -183,6 +183,12 @@ class Settings(tk.Toplevel):
 
         self.eyes_sound.grid(sticky='ew', columnspan=2, pady=4)
 
+        self.eyes_notif = ttk.Checkbutton(self.frames["Eyes' rest"],
+                                          text=_('Notification'),
+                                          style='title.TCheckbutton')
+        self.eyes_notif.state(((not CONFIG.getboolean("Eyes", "notification"))*"!" + "selected", "!alternate"))
+        self.eyes_notif.grid(sticky="w", columnspan=2, pady=4, padx=4)
+
         self.eyes_autostart = ttk.Checkbutton(self.frames["Eyes' rest"],
                                               text=_('Launch on startup'),
                                               style='title.TCheckbutton')
@@ -813,6 +819,7 @@ class Settings(tk.Toplevel):
         sound, mute = self.eyes_sound.get()
         CONFIG.set("Eyes", "sound", sound)
         CONFIG.set("Eyes", "mute", str(mute))
+        CONFIG.set("Eyes", "notification", str(self.eyes_notif.instate(["selected"])))
         CONFIG.set("Eyes", "autostart", str(self.eyes_autostart.instate(["selected"])))
 
         # --- Reminders

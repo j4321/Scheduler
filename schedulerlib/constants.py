@@ -112,6 +112,7 @@ default_config = {
         'interval': "20",
         'sound': os.path.join(PATH_SOUNDS, 'ting.mp3'),
         'mute': 'False',
+        'notification': 'True',
         'autostart': 'False',
     },
     'Reminders': {
