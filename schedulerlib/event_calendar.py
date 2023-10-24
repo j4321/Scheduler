@@ -173,14 +173,14 @@ class EventCalendar(Calendar):
         # --- display events and holidays
         # repeated event
         start, end = cal[0][0], cal[-1][-1]
-        for iid, (desc, nbdays, drrule, cat, start_time) in self._repeated_events.items():
+        for iid, (desc, nbdays, drrule, cat, start_time, is_ext) in self._repeated_events.items():
             for ev_date in drrule.between(start, end):
                 for d in range(nbdays):
                     date = ev_date + self.timedelta(days=d)
                     date2 = date.strftime('%Y/%m/%d')
                     if date2 not in self._current_month_events:
                         self._current_month_events[date2] = []
-                    self._current_month_events[date2].append((start_time, desc, iid, cat))
+                    self._current_month_events[date2].append((start_time, desc, iid, cat, is_ext))
         for w in range(6):
             for d in range(7):
                 day = cal[w][d]
@@ -218,8 +218,8 @@ class EventCalendar(Calendar):
             tp.configure(text=txt)
 
     def _get_cat(self, evts):
-        cats = [(self._cats.get(cat, [10000])[-1], start_time, desc, cat) for start_time, desc, iid, cat in evts]
-        return sorted(cats)[0][-1]
+        cats = [(self._cats.get(cat, [10000])[-1], start_time, desc, cat, is_ext) for start_time, desc, iid, cat, is_ext in evts]
+        return sorted(cats)[0][-2]
 
     def _remove_from_tooltip(self, date, txt):
         m1, m2 = date.month, self._date.month
@@ -270,7 +270,7 @@ class EventCalendar(Calendar):
                 txt = '\n'.join([evt[1] for evt in evts])
                 self._set_tooltip(w, d, txt, self._get_cat(evts))
 
-    def _add_event(self, start, nbdays, desc, iid, drrule, cat):
+    def _add_event(self, start, nbdays, desc, iid, drrule, cat, is_ext):
         cal = self._get_cal(self._date.year, self._date.month)
         mstart, mend = cal[0][0], cal[-1][-1]
         start_time = start.time()
@@ -280,15 +280,15 @@ class EventCalendar(Calendar):
                 date2 = date.strftime('%Y/%m/%d')
                 if date2 not in self._events:
                     self._events[date2] = []
-                self._events[date2].append((start_time, desc, iid, cat))
+                self._events[date2].append((start_time, desc, iid, cat, is_ext))
                 if mstart <= date.date() <= mend:
                     if date2 not in self._current_month_events:
                         self._current_month_events[date2] = []
-                    self._current_month_events[date2].append((start_time, desc, iid, cat))
+                    self._current_month_events[date2].append((start_time, desc, iid, cat, is_ext))
                     self._current_month_events[date2].sort()
                     self._show_event(date, desc)
         else:
-            self._repeated_events[iid] = (desc, nbdays, drrule, cat, start.time())
+            self._repeated_events[iid] = (desc, nbdays, drrule, cat, start.time(), is_ext)
 
             for ev_date in drrule.between(mstart, mend):
                 for d in range(nbdays):
@@ -296,12 +296,12 @@ class EventCalendar(Calendar):
                     date2 = date.strftime('%Y/%m/%d')
                     if date2 not in self._current_month_events:
                         self._current_month_events[date2] = []
-                    self._current_month_events[date2].append((start_time, desc, iid, cat))
+                    self._current_month_events[date2].append((start_time, desc, iid, cat, is_ext))
                     self._current_month_events[date2].sort()
                     self._show_event(date, desc)
         self._display_selection()
 
-    def _remove_event(self, start, nbdays, desc, iid, drrule, cat):
+    def _remove_event(self, start, nbdays, desc, iid, drrule, cat, is_ext):
         year, month = self._date.year, self._date.month
         start_time = start.time()
         try:
@@ -310,8 +310,8 @@ class EventCalendar(Calendar):
                     date = start + self.timedelta(days=d)
                     date2 = date.strftime('%Y/%m/%d')
                     if date2 in self._current_month_events:
-                        self._current_month_events[date2].remove((start_time, desc, iid, cat))
-                    self._events[date2].remove((start_time, desc, iid, cat))
+                        self._current_month_events[date2].remove((start_time, desc, iid, cat, is_ext))
+                    self._events[date2].remove((start_time, desc, iid, cat, is_ext))
                     if not self._events[date2]:
                         del(self._events[date2])
                     self._remove_from_tooltip(date, desc)
@@ -323,7 +323,7 @@ class EventCalendar(Calendar):
                         date = ev_date + self.timedelta(days=d)
                         date2 = date.strftime('%Y/%m/%d')
                         if date2 in self._current_month_events:
-                            self._current_month_events[date2].remove((start_time, desc, iid, cat))
+                            self._current_month_events[date2].remove((start_time, desc, iid, cat, is_ext))
                         self._remove_from_tooltip(date, desc)
 
         except ValueError:
@@ -366,15 +366,18 @@ class EventCalendar(Calendar):
                               command=lambda: self.master.master.add(date))
         if evts:
             self.menu.add_separator()
-            self.menu.add_separator()
+            # self.menu.add_separator()
             index_edit = 2
-            for start_time, desc, iid, cat in evts:
+            for start_time, desc, iid, cat, is_ext in evts:
                 self.menu.insert_command(index_edit,
                                          label=_("Edit") + " %s" % desc,
                                          command=lambda i=iid: self.master.master.edit_from_cal(i, date))
                 index_edit += 1
-                self.menu.add_command(label=_("Delete") + " %s" % desc,
-                                      command=lambda i=iid: self.master.master.delete_from_cal(i, date))
+                if not is_ext:  # it is pointless to remove external events as they will be bakc after the next sync
+                    self.menu.add_command(label=_("Delete") + " %s" % desc,
+                                          command=lambda i=iid: self.master.master.delete_from_cal(i, date))
+            if index_edit <= self.menu.index("end"):
+                self.menu.insert_separator(index_edit)
         else:
             self.menu.add_separator()
             if date.strftime('%Y/%m/%d') in HOLIDAYS:
@@ -390,10 +393,10 @@ class EventCalendar(Calendar):
     def get_events(self, date):
         """ Return the iid of all events occuring on date. """
         evts = []
-        for start_time, desc, iid, cat in self._events.get(date.strftime('%Y/%m/%d'), []):
+        for start_time, desc, iid, cat, is_ext in self._events.get(date.strftime('%Y/%m/%d'), []):
             evts.append(iid)
 
-        for iid, (desc, nbdays, drrule, cat, start_time) in self._repeated_events.items():
+        for iid, (desc, nbdays, drrule, cat, start_time, is_ext) in self._repeated_events.items():
             if drrule.between(date + self.timedelta(days=-nbdays + 1), date):
                 evts.append(iid)
         return evts
@@ -441,7 +444,7 @@ class EventCalendar(Calendar):
         else:
             desc = '➢ %s' % event['Summary']
         dt = end - start
-        self._add_event(start, dt.days + 1, desc, event.iid, event.rrule, event['Category'])
+        self._add_event(start, dt.days + 1, desc, event.iid, event.rrule, event['Category'], bool(event["ExtCal"]))
 
     def remove_event(self, event):
         start = event['Start']
@@ -453,7 +456,7 @@ class EventCalendar(Calendar):
         else:
             desc = '➢ %s' % event['Summary']
         dt = end - start
-        self._remove_event(start, dt.days + 1, desc, event.iid, event.rrule, event['Category'])
+        self._remove_event(start, dt.days + 1, desc, event.iid, event.rrule, event['Category'], bool(event["ExtCal"]))
 
     def bind(self, *args):
         Calendar.bind(self, *args)

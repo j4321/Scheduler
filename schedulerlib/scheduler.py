@@ -532,7 +532,7 @@ apply {name {
     def _delete_events(self, event):
         sel = self.tree.selection()
         if sel:
-            ans = askokcancel(_("Confirmation"), _("Delete selected events?"), parent=self)
+            ans = askokcancel(_("Confirmation"), _("Delete selected events (external events will not be removed)?"), parent=self)
             if ans:
                 self.delete(*sel)
 
@@ -643,10 +643,12 @@ apply {name {
     def delete(self, *iids):
         min_ind = len(self.tree.get_children(''))
         for iid in iids:
+            self.events[iid].reminder_remove_all()
+            if self.events[iid]["ExtCal"]:
+                continue # can only remove local reminders for external events
             index = self.tree.index(iid)
             min_ind = min(min_ind, index)
             self.tree.delete(iid)
-            self.events[iid].reminder_remove_all()
             self.widgets['Calendar'].remove_event(self.events[iid])
             del self.events[iid]
         for k, item in enumerate(self.tree.get_children('')[min_ind:], min_ind):
@@ -1096,6 +1098,8 @@ apply {name {
                     self._img_dot = tkPhotoImage(master=self)
                 self.menu_task.entryconfigure(1, image=self._img_dot)
                 self.menu.insert_cascade(0, menu=self.menu_task, label=_('Progress'))
+            # external event cannot be deleted
+            self.menu.entryconfigure(_("Delete"), state=["normal", "disabled"][bool(self.events[self.right_click_iid]['ExtCal'])])
             self.menu.tk_popup(event.x_root, event.y_root)
 
     def _delete_menu(self):
