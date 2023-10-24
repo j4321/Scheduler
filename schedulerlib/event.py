@@ -303,7 +303,7 @@ class Event:
             self.reminder_add(date)
 
     def values(self):
-        """Return the properties (Summary, Place, Category, Start, End, Is recurring, Next occurrence)."""
+        """Return the properties (Summary, Place, Category, Start, End, Is recurring, Next occurrence, Calendar)."""
         locale = CONFIG.get("General", "locale")
         next_occurrence = ''
         repeat = self['Repeat']
@@ -311,6 +311,7 @@ class Event:
         format_func = format_date if self['WholeDay'] else format_datetime
         start = format_func(self['Start'], locale=locale)
         end = format_func(self['End'], locale=locale)
+        cal = self["ExtCal"] if self["ExtCal"] else _("local")
         if repeat:
             next_oc = self.rrule.after(datetime.now())
             if next_oc:
@@ -318,7 +319,7 @@ class Event:
         elif self['Start'] > datetime.now():
             next_occurrence = start
         return (self['Summary'], self['Place'], self['Category'], start, end,
-                is_rec, next_occurrence)
+                is_rec, next_occurrence, cal)
 
     def get(self, key, default=None):
         return self._properties.get(key, default)

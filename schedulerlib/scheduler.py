@@ -306,7 +306,9 @@ class EventScheduler(Tk):
             _('Recurring'): ({'stretch': False, 'width': 70},
                              lambda: self._sort_by_desc(_('Recurring'), False)),
             _('Next occurence'): ({'stretch': False, 'width': 150},
-                                  lambda: self._sort_by_date(_('Next occurence'), False))
+                                  lambda: self._sort_by_date(_('Next occurence'), False)),
+            _('Calendar'): ({'stretch': False, 'width': 150},
+                            lambda: self._sort_by_desc(_('Calendar'), False))
 
         }
         #Summary, Place, Category, Start, End, Is recurring, Next occurrence
@@ -330,7 +332,7 @@ class EventScheduler(Tk):
                command=self.delete_outdated_events).pack(side="right", padx=4)
         # --- --- filters
         self.filter_col = Combobox(toolbar, state="readonly",
-                                   values=("", _("Category"), _("Date"), _("Recurring")),
+                                   values=("", _("Category"), _("Date"), _("Recurring"), _("Calendar")),
                                    exportselection=False)
         self.filter_col.pack(side="left", padx=4)
         # --- --- --- category
@@ -1044,9 +1046,15 @@ apply {name {
             self.filter_date.pack(side="left", padx=4)
         else:
             if col == _("Category"):
-                self.filter_value.configure(values=sorted(CONFIG.options('Categories')))
+                self.filter_value.configure(values=[""] + sorted(CONFIG.options('Categories')))
             elif col == _("Recurring"):
-                self.filter_value.configure(values=[_("Yes"), _("No")])
+                self.filter_value.configure(values=["", _("Yes"), _("No")])
+            elif col == _("Calendar"):
+                cals = sorted(CONFIG.get('ExternalSync', "calendars").split(", "))
+                if not "" in cals:
+                    cals.insert(0, "")
+                cals.insert(1, _("local"))
+                self.filter_value.configure(values=cals)
             self.filter_value.set("")
             self.filter_value.pack(side="left", padx=4)
             self.filter_date.pack_forget()
@@ -1070,14 +1078,17 @@ apply {name {
     def apply_filter_value(self, event):
         col = self.filter_col.get()
         val = self.filter_value.get()
-        items = list(self.events.keys())
-        i = 0
-        for item in items:
-            if self.tree.set(item, col) == val:
-                self._move_item(item, i)
-                i += 1
-            else:
-                self.tree.detach(item)
+        if val:
+            items = list(self.events.keys())
+            i = 0
+            for item in items:
+                if self.tree.set(item, col) == val:
+                    self._move_item(item, i)
+                    i += 1
+                else:
+                    self.tree.detach(item)
+        else:
+            self._reset_filter()
 
     # --- manager's menu
     def _post_menu(self, event):
