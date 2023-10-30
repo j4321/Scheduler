@@ -127,6 +127,8 @@ default_config = {
         'alarm': os.path.join(PATH_SOUNDS, 'alarm.mp3'),
         'blink': 'True',
         'timeout': '5',
+        'default_delay': '15',
+        'default_unit': 'minutes',
     },
     'Events': {
         'geometry': '',

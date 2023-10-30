@@ -196,8 +196,23 @@ class Settings(tk.Toplevel):
         self.eyes_autostart.grid(sticky="w", columnspan=2, pady=4, padx=4)
 
     def _init_reminders(self):
-        # --- window
 
+        frame_default = ttk.Frame(self.frames['Reminders'])
+        frame_when = ttk.Frame(frame_default, style='txt.TFrame', relief='sunken', border=1)
+        self.default_delay = tk.Spinbox(frame_when, from_=0, width=3, justify='center',
+                               relief='flat', highlightthickness=0, validate='key',
+                               validatecommand=(self._only_nb, '%P'))
+        self.default_delay.pack()
+        self.default_delay.delete(0, 'end')
+        self.default_delay.insert(0, CONFIG.get("Reminders", "default_delay"))
+        self.default_unit = ttk.Combobox(frame_default, width=8, state='readonly',
+                            values=(_('minutes'), _('hours'), _('days')))
+        self.default_unit.set(_(CONFIG.get("Reminders", "default_unit")))
+        ttk.Label(frame_default, text=_("Default reminder")).pack(side="left")
+        frame_when.pack(side="left", padx=4)
+        self.default_unit.pack(side="left", padx=4)
+
+        # --- window
         def toggle_window():
             b = 'selected' in self.reminders_window.state()
             state = [b * '!' + 'disabled']
@@ -290,6 +305,8 @@ class Settings(tk.Toplevel):
                                     '!' * (not CONFIG.getboolean('Reminders', 'notification')) + 'selected'))
 
         # --- placement
+        frame_default.pack(anchor='nw', fill='x')
+        ttk.Separator(self.frames['Reminders'], orient='horizontal').pack(fill='x', pady=10)
         frame_window.pack(anchor='nw', fill='x')
         ttk.Separator(self.frames['Reminders'], orient='horizontal').pack(fill='x', pady=10)
         frame_notif.pack(anchor='nw')
@@ -838,6 +855,11 @@ class Settings(tk.Toplevel):
             timeout = '5'
         CONFIG.set("Reminders", 'timeout', timeout)
         CONFIG.set("Reminders", 'mute', str(mute))
+        delay = self.default_delay.get()
+        if delay:
+            CONFIG.set("Reminders", 'default_delay', delay)
+            units = {_(unit): unit for unit in ["minutes", "hours", "days"]}
+            CONFIG.set("Reminders", 'default_unit', units[self.default_unit.get()])
 
         # --- Calendar
         CONFIG.set("Calendar", "alpha", "%.2f" % (self.cal_opacity.get_opacity()))

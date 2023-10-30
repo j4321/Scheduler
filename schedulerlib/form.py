@@ -522,8 +522,8 @@ class Form(Toplevel):
                     when.insert(0, str(int(m)))
                     what.set(_('minutes'))
         else:
-            when.insert(0, '15')
-            what.set(_('minutes'))
+            when.insert(0, CONFIG.get("Reminders", "default_delay"))
+            what.set(_(CONFIG.get("Reminders", "default_unit")))
 
         self.alarms.append((when, what))
 
