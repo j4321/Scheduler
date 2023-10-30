@@ -66,8 +66,10 @@ class Settings(tk.Toplevel):
         self.frames['Pomodoro'] = PomodoroParams(self)
 
         w = 0
+        self._cat_dict = {}
         for cat in cats:
             c = _(cat) + ' '
+            self._cat_dict[c] = cat
             self.listbox.insert('end', c)
             w = max(len(c), w)
             self.frames[cat].grid(row=0, column=1, sticky='ewns', padx=4, pady=4)
@@ -102,7 +104,7 @@ class Settings(tk.Toplevel):
         ttk.Label(lang_frame, text=_("Language")).pack(side="left")
         languages = list(REV_LANGUAGES)
         self.cb_lang = ttk.Combobox(lang_frame, textvariable=self.lang,
-                                    state='readonly', style='menu.TCombobox',
+                                    state='readonly',
                                     exportselection=False,
                                     width=len(max(languages, key=len)) + 1,
                                     values=languages)
@@ -113,7 +115,7 @@ class Settings(tk.Toplevel):
         ttk.Label(frame_gui,
                   text=_("GUI Toolkit for the system tray icon")).pack(side="left")
         self.cb_gui = ttk.Combobox(frame_gui, textvariable=self.gui,
-                                   state='readonly', style='menu.TCombobox',
+                                   state='readonly',
                                    exportselection=False, width=4,
                                    values=[t.capitalize() for (t, b) in TOOLKITS.items() if b])
         self.cb_gui.pack(side="left", padx=4)
@@ -206,7 +208,7 @@ class Settings(tk.Toplevel):
         self.default_delay.delete(0, 'end')
         self.default_delay.insert(0, CONFIG.get("Reminders", "default_delay"))
         self.default_unit = ttk.Combobox(frame_default, width=8, state='readonly',
-                            values=(_('minutes'), _('hours'), _('days')))
+                                         values=(_('minutes'), _('hours'), _('days')))
         self.default_unit.set(_(CONFIG.get("Reminders", "default_unit")))
         ttk.Label(frame_default, text=_("Default reminder")).pack(side="left")
         frame_when.pack(side="left", padx=4)
@@ -648,7 +650,7 @@ class Settings(tk.Toplevel):
         except IndexError:
             return
         self._current_frame.grid_remove()
-        self._current_frame = self.frames[self.listbox.get(index).strip()]
+        self._current_frame = self.frames[self._cat_dict[self.listbox.get(index)]]
         self._current_frame.grid()
 
     def change_langue(self, event=None):
