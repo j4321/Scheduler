@@ -26,6 +26,7 @@ import logging
 import traceback
 import signal
 import requests
+import re
 from subprocess import Popen
 from pickle import Pickler, Unpickler
 from tkinter import Tk, Menu, StringVar, TclError, BooleanVar, Toplevel
@@ -794,6 +795,19 @@ apply {name {
                 self.sync_after_id = self.after(CONFIG.getint("ExternalSync", "frequency")*60*1000,
                                                 self.ext_cal_sync)
 
+    @staticmethod
+    def _fix_ics(data):
+        """Workaround to fix outlook calendar data."""
+        if not data.strip().endswith("END:VCALENDAR"):
+            data = data + "END:VCALENDAR\r\n"
+        if len(re.findall(r"^BEGIN", data, re.MULTILINE)) != len(re.findall(r"^END", data, re.MULTILINE)):
+            lines = data.splitlines()
+            for i in range(1, len(lines)):
+                if lines[i].startswith("BEGIN:VEVENT") and not lines[i-1].startswith("END"):
+                    lines[i] = "END:VEVENT\r\n" + lines[i]
+            data = "\r\n".join(lines)
+        return data
+
     def _load_ics_extsync(self, url, extcal):
         """
         Import events from icalendar data (sync).
@@ -803,7 +817,10 @@ apply {name {
         try:
             data = requests.get(url)
             if data.ok:
-                ical = icalendar.Calendar.from_ical(data.text)
+                try:
+                    ical = icalendar.Calendar.from_ical(data.text)
+                except ValueError:
+                    ical = icalendar.Calendar.from_ical(self._fix_ics(data.text))
             else:
                 data.raise_for_status()
         except requests.exceptions.ConnectionError as e:
@@ -813,7 +830,7 @@ apply {name {
             err = ''.join(traceback.format_exc())
             logging.error(err)
             showerror(_("Error"),
-                      _("The import of the .ics data failed.") + f"\n\n{e}",
+                      _("The import of the .ics data from {url} failed.").format(url=url) + f"\n\n{e}",
                       err)
             return False, False
         # use external calendar name as category
@@ -830,7 +847,7 @@ apply {name {
                 try:
                     event = Event.from_vevent(component, self.scheduler, category, category)
                 except Exception:
-                    logging.exception("Malformed Event Error")
+                    logging.exception(f"Malformed Event Error in {url}")
                     continue
                 iid = event.iid
                 new_evts.append(iid)
