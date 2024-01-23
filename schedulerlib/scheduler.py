@@ -842,10 +842,22 @@ apply {name {
             CONFIG.set("Categories", category, "white, #186CBE, 0")
             self.widgets['Calendar'].update_style()
             self.widgets['Events'].update_style()
+        ical_evts = {}
         for component in ical.subcomponents:
             if component.name == "VEVENT":
+                uid = component.get("uid")
+                if uid in ical_evts:  # recurring events can have identical uids
+                    ical_evts[uid].append(component)
+                else:
+                    ical_evts[uid] = [component]
+        for uid, evs in ical_evts.items():
+            #% TODO: fix recurring event handling from .ics files
+            # Recurring events show as both a general recurring event and individual occurrences with the same uid in the .ics so only the last occurrence showed in the calendar
+            # Current hacky fix is to number occurrences so that I can see the specific details about single occurrence but then event shows up twice in calendar as individual occ + recurring evt
+            iid_str = uid if len(evs) == 1 else uid + "-{}"
+            for i, ev in enumerate(evs):
                 try:
-                    event = Event.from_vevent(component, self.scheduler, category, category)
+                    event = Event.from_vevent(ev, self.scheduler, category, category, iid=iid_str.format(i))
                 except Exception:
                     logging.exception(f"Malformed Event Error in {url}")
                     continue

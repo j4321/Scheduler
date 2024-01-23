@@ -114,7 +114,7 @@ class Event:
         self.create_rrule()
 
     @classmethod
-    def from_vevent(cls, vevent, scheduler, category, extcal=""):
+    def from_vevent(cls, vevent, scheduler, category, extcal="", iid=None):
         """Create Event from icalendar vEvent."""
         props = {"Category": category, "ExtCal": extcal}
         # info
@@ -177,7 +177,9 @@ class Event:
                                'ExclDates': excl}
 
         # reminders
-        ev = cls(scheduler, iid=str(vevent.get("uid")), **props)
+        if iid is None:
+            iid = str(vevent.get("uid"))
+        ev = cls(scheduler, iid=iid, **props)
         for component in vevent.subcomponents:
             if component.name == 'VALARM':
                 action = component.get("action")
