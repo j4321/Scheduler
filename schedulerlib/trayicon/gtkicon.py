@@ -204,13 +204,17 @@ class TrayIcon:
     def _on_popup_menu(self, icon, button, time):
         self.menu.popup(None, None, Gtk.StatusIcon.position_menu, icon, button, time)
 
-    def _change_icon_appind(self, icon, desc=''):
+    def _change_icon_appind(self, icon, desc='', fallback_icon=None):
         """Change icon."""
-        self.tray_icon.set_icon_full(icon, desc)
+        icon_exists = Gtk.IconTheme.get_default().has_icon(icon)
+        if icon_exists:
+            self.tray_icon.set_icon_full(icon, desc)
+        elif fallback_icon:
+            self.tray_icon.set_icon_full(fallback_icon, desc)
 
-    def _change_icon_fallback(self, icon, desc=''):
+    def _change_icon_fallback(self, icon, desc='', fallback_icon=None):
         """Change icon."""
-        self.tray_icon.set_from_file(icon)
+        self.tray_icon.set_from_file(fallback_icon)
 
     def loop(self, tk_window):
         """Update Gtk GUI inside tkinter mainloop."""

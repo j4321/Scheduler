@@ -69,8 +69,8 @@ class SubMenu(tkinter.Menu):
     def delete(self, item1, item2=None):
         """
         Delete all items between item1 and item2.
-        
-        If item2 is None, delete only the item corresponding to item1. 
+
+        If item2 is None, delete only the item corresponding to item1.
         """
         if item2 == "end":
             item2 = tkinter.Menu.index(self, "end")
@@ -96,7 +96,7 @@ class SubMenu(tkinter.Menu):
                     return 0
             else:
                 return i
-    
+
     def set_item_image(self, item, image):
         """Set the item's image to given image (path to file)."""
         ind = self.index(item)
@@ -291,9 +291,11 @@ class TrayIcon(tkinter.BaseWidget, tkinter.Wm):
             x = 5
         self.menu.tk_popup(x, y)
 
-    def change_icon(self, icon, desc=''):
+    def change_icon(self, icon, desc='', fallback_icon=None):
         """Change icon."""
-        self._icon.configure(file=icon)
+        del self._icon
+        self._icon = PhotoImage(master=self.master, file=icon)
+        self.configure(image=self._icon)
         self.update()
 
     def loop(self, tk_window):

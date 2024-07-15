@@ -33,8 +33,8 @@ except ImportError:
 
 class SubMenu(QMenu):
     """
-    Menu or submenu for the system tray icon TrayIcon. 
-    
+    Menu or submenu for the system tray icon TrayIcon.
+
     Qt version.
     """
     def __init__(self, *args, label=None, parent=None, **kwargs):
@@ -69,7 +69,7 @@ class SubMenu(QMenu):
     def add_checkbutton(self, label="", command=None):
         """
         Add a checkbutton item with given label and associated to given command to the menu.
-        
+
         The checkbutton state can be obtained/changed using the ``get_item_value``/``set_item_value`` methods.
         """
         action = QAction(label, self)
@@ -85,8 +85,8 @@ class SubMenu(QMenu):
     def delete(self, item1, item2=None):
         """
         Delete all items between item1 and item2 (included).
-        
-        If item2 is None, delete only the item corresponding to item1. 
+
+        If item2 is None, delete only the item corresponding to item1.
         """
         if len(self.actions()) == 0:
             return
@@ -102,7 +102,7 @@ class SubMenu(QMenu):
     def index(self, item):
         """
         Return the index of item.
-        
+
         item can be an integer corresponding to the entry number in the menu,
         the label of a menu entry or "end". In the fisrt case, the returned index will
         be identical to item.
@@ -142,16 +142,16 @@ class SubMenu(QMenu):
     def get_item_menu(self, item):
         """
         Return item's menu.
-        
+
         It is assumed that the item is a cascade.
         """
         i = self.actions()[self.index(item)]
         return i.menu()
-        
+
     def set_item_menu(self, item, menu):
         """
         Set item's menu to given menu (SubMenu instance).
-        
+
         It is assumed that the item is a cascade.
         """
         i = self.actions()[self.index(item)]
@@ -194,15 +194,18 @@ class TrayIcon(QApplication):
         self.processEvents()
         tk_window.loop_id = tk_window.after(10, self.loop, tk_window)
 
-    def change_icon(self, icon, desc=''):
+    def change_icon(self, icon, desc='', fallback_icon=None):
         """Change icon."""
         del self._icon
-        self._icon = QIcon(icon)
+        if fallback_icon:
+            del self._fallback_icon
+            self._fallback_icon = QIcon(fallback_icon)
+        self._icon = QIcon.fromTheme(icon, self._fallback_icon)
         self.tray_icon.setIcon(self._icon)
 
     def bind_left_click(self, command):
         """Bind command to left click on the icon."""
-        
+
         def action(reason):
             """Execute command only on left click (not when the menu is displayed)."""
             if reason == QSystemTrayIcon.Trigger:

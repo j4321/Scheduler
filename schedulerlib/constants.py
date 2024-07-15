@@ -298,8 +298,11 @@ except Exception:
 
 # --- images
 ICON_NAME = "scheduler-tray"  # gtk / qt tray icon
+ICON_MUTED_NAME = "scheduler-tray-muted"
 ICON_FALLBACK = os.path.join(PATH_IMAGES, "scheduler-tray.svg")  # gtk / qt fallback tray icon
+ICON_MUTED_FALLBACK = os.path.join(PATH_IMAGES, "scheduler-tray-muted.svg")
 TKTRAY_ICON = os.path.join(PATH_IMAGES, 'scheduler.png')
+TKTRAY_ICON_MUTED = os.path.join(PATH_IMAGES, 'scheduler-muted.png')
 IM_SCROLL_ALPHA = os.path.join(PATH_IMAGES, "scroll.png")
 IM_EYE = os.path.join(PATH_IMAGES, "eye.svg")
 
@@ -374,8 +377,10 @@ if not TOOLKITS.get(GUI):
 
 if GUI == 'tk':
     ICON = TKTRAY_ICON
+    ICON_MUTED = TKTRAY_ICON_MUTED
 else:
     ICON = ICON_NAME
+    ICON_MUTED = ICON_MUTED_NAME
 
 save_config()
 

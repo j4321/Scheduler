@@ -45,8 +45,8 @@ from apscheduler.triggers.cron import CronTrigger
 from tkcalendar import DateEntry
 
 from schedulerlib.messagebox import showerror, askokcancel, askoptions
-from schedulerlib.constants import IMAGES, ICON, ICON_FALLBACK, IM_SCROLL_ALPHA, \
-    CONFIG, JOBSTORE, DATA_PATH, BACKUP_PATH, active_color, backup, add_trace, \
+from schedulerlib.constants import IMAGES, ICON, ICON_FALLBACK, ICON_MUTED, ICON_MUTED_FALLBACK, \
+    IM_SCROLL_ALPHA, CONFIG, JOBSTORE, DATA_PATH, BACKUP_PATH, active_color, backup, add_trace, \
     format_time, askopenfilename, asksaveasfilename, OPENFILE_PATH, ICON_NOTIF
 from schedulerlib.trayicon import TrayIcon, SubMenu
 from schedulerlib.form import Form
@@ -85,7 +85,11 @@ class EventScheduler(Tk):
         self.menu_widgets = SubMenu(parent=self.icon.menu)
         self.menu_eyes = Eyes(self.icon.menu, self)
         self.icon.menu.add_checkbutton(label=_('Silent mode'), command=self.toggle_silent_mode)
-        self.icon.menu.set_item_value(_('Silent mode'), CONFIG.getboolean('General', 'silent_mode'))
+        silent_mode = CONFIG.getboolean('General', 'silent_mode')
+        self.icon.menu.set_item_value(_('Silent mode'), silent_mode)
+        if silent_mode:
+            self.icon.change_icon(icon=ICON_MUTED, fallback_icon=ICON_MUTED_FALLBACK)
+
         self.icon.menu.add_separator()
         self.icon.menu.add_checkbutton(label=_('Manager'), command=self.display_hide)
         self.icon.menu.add_cascade(label=_('Widgets'), menu=self.menu_widgets)
@@ -518,8 +522,13 @@ apply {name {
         self.update_idletasks()
 
     def toggle_silent_mode(self):
+        value = self.icon.menu.get_item_value(_('Silent mode'))
+        if value:
+            self.icon.change_icon(icon=ICON_MUTED, fallback_icon=ICON_MUTED_FALLBACK)
+        else:
+            self.icon.change_icon(icon=ICON, fallback_icon=ICON_FALLBACK)
         CONFIG.set('General', 'silent_mode',
-                   str(self.icon.menu.get_item_value(_('Silent mode'))))
+                   str(value))
 
     # --- bindings
     def _select(self, event):
