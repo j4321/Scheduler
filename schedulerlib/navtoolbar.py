@@ -36,7 +36,13 @@ try:
     from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 except ImportError:
     from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg as NavigationToolbar2Tk
-from matplotlib.backends._backend_tk import ToolTip
+try:
+    from matplotlib.backends._backend_tk import add_tooltip
+except ImportError:
+    from matplotlib.backends._backend_tk import ToolTip
+
+    add_tooltip = ToolTip.createToolTip
+
 from matplotlib.backend_bases import NavigationToolbar2
 from matplotlib import rcParams
 
@@ -109,7 +115,7 @@ class NavigationToolbar(NavigationToolbar2Tk):
                     command=getattr(self, callback),
                 )
                 if tooltip_text is not None:
-                    ToolTip.createToolTip(button, tooltip_text)
+                    add_tooltip(button, tooltip_text)
 
         self.message = tk.StringVar(master=self)
         self._message_label = tk.Label(master=self, textvariable=self.message)
