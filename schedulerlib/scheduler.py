@@ -838,6 +838,8 @@ apply {name {
         except Exception as e:
             err = ''.join(traceback.format_exc())
             logging.error(err)
+            if "Too Many Requests" in err:
+                return False, True  # retry later
             showerror(_("Error"),
                       _("The import of the .ics data from {url} failed.").format(url=url) + f"\n\n{e}",
                       err)
